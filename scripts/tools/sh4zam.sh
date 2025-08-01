@@ -28,6 +28,7 @@ function clone() {
 function build() {
 	kosaio-echo "Re/Building sh4zam..."
 	cd "${SH4ZAM_DIR}"
+	rm -r build
 	mkdir -p build
 	cd build
 	kos-cmake ..
