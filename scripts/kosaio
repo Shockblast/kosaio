@@ -1,0 +1,93 @@
+#!/bin/bash
+# Description: A master script to manage various KallistiOS and Dreamcast SDK tools.
+# It acts as a dispatcher, calling the install, uninstall, or update functions
+# from the individual tool management scripts.
+
+set -e # Exit immediately if a command exits with a non-zero status.
+
+# Load global variables and functions
+source "${KOSAIO_SCRIPTS}/global"
+
+function show-usage() {
+	kosaio-echo "Usage: kosaio <tool> <action>"
+	echo "A master script to manage various KallistiOS and Dreamcast SDK tools."
+	echo "It acts as a dispatcher, calling the install, uninstall, or update functions from the individual tool management scripts."
+	echo
+	echo "Available tools: * contains notes"
+	echo "  * kos: The main tool for create Dreamcast content, you can update from here (slow)"
+	echo "  * aldc: An OpenAL implementation for the Dreamcast"
+	echo "  * gldc: An OpenGL implementation for the Dreamcast"
+	echo "  - dcload-ip: A tool for uploading homebrew applications to the Sega Dreamcast over an IP network"
+	echo "  - dcload-serial: A tool for uploading homebrew applications to the Sega Dreamcast over an serial connection"
+	echo "  * flycast (Dev branch | Slow Clone/Build): Dreamcast Emulator with GDB for debug, **requires Dreamcast bios files in you host**."
+	echo "  - img4dc: A collection of tools for working with various Dreamcast disc image formats like CDI and MDS"
+	echo "  - make-ip: A tool to create IP.BIN boot files for Sega Dreamcast executables."
+	echo "  - mkdcdisc: A tool to create self-booting CDI disc images for the Sega Dreamcast."
+	echo "  - mksdiso: A tool to create bootable SD card images for Optical Drive Emulators like GDEmu."
+	echo "  - sh4zam: General-purpose math and linear algebra for Dreamcast"
+	echo
+	echo "Available actions:"
+	echo "  info         - Get more information and notes about the tool."
+	echo "  self-update  - Update KOSAIO it self."
+	echo "  install      - Installs the tool (dependencies, clone, build and copy-bin)."
+	echo "  uninstall    - Uninstalls the tool."
+	echo "  clone        - Clones the tool's repository (the install action do it automatically)."
+	echo "  build        - Compile/Build the tool (the install action do it automatically)."
+	echo "  copy-bin     - Copy the files compiled to the corresponded folders if required (the install action do it automatically)."
+	echo "  update       - Updates the tool from source (dont forget to build and copy-bin after)."
+	echo "  dependencies - Installs dependencies (the install action do it automatically)."
+	echo
+	echo "Example:"
+	echo " kosaio sh4zam install"
+	exit 1
+}
+
+function self-update() {
+	kosaio-git-common-update "${KOSAIO_DIR}"
+	find "${KOSAIO_DIR}" -type d -exec chmod 755 {} +
+	find "${KOSAIO_DIR}" -type f -exec chmod 644 {} +
+	chown -R root:root "${KOSAIO_DIR}"
+	kosaio-echo "KOSAIO UPDATED"
+	exit 1
+}
+
+# --- Main Logic ---
+
+# Check for correct number of arguments
+if [ "$#" -ne 2 ]; then
+	show-usage
+fi
+
+TOOL="$1"
+ACTION="$2"
+TOOL_SCRIPT="${SCRIPT_DIR}/tools/${TOOL}.sh"
+
+# Validate tool
+if [ "${TOOL}" -eq 'self-update' ]; then
+	self-update
+fi
+
+if [ ! -f "${TOOL_SCRIPT}" ]; then
+	kosaio-echo "Error: Tool '${TOOL}' not found."
+	echo "Script '${TOOL_SCRIPT}' does not exist."
+	show-usage
+fi
+
+# Source the tool's script to make its functions available in the current shell
+# This is safe because the scripts only contain function definitions and don't execute code at the top level.
+source "${TOOL_SCRIPT}"
+
+# Check if the function for the given action exists in the sourced script
+if ! [ "$(type -t ${ACTION})" == "function" ]; then
+	echo "Error: Action '${ACTION}' is not supported by the tool '${TOOL}'."
+	echo "Function '${ACTION}' is not defined in '${TOOL_SCRIPT}'."
+	exit 1
+fi
+
+# Execute the action
+kosaio-echo "Executing: ${TOOL} ${ACTION}"
+
+# This calls the function from the sourced script, e.g., install()
+"${ACTION}"
+
+kosaio-echo "Action '${ACTION}' for tool '${TOOL}' completed."
