@@ -6,7 +6,7 @@
 set -e # Exit immediately if a command exits with a non-zero status.
 
 # Load global variables and functions
-source "${KOSAIO_DIR}/global"
+source "${KOSAIO_SCRIPTS}/global"
 
 function show-usage() {
 	kosaio-echo "Usage: kosaio <tool> <action>"
