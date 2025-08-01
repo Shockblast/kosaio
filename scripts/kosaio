@@ -6,7 +6,7 @@
 set -e # Exit immediately if a command exits with a non-zero status.
 
 # Load global variables and functions
-source "${KOSAIO_SCRIPTS}/global"
+source "${KOSAIO_DIR}/global"
 
 function show-usage() {
 	kosaio-echo "Usage: kosaio <tool> <action>"
@@ -53,6 +53,11 @@ function self-update() {
 
 # --- Main Logic ---
 
+# Handle special commands first
+if [ "$1" = "self-update" ]; then
+	self-update
+fi
+
 # Check for correct number of arguments
 if [ "$#" -ne 2 ]; then
 	show-usage
@@ -60,13 +65,9 @@ fi
 
 TOOL="$1"
 ACTION="$2"
-TOOL_SCRIPT="${SCRIPT_DIR}/tools/${TOOL}.sh"
+TOOL_SCRIPT="${KOSAIO_SCRIPTS}/tools/${TOOL}.sh"
 
 # Validate tool
-if [ "${TOOL}" -eq 'self-update' ]; then
-	self-update
-fi
-
 if [ ! -f "${TOOL_SCRIPT}" ]; then
 	kosaio-echo "Error: Tool '${TOOL}' not found."
 	echo "Script '${TOOL_SCRIPT}' does not exist."
