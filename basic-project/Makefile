@@ -16,10 +16,10 @@ GAME_OBJS_ = game/main.o
 GAME_OBJS = $(patsubst %,build/%,$(GAME_OBJS_))
 
 # Generate header dependencies.
-ALL_DEPS= $(ALL_OBJS:.o=.d)
+GAME_DEPS= $(GAME_OBJS:.o=.d)
 
 # Suck header dependencies in.
--include $(ALL_DEPS)
+-include $(GAME_DEPS)
 
 # Default action for make
 .PHONY: make.dirs build.elf
@@ -44,7 +44,7 @@ clean.releases:
 clean.all: clean.builds clean.releases make.dirs
 
 # Build
-build.elf: $(GAME_OBJS) mdirs
+build.elf: $(GAME_OBJS) make.dirs
 	${Q}echo "===> Building game.elf"
 	${Q}rm -f release/game.elf
 	${Q}$(KOS_CC) $(KOS_LDFLAGS) -o release/game.elf $(GAME_OBJS) $(KOS_LIBS)
