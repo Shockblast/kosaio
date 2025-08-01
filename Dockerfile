@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install minimal tools
 RUN apt-get update && apt-get upgrade -y && \
-	apt-get install -y --no-install-recommends git nano vim && \
+	apt-get install -y --no-install-recommends git nano vim ca-certificates && \
 	apt-get clean && \
 	git config --global pull.rebase true
 
