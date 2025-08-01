@@ -47,6 +47,7 @@ function self-update() {
 	find "${KOSAIO_DIR}" -type d -exec chmod 755 {} +
 	find "${KOSAIO_DIR}" -type f -exec chmod 644 {} +
 	chown -R root:root "${KOSAIO_DIR}"
+	chmod -R +x "${KOSAIO_DIR}"
 	kosaio-echo "KOSAIO UPDATED"
 	exit 1
 }

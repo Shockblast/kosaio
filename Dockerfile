@@ -37,7 +37,8 @@ RUN mkdir -p ${TARGET_DIRS}
 # Set Permissions
 RUN find ${TARGET_DIRS} -type d -exec chmod 755 {} + && \
 	find ${TARGET_DIRS} -type f -exec chmod 644 {} + && \
-	chown -R root:root ${TARGET_DIRS}
+	chown -R root:root ${TARGET_DIRS} && \
+	chmod -R +x ${TARGET_DIRS}
 
 # Install system dependencies and clone KOS and KOS-PORTS using kosaio
 RUN kosaio kos dependencies && kosaio kos clone
