@@ -15,7 +15,6 @@ This image contains the following tools:
 | **dcload-serial**           | Allows loading and executing binaries on the Dreamcast via the serial port (with a "Coders Cable").                 |
 | **flycast**                 | A Dreamcast emulator with GDB support, ideal for debugging and testing without real hardware (requires BIOS files). |
 | **gldc**                    | An implementation of the OpenGL API for Dreamcast, facilitating 3D graphics development.                            |
-| **img4dc**                  | Collection of tools for working with various Dreamcast disc image formats (CDI, MDS, etc.).                         |
 | **make-ip**                 | Tool for creating 'IP.BIN' boot files for Dreamcast executables.                                                    |
 | **mkdcdisc**                | Allows creating disc images in CDI format, compatible with emulators and for burning to CD-R.                       |
 | **mksdiso**                 | Utility for creating ISO images for SD loaders like GDEmu.                                                          |
