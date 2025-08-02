@@ -6,7 +6,8 @@ MAKEIP_DIR="${DREAMCAST_SDK_EXTRAS}/makeip"
 function info() {
 	kosaio-echo "Name: makeip \n" \
 		"Git: https://github.com/Dreamcast-Projects/makeip.git \n" \
-		"Description: A tool to create IP.BIN boot files for Sega Dreamcast executables. This file contains metadata like the game title and is required for booting."
+		"Description: A tool to create IP.BIN boot files for Sega Dreamcast executables. This file contains metadata like the game title and is required for booting. \n" \
+		"Note: This version is more up-to-date than the one integrated in Kallistios."
 }
 
 function dependencies() {
@@ -18,7 +19,7 @@ function dependencies() {
 function copy-bin() {
 	cd "${MAKEIP_DIR}/src"
 	make install
-	kosaio-echo "makeip copy by make."
+	kosaio-echo "makeip installed by make."
 }
 
 function clone() {
