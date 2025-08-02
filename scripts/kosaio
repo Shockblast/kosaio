@@ -20,7 +20,6 @@ function show-usage() {
 	echo "  - dcload-ip: A tool for uploading homebrew applications to the Sega Dreamcast over an IP network"
 	echo "  - dcload-serial: A tool for uploading homebrew applications to the Sega Dreamcast over an serial connection"
 	echo "  * flycast (Dev branch | Slow Clone/Build): Dreamcast Emulator with GDB for debug, **requires Dreamcast bios files in you host**."
-	echo "  - img4dc: A collection of tools for working with various Dreamcast disc image formats like CDI and MDS"
 	echo "  - make-ip: A tool to create IP.BIN boot files for Sega Dreamcast executables."
 	echo "  - mkdcdisc: A tool to create self-booting CDI disc images for the Sega Dreamcast."
 	echo "  - mksdiso: A tool to create bootable SD card images for Optical Drive Emulators like GDEmu."
