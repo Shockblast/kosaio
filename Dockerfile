@@ -13,7 +13,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends git nano vim ca-certificates && \
 	apt-get clean && \
-	git config --global pull.rebase true
+	git config --global pull.rebase true && \
+	git config --global core.fileMode false
 
 # Global environment variables
 ENV DREAMCAST_SDK="/opt/toolchains/dc"
