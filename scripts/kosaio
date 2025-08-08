@@ -1,77 +1,161 @@
 #!/bin/bash
-# Description: A master script to manage various KallistiOS and Dreamcast SDK tools.
-# It acts as a dispatcher, calling the install, uninstall, or update functions
-# from the individual tool management scripts.
+set -e
 
-set -e # Exit immediately if a command exits with a non-zero status.
+# Check config file
+if [ ! -f "/root/"${KOSAIO_CONFIG}""]; then
+	kosaio_echo "Kosaio config file doest exist, we create it."
+	touch "/root/"${KOSAIO_CONFIG}""
+fi
 
-# Load global variables and functions
-source "${KOSAIO_SCRIPTS}/global"
+# Public functions
 
-function show-usage() {
-	kosaio-echo "Usage: kosaio <tool> <action>"
-	echo "A master script to manage various KallistiOS and Dreamcast SDK tools."
+function show_usage() {
+	kosaio_echo "Usage: kosaio <tool> <action>"
+	echo "A master script to manage various Dreamcast SDK tools."
 	echo "It acts as a dispatcher, calling the install, uninstall, or update functions from the individual tool management scripts."
 	echo
-	echo "Available tools: * contains notes"
-	echo "  * kos: The main tool for create Dreamcast content, you can update from here (slow)"
-	echo "  * aldc: An OpenAL implementation for the Dreamcast"
-	echo "  * gldc: An OpenGL implementation for the Dreamcast"
-	echo "  - dcload-ip: A tool for uploading homebrew applications to the Sega Dreamcast over an IP network"
-	echo "  - dcload-serial: A tool for uploading homebrew applications to the Sega Dreamcast over an serial connection"
-	echo "  * flycast (Dev branch | Slow Clone/Build): Dreamcast Emulator with GDB for debug, **requires Dreamcast bios files in you host**."
-	echo "  - make-ip: A tool to create IP.BIN boot files for Sega Dreamcast executables."
-	echo "  - mkdcdisc: A tool to create self-booting CDI disc images for the Sega Dreamcast."
-	echo "  - mksdiso: A tool to create bootable SD card images for Optical Drive Emulators like GDEmu."
-	echo "  - sh4zam: General-purpose math and linear algebra for Dreamcast"
+	echo "Available sdk tools:"
+
+	if [ -d "${KOSAIO_DIR}/scripts/sdk/" ]; then
+		for tool_script in "${KOSAIO_DIR}/scripts/sdk/"*.sh; do
+			tool_name=$(basename "${tool_script}" .sh)
+			echo "	- ${tool_name}"
+		done
+	else
+		kosaio_echo "Warning: Folder ${KOSAIO_DIR}/scripts/sdk/ doest exist, check kosaio installation."
+	fi
+
 	echo
 	echo "Available actions:"
-	echo "  info         - Get more information and notes about the tool."
-	echo "  self-update  - Update KOSAIO it self."
-	echo "  install      - Installs the tool (dependencies, clone, build and copy-bin)."
-	echo "  uninstall    - Uninstalls the tool."
-	echo "  clone        - Clones the tool's repository (the install action do it automatically)."
-	echo "  build        - Compile/Build the tool (the install action do it automatically)."
-	echo "  copy-bin     - Copy the files compiled to the corresponded folders if required (the install action do it automatically)."
-	echo "  update       - Updates the tool from source (dont forget to build and copy-bin after)."
-	echo "  dependencies - Installs dependencies (the install action do it automatically)."
+	echo "	- info			-  Get more information and notes about the tool."
+	echo "	- install		-  Installs the tool (clone, build and install_bin)."
+	echo "	- uninstall		-  Uninstalls the tool."
+	echo "	- clone			-  Clones the tool's repository (the install action do it automatically)."
+	echo "	- build			-  Compile/Build the tool (the install action do it automatically)."
+	echo "	- install_bin	-  Copy the files compiled to the corresponded folders if required (the install action do it automatically)."
+	echo "	- update		-  Updates the tool from source (dont forget to build and install_bin after)."
 	echo
 	echo "Example:"
-	echo " kosaio sh4zam install"
+	echo "$ kosaio kos install"
+	echo
+	echo "KOSAIO tools:"
+	echo "	- self-update: Update KOSAIO it self."
+	echo "	- project: Project Manager"
+	echo "		- create: Create a nue project with minimal files and settings."
+	echo "	- doctor: Check and repairs basic stuff about Kosaio, git, Kallistios, etc..."
+	echo "		- check_required_vars: Check if all vars from Kosaio and kallistios are set."
+	echo "		- check_folder_permission: Check if all permissions folders from Kosaio and kallistios are set."
+	echo "		- check_git_settings: Check git settings to avoid problems with self_update."
+	echo "		- install_all_dependencies: If you have problem with some tool compilation, you can try this."
+	echo
+	echo "Example:"
+	echo "$ kosaio doctor check_required_vars"
+	echo
 	exit 1
 }
 
-function self-update() {
-	kosaio-git-common-update "${KOSAIO_DIR}"
-	find "${KOSAIO_DIR}" -type d -exec chmod 755 {} +
-	find "${KOSAIO_DIR}" -type f -exec chmod 644 {} +
-	chown -R root:root "${KOSAIO_DIR}"
-	chmod -R +x "${KOSAIO_DIR}"
-	kosaio-echo "KOSAIO UPDATED"
-	exit 1
+# Private Functions
+
+function kosaio_echo() {
+	echo -e "======================================== \n"
+	echo -e "$@"
+	echo -e "======================================== \n"
+}
+
+function kosaio_set_folder_permission() {
+	if [ "$#" -eq 0 ]; then
+		echo "Error: kosaio_set_folder_permission requires at least one path." >&2
+		exit 1
+	fi
+
+	for path in "$@"; do
+		if [ ! -e "${path}" ]; then
+			echo "Error: Path not found: ${path}" >&2
+			exit 1
+		else
+			find "${path}" -type d -exec chmod 755 {} +
+			find "${path}" -type f -exec chmod 755 {} +
+			chown -R root:root "${path}"
+			echo "Permissions set for ${path}"
+		fi
+	done
+}
+
+function kosaio_git_common_update() {
+	local repo_dir="$1"
+
+	if [ -z "${repo_dir}" ]; then
+		echo "Usage: kosaio_git_common_update <path_to_repo>" >&2
+		return 1
+	fi
+
+	if [ -d "${repo_dir}"]; then
+		cd "${repo_dir}" || exit
+		echo "Checking for updates in $(basename "${repo_dir}")..."
+		local old_head
+		old_head=$(git rev-parse HEAD)
+		git fetch origin
+
+		# Check if an upstream branch is configured to avoid errors
+		if ! git rev-parse --abbrev-ref @'{u}' >/dev/null 2>&1; then
+			echo "No upstream branch is configured for the current branch. Skipping pull."
+			return
+		fi
+
+		if [ "${old_head}" != "$(git rev-parse '@{u}')" ]; then
+			echo "Local branch is behind remote. Pulling changes..."
+			git pull
+			echo "New changes:"
+			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
+		else
+			echo "Local branch is up-to-date with remote."
+		fi
+	fi
+}
+
+function kosaio_require_packages() {
+	local missing=()
+	for pkg in "$@"; do
+		if ! dpkg -s "$pkg" &>/dev/null; then
+			missing+=("$pkg")
+		fi
+	done
+
+	if [[ ${#missing[@]} -gt 0 ]]; then
+		echo "Installing missing packages: ${missing[*]}"
+		sudo apt-get install -y "${missing[@]}"
+	fi
 }
 
 # --- Main Logic ---
+TOOL="$1"
+ACTION="$2"
+FOLDER="sdk"
 
 # Handle special commands first
 if [ "$1" = "self-update" ]; then
-	self-update
+	kosaio_git_common_update "${KOSAIO_DIR}"
+	kosaio_set_folder_permission "${KOSAIO_DIR}"
+	kosaio_echo "KOSAIO UPDATED"
+	exit 1
+fi
+
+if [ "$1" = "doctor" || "$1" = "project" ]; then
+	FOLDER="tools"
 fi
 
 # Check for correct number of arguments
 if [ "$#" -ne 2 ]; then
-	show-usage
+	show_usage
 fi
 
-TOOL="$1"
-ACTION="$2"
-TOOL_SCRIPT="${KOSAIO_SCRIPTS}/tools/${TOOL}.sh"
+TOOL_SCRIPT="${KOSAIO_DIR}/scripts/${FOLDER}/${TOOL}.sh"
 
 # Validate tool
 if [ ! -f "${TOOL_SCRIPT}" ]; then
 	kosaio-echo "Error: Tool '${TOOL}' not found."
 	echo "Script '${TOOL_SCRIPT}' does not exist."
-	show-usage
+	show_usage
 fi
 
 # Source the tool's script to make its functions available in the current shell
@@ -86,9 +170,9 @@ if ! [ "$(type -t ${ACTION})" == "function" ]; then
 fi
 
 # Execute the action
-kosaio-echo "Executing: ${TOOL} ${ACTION}"
+kosaio_echo "Executing: ${TOOL} ${ACTION}"
 
 # This calls the function from the sourced script, e.g., install()
 "${ACTION}"
 
-kosaio-echo "Action '${ACTION}' for tool '${TOOL}' completed."
+kosaio_echo "Action '${ACTION}' for tool '${TOOL}' completed."
