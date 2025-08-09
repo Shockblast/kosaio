@@ -67,7 +67,7 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "mksdiso is not installled."

@@ -74,7 +74,7 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk makeip)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk makeip)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "makeip is not installled."

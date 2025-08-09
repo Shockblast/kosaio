@@ -94,7 +94,7 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk flycast)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk flycast)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "flycast is not installled."

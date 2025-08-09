@@ -83,7 +83,7 @@ function uninstall() {
 # Private functions
 
 function __check_requeriments() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "KOS is required to compile/use Sh4zam."
@@ -92,7 +92,7 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "Sh4zam is not installled."

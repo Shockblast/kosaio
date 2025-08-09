@@ -1,10 +1,83 @@
 #!/bin/bash
 set -e
 
+# Private Functions
+
+function kosaio_echo() {
+	echo -e "======================================== \n"
+	echo -e "$@"
+	echo -e "======================================== \n"
+}
+
+function kosaio_set_folder_permission() {
+	if [ "$#" -eq 0 ]; then
+		echo "Error: kosaio_set_folder_permission requires at least one path." >&2
+		exit 1
+	fi
+
+	for path in "$@"; do
+		if [ ! -e "${path}" ]; then
+			echo "Error: Path not found: ${path}" >&2
+			exit 1
+		else
+			find "${path}" -type d -exec chmod 755 {} +
+			find "${path}" -type f -exec chmod 755 {} +
+			chown -R root:root "${path}"
+			echo "Permissions set for ${path}"
+		fi
+	done
+}
+
+function kosaio_git_common_update() {
+	local repo_dir="$1"
+
+	if [[ -z "${repo_dir}" ]]; then
+		echo "Usage: kosaio_git_common_update <path_to_repo>" >&2
+		return 1
+	fi
+
+	if [[ -d "${repo_dir}" ]]; then
+		cd "${repo_dir}" || exit
+		echo "Checking for updates in $(basename "${repo_dir}")..."
+		local old_head
+		old_head=$(git rev-parse HEAD)
+		git fetch origin
+
+		# Check if an upstream branch is configured to avoid errors
+		if ! git rev-parse --abbrev-ref @'{u}' >/dev/null 2>&1; then
+			echo "No upstream branch is configured for the current branch. Skipping pull."
+			return
+		fi
+
+		if [ "${old_head}" != "$(git rev-parse '@{u}')" ]; then
+			echo "Local branch is behind remote. Pulling changes..."
+			git pull
+			echo "New changes:"
+			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
+		else
+			echo "Local branch is up-to-date with remote."
+		fi
+	fi
+}
+
+function kosaio_require_packages() {
+	local missing=()
+	for pkg in "$@"; do
+		if ! dpkg -s "$pkg" &>/dev/null; then
+			missing+=("$pkg")
+		fi
+	done
+
+	if [[ ${#missing[@]} -gt 0 ]]; then
+		echo "Installing missing packages: ${missing[*]}"
+		apt-get install -y "${missing[@]}"
+	fi
+}
+
 # Check config file
-if [ ! -f "/root/"${KOSAIO_CONFIG}""]; then
+if [ ! -f "${KOSAIO_CONFIG}" ]; then
 	kosaio_echo "Kosaio config file doest exist, we create it."
-	touch "/root/"${KOSAIO_CONFIG}""
+	touch "${KOSAIO_CONFIG}"
 fi
 
 # Public functions
@@ -54,79 +127,6 @@ function show_usage() {
 	exit 1
 }
 
-# Private Functions
-
-function kosaio_echo() {
-	echo -e "======================================== \n"
-	echo -e "$@"
-	echo -e "======================================== \n"
-}
-
-function kosaio_set_folder_permission() {
-	if [ "$#" -eq 0 ]; then
-		echo "Error: kosaio_set_folder_permission requires at least one path." >&2
-		exit 1
-	fi
-
-	for path in "$@"; do
-		if [ ! -e "${path}" ]; then
-			echo "Error: Path not found: ${path}" >&2
-			exit 1
-		else
-			find "${path}" -type d -exec chmod 755 {} +
-			find "${path}" -type f -exec chmod 755 {} +
-			chown -R root:root "${path}"
-			echo "Permissions set for ${path}"
-		fi
-	done
-}
-
-function kosaio_git_common_update() {
-	local repo_dir="$1"
-
-	if [ -z "${repo_dir}" ]; then
-		echo "Usage: kosaio_git_common_update <path_to_repo>" >&2
-		return 1
-	fi
-
-	if [ -d "${repo_dir}"]; then
-		cd "${repo_dir}" || exit
-		echo "Checking for updates in $(basename "${repo_dir}")..."
-		local old_head
-		old_head=$(git rev-parse HEAD)
-		git fetch origin
-
-		# Check if an upstream branch is configured to avoid errors
-		if ! git rev-parse --abbrev-ref @'{u}' >/dev/null 2>&1; then
-			echo "No upstream branch is configured for the current branch. Skipping pull."
-			return
-		fi
-
-		if [ "${old_head}" != "$(git rev-parse '@{u}')" ]; then
-			echo "Local branch is behind remote. Pulling changes..."
-			git pull
-			echo "New changes:"
-			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
-		else
-			echo "Local branch is up-to-date with remote."
-		fi
-	fi
-}
-
-function kosaio_require_packages() {
-	local missing=()
-	for pkg in "$@"; do
-		if ! dpkg -s "$pkg" &>/dev/null; then
-			missing+=("$pkg")
-		fi
-	done
-
-	if [[ ${#missing[@]} -gt 0 ]]; then
-		echo "Installing missing packages: ${missing[*]}"
-		sudo apt-get install -y "${missing[@]}"
-	fi
-}
-
 # --- Main Logic ---
 TOOL="$1"
 ACTION="$2"
@@ -140,7 +140,7 @@ if [ "$1" = "self-update" ]; then
 	exit 1
 fi
 
-if [ "$1" = "doctor" || "$1" = "project" ]; then
+if [[ "$1" = "doctor" || "$1" = "project" ]]; then
 	FOLDER="tools"
 fi
 
@@ -153,7 +153,7 @@ TOOL_SCRIPT="${KOSAIO_DIR}/scripts/${FOLDER}/${TOOL}.sh"
 
 # Validate tool
 if [ ! -f "${TOOL_SCRIPT}" ]; then
-	kosaio-echo "Error: Tool '${TOOL}' not found."
+	kosaio_echo "Error: Tool '${TOOL}' not found."
 	echo "Script '${TOOL_SCRIPT}' does not exist."
 	show_usage
 fi

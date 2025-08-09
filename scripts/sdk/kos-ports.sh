@@ -66,7 +66,7 @@ function uninstall() {
 # Private functions
 
 function __check_requeriments() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "KOS is required to use/compile KOS-PORTS."
@@ -75,7 +75,7 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "KOS-PORTS is not installled."

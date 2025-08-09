@@ -73,7 +73,7 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "dcload-serial is not installled."

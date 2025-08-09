@@ -96,10 +96,10 @@ function install_bin() {
 function uninstall() {
 	__is_installed
 
-	local KOS_PORTS = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports)
-	local GLDC = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk gldc)
-	local ALDC = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk aldc)
-	local SH4ZAM = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam)
+	local KOS_PORTS=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports)
+	local GLDC=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk gldc)
+	local ALDC=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk aldc)
+	local SH4ZAM=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam)
 
 	if [ "${KOS_PORTS}" = "1" ]; then
 		kosaio_echo "Warning: You have installed KOS-PORTS, KOS is required to compile/use KOS-PORTS."
@@ -138,7 +138,7 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED = $(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then
 		kosaio_echo "KOS is not installled."

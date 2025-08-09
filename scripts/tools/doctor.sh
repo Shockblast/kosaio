@@ -20,7 +20,7 @@ function check_required_vars() {
 	)
 
 	for var_name in "${SDK_DIR_LIST[@]}"; do
-		if [ -z "${!var_name}" ]; then
+		if [[ -z "${!var_name}" ]]; then
 			echo "Error: ${var_name} is not set. Please set it appropriately." >&2
 			exit 1
 		else
