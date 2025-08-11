@@ -56,7 +56,7 @@ function kosaio_git_common_update() {
 		local local_rev=$(git rev-parse @)
 		local remote_rev=$(git rev-parse @{u})
 		local base_rev=$(git merge-base @ @{u})
-		git reset --hard origin/main
+		git reset --hard
 
 		if [[ "${local_rev}" == "${remote_rev}" ]]; then
 			echo "Local branch is up-to-date with remote."
