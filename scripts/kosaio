@@ -36,25 +36,42 @@ function kosaio_git_common_update() {
 	fi
 
 	if [[ -d "${repo_dir}" ]]; then
-		cd "${repo_dir}" || exit
+		cd "${repo_dir}" || return 1
 		echo "Checking for updates in $(basename "${repo_dir}")..."
-		local old_head
-		old_head=$(git rev-parse HEAD)
+
+		# Store the original HEAD to show the log of new commits later
+		local old_head=$(git rev-parse HEAD)
+
+		# Fetch the latest changes from the remote without merging them
 		git fetch origin
 
 		# Check if an upstream branch is configured to avoid errors
-		if ! git rev-parse --abbrev-ref @'{u}' >/dev/null 2>&1; then
+		local upstream
+		upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+		if [[ -z "$upstream" ]]; then
 			echo "No upstream branch is configured for the current branch. Skipping pull."
-			return
+			return 0
 		fi
 
-		if [ "${old_head}" != "$(git rev-parse '@{u}')" ]; then
-			echo "Local branch is behind remote. Pulling changes..."
+		local local_rev=$(git rev-parse @)
+		local remote_rev=$(git rev-parse @{u})
+		local base_rev=$(git merge-base @ @{u})
+		git reset --hard origin/main
+
+		if [[ "${local_rev}" == "${remote_rev}" ]]; then
+			echo "Local branch is up-to-date with remote."
+		elif [[ "${local_rev}" == "${base_rev}" ]]; then
+			echo "Local branch is behind '${upstream}'. Pulling changes..."
 			git pull
 			echo "New changes:"
 			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
+		elif [[ "${remote_rev}" == "${base_rev}" ]]; then
+			echo "Local branch is ahead of '${upstream}'. Nothing to pull."
 		else
-			echo "Local branch is up-to-date with remote."
+			echo "Branches have diverged. Pulling changes..."
+			git pull
+			echo "New changes:"
+			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
 		fi
 	fi
 }
@@ -147,6 +164,7 @@ function show_usage() {
 	echo
 	echo "Example:"
 	echo "$ kosaio doctor check_required_vars"
+	echo "$ kosaio self-update"
 	echo
 	exit 1
 }
