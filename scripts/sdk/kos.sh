@@ -17,6 +17,7 @@ function clone() {
 	__check_requeriments
 	kosaio_echo "Cloning KOS..."
 	git clone --depth=1 --single-branch --recursive https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
+	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos 1
 	kosaio_echo "KOS has been cloned."
 }
 
@@ -26,10 +27,19 @@ function build() {
 	kosaio_echo "Build KOS..."
 
 	# Copy dc-chain settings
-	if [ -f "${DREAMCAST_SDK}/kos/utils/dc-chain" ]; then
-		echo "Note: "${DREAMCAST_SDK}/kos/utils/dc-chain" file found." >&2
+	echo "Note: Copy Makefile.cfg to ${DREAMCAST_SDK}/kos/utils/dc-chain"
+
+	if [ -f "${DREAMCAST_SDK}/kos/utils/dc-chain/Makefile.cfg" ]; then
+		echo "Note: Makefile.cfg file found in ${DREAMCAST_SDK}/kos/utils/dc-chain." >&2
 	else
 		cp "${KOSAIO_DIR}/dc-chain-settings/Makefile.cfg" "${DREAMCAST_SDK}/kos/utils/dc-chain"
+
+		if [ -f "${DREAMCAST_SDK}/kos/utils/dc-chain/Makefile.cfg" ]; then
+			echo "Note: Copied Makefile.cfg to ${DREAMCAST_SDK}/kos/utils/dc-chain."
+		else
+			echo "Error: Cant copy Makefile.cfg, check permissions."
+			exit 1
+		fi
 	fi
 
 	# Build dc-chain
@@ -56,8 +66,16 @@ function build() {
 	# Copy kos env, this replace the older in case of update
 	cp "${DREAMCAST_SDK}/kos/doc/environ.sh.sample" "${DREAMCAST_SDK}/kos/environ.sh"
 
+	if [ -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+		echo "Note: Copied environ.sh to ${DREAMCAST_SDK}/kos."
+	else
+		echo "Error: Cant copy environ.sh, check permissions."
+		exit 1
+	fi
+
 	# Include kos env to .bashrc
 	echo "source ${DREAMCAST_SDK}/kos/environ.sh" >>/root/.bashrc
+	echo "Note: Source environ.sh to .bashrc."
 
 	# Build kos
 	source ${DREAMCAST_SDK}/kos/environ.sh
@@ -126,6 +144,7 @@ function uninstall() {
 		cp "/root/.bashrc_og" "/root/.bashrc"
 	fi
 
+	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos 0
 	kosaio_echo "KOS Uninstallled."
 }
 
