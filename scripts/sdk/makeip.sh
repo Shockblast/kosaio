@@ -13,7 +13,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning makeip."
 	git clone --depth=1 --single-branch "https://github.com/Dreamcast-Projects/makeip.git" "${MAKEIP_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk makeip 1
@@ -21,8 +20,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Re/Building makeip..."
 	cd "${MAKEIP_DIR}/src"
 	make -j$(nproc)
@@ -30,8 +29,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for makeip updates..."
 	kosaio_git_common_update "${MAKEIP_DIR}"
 	kosaio_echo "makeip updated"
@@ -42,13 +41,13 @@ function install() {
 	kosaio_echo "Installing makeip..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "makeip installation complete."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	cd "${MAKEIP_DIR}/src"
 	make install
 	kosaio_echo "makeip installed by make."

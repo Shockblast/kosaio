@@ -13,7 +13,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning KOS and KOS-PORTS..."
 	git clone --depth=1 --single-branch --recursive https://github.com/KallistiOS/kos-ports "${KOS_PORTS_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports 1
@@ -21,8 +20,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Build KOS-PORTS..."
 	cd "${KOS_PORTS_DIR}/utils"
 	./build-all.sh || true # avoid some libs contain errors
@@ -30,8 +29,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for KOS-PORTS updates..."
 	kosaio_git_common_update "${KOS_PORTS_DIR}"
 	cd "${KOS_PORTS_DIR}"
@@ -45,13 +44,13 @@ function install() {
 	kosaio_echo "Installing KOS-PORTS..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "KOS-PORTS installed."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Nothing to copy..."
 }
 

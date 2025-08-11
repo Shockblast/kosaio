@@ -12,7 +12,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning dcload-ip..."
 	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-ip.git "${DCLOADIP_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip 1
@@ -20,8 +19,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Building dcload-ip..."
 	cd "${DCLOADIP_DIR}"
 	make -j$(nproc)
@@ -29,8 +28,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for dcload-ip updates..."
 	kosaio_git_common_update "${DCLOADIP_DIR}"
 	kosaio_echo "dcload-ip updated"
@@ -41,13 +40,13 @@ function install() {
 	kosaio_echo "Installing dcload-ip."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "dcload-ip has been installed."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	cd "${DCLOADIP_DIR}"
 	make install
 	kosaio_echo "dcload-ip installed by make."

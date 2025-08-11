@@ -12,7 +12,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning dcload-serial..."
 	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-serial.git "${DCLOADSERIAL_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial 1
@@ -20,8 +19,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Building dcload-serial..."
 	cd "${DCLOADSERIAL_DIR}"
 	make -j$(nproc)
@@ -29,8 +28,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for dcload-serial updates..."
 	kosaio_git_common_update "${DCLOADSERIAL_DIR}"
 	kosaio_echo "dcload-serial updated"
@@ -41,13 +40,13 @@ function install() {
 	kosaio_echo "Installing dcload-serial."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "dcload-serial has been installed"
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	cd "${DCLOADSERIAL_DIR}"
 	make install
 	kosaio_echo "dcload-serial installed by make."

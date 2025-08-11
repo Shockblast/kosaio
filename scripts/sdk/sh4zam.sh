@@ -13,7 +13,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning sh4zam..."
 	git clone --depth=1 --single-branch https://github.com/gyrovorbis/sh4zam.git "${SH4ZAM_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam 1
@@ -21,8 +20,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Re/Building sh4zam..."
 	cd "${SH4ZAM_DIR}"
 
@@ -38,8 +37,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for sh4zam updates..."
 	kosaio_git_common_update "${SH4ZAM_DIR}"
 	kosaio_echo "sh4zam updated."
@@ -50,13 +49,13 @@ function install() {
 	kosaio_echo "Installing sh4zam..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "sh4zam installation complete."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	cd "${SH4ZAM_DIR}/build"
 	rm -rf build
 	make install

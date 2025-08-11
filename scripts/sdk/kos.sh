@@ -14,7 +14,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning KOS..."
 	git clone --depth=1 --single-branch --recursive https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos 1
@@ -22,8 +21,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Build KOS..."
 
 	# Copy dc-chain settings
@@ -86,8 +85,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for KOS updates..."
 	kosaio_git_common_update "${KOS_DIR}"
 	cd "${KOS_DIR}"
@@ -101,13 +100,13 @@ function install() {
 	kosaio_echo "Installing KOS..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "KOS Installed."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Nothing to copy..."
 }
 

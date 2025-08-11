@@ -13,7 +13,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning ALdc."
 	git clone --depth=1 --single-branch "https://gitlab.com/simulant/aldc.git" "${ALDC_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk aldc 1
@@ -21,8 +20,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Re/Building ALdc..."
 	cd "${ALDC_DIR}"
 
@@ -38,8 +37,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for ALdc updates..."
 	kosaio_git_common_update "${ALDC_DIR}"
 	kosaio_echo "ALdc Update complete."
@@ -50,13 +49,13 @@ function install() {
 	kosaio_echo "Installing ALdc..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "ALdc installation complete."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Nothing to copy..."
 }
 

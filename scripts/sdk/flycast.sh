@@ -15,7 +15,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning Flycast (dev branch, very slow)..."
 	git clone --depth=1 --single-branch --recursive https://github.com/flyinghead/flycast.git -b dev "${FLYCAST_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk flycast 1
@@ -23,8 +22,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Re/Building Flycast (slow)..."
 	cd "${FLYCAST_DIR}"
 
@@ -40,8 +39,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for Flycast updates..."
 	kosaio_git_common_update "${FLYCAST_DIR}"
 	cd "${FLYCAST_DIR}"
@@ -54,16 +53,16 @@ function install() {
 	kosaio_echo "Installing Flycast..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "Flycast installation complete.\n " \
 		"You can find the executable in ${FLYCAST_BIN_PATH}\n " \
 		"If build failed you can post a issue in flycast github.\n " \
 		"Remember to provide the necessary BIOS files in the host OS."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 
 	if [ ! -f "${FLYCAST_DIR}/build/flycast" ]; then
 		echo "Error: Flycast build not found, build fail?" >&2

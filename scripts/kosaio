@@ -125,12 +125,12 @@ function show_usage() {
 	echo
 	echo "Available actions:"
 	echo "	- info			-  Get more information and notes about the tool."
-	echo "	- install		-  Installs the tool (clone, build and install_bin)."
+	echo "	- install		-  Installs the tool (clone, build and apply)."
 	echo "	- uninstall		-  Uninstalls the tool."
 	echo "	- clone			-  Clones the tool's repository (the install action do it automatically)."
 	echo "	- build			-  Compile/Build the tool (the install action do it automatically)."
-	echo "	- install_bin	-  Copy the files compiled to the corresponded folders if required (the install action do it automatically)."
-	echo "	- update		-  Updates the tool from source (dont forget to build and install_bin after)."
+	echo "	- apply			-  Copy the files compiled to the corresponded folders if required (the install action do it automatically)."
+	echo "	- update		-  Updates the tool from source (dont forget to build and apply after)."
 	echo
 	echo "Example:"
 	echo "$ kosaio kos install"

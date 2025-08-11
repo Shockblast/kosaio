@@ -12,7 +12,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning mksdiso..."
 	git clone --depth=1 --single-branch https://github.com/Nold360/mksdiso.git "${MKSDISO_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso 1
@@ -20,15 +19,15 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "NOTE: mksdiso can only do install, uninstall and update on this script...\n" \
 		"If you want to compile something or explore you will need to open the folder repository here -> (${MKSDISO_DIR})."
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for mksdiso updates..."
 	kosaio_git_common_update "${MKSDISO_DIR}"
 	kosaio_echo "mksdiso updated."
@@ -39,13 +38,13 @@ function install() {
 	kosaio_echo "Installing mksdiso..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "mksdiso installation complete."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 	cd "${MKSDISO_DIR}"
 	make install
 	kosaio_echo "mksdiso installed by make."

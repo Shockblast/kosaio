@@ -12,7 +12,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning mkdcdisc..."
 	git clone --depth=1 --single-branch https://gitlab.com/simulant/mkdcdisc.git "${MKDCDISC_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mkdcdisc 1
@@ -20,8 +19,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Re/Building mkdcdisc..."
 	cd "${MKDCDISC_DIR}"
 	meson setup builddir
@@ -30,8 +29,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for mkdcdisc updates..."
 	kosaio_git_common_update "${MKDCDISC_DIR}"
 	kosaio_echo "mkdcdisc updated"
@@ -42,13 +41,13 @@ function install() {
 	kosaio_echo "Installing mkdcdisc..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "mkdcdisc installation complete."
 }
 
-function install_bin() {
-	__check_requeriments
+function apply() {
 	__is_installed
+	__check_requeriments
 
 	if [ ! -f "${MKDCDISC_DIR}/builddir/mkdcdisc" ]; then
 		echo "Error: mkdcdisc build not found, build fail?" >&2

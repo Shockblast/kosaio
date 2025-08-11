@@ -13,7 +13,6 @@ function info() {
 }
 
 function clone() {
-	__check_requeriments
 	kosaio_echo "Cloning GLdc."
 	git clone --depth=1 --single-branch "https://gitlab.com/simulant/GLdc.git" "${GLDC_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk gldc 1
@@ -21,8 +20,8 @@ function clone() {
 }
 
 function build() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Re/Building GLdc..."
 	cd "${GLDC_DIR}"
 
@@ -38,8 +37,8 @@ function build() {
 }
 
 function update() {
-	__check_requeriments
 	__is_installed
+	__check_requeriments
 	kosaio_echo "Checking for GLdc updates..."
 	kosaio_git_common_update "${GLDC_DIR}"
 	kosaio_echo "GLdc Update complete."
@@ -50,11 +49,11 @@ function install() {
 	kosaio_echo "Installing GLdc..."
 	clone
 	build
-	install_bin
+	apply
 	kosaio_echo "GLdc installation complete."
 }
 
-function install_bin() {
+function apply() {
 	__check_requeriments
 	__is_installed
 	kosaio_echo "Nothing to copy..."
