@@ -17,6 +17,7 @@ function check_required_vars() {
 		"KOS_BASE"
 		"KOS_PORTS"
 		"DC_TOOLS_BASE"
+		"TARGET_DIRS"
 	)
 
 	for var_name in "${SDK_DIR_LIST[@]}"; do
