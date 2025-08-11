@@ -77,6 +77,31 @@ function kosaio_require_packages() {
 if [ ! -f "${KOSAIO_CONFIG}" ]; then
 	kosaio_echo "Kosaio config file doest exist, we create it."
 	touch "${KOSAIO_CONFIG}"
+
+	if [ -f "${KOSAIO_CONFIG}" ]; then
+		if [ -d "${KOSAIO_DIR}/scripts/sdk/" ]; then
+			for tool_script in "${KOSAIO_DIR}/scripts/sdk/"*.sh; do
+				tool_name=$(basename "${tool_script}" .sh)
+				crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_script}" 0
+			done
+		else
+			kosaio_echo "Warning: Folder ${KOSAIO_DIR}/scripts/sdk/ doest exist, check kosaio installation."
+		fi
+	else
+		kosaio_echo "Cant create ${KOSAIO_CONFIG} file doest exist, plase check permissions."
+	fi
+else
+	# Check if exist new sdk tools and add on kosaio.ini
+	if [ -d "${KOSAIO_DIR}/scripts/sdk/" ]; then
+		for tool_script in "${KOSAIO_DIR}/scripts/sdk/"*.sh; do
+			tool_name=$(basename "${tool_script}" .sh)
+			if ! crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_script}" >/dev/null 2>&1; then
+				crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_script}" 0
+			fi
+		done
+	else
+		kosaio_echo "Warning: Folder ${KOSAIO_DIR}/scripts/sdk/ doest exist, check kosaio installation."
+	fi
 fi
 
 # Public functions
