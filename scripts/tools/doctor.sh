@@ -34,7 +34,7 @@ function check_required_vars() {
 
 function check_folder_permission() {
 	chmod -R 755 ${TARGET_DIRS}
-	chown -R root:root "${TARGET_DIRS}"
+	chown -R root:root ${TARGET_DIRS}
 
 	kosaio_echo "SDK FOLDER PERMISSION CHECK."
 }
