@@ -32,15 +32,8 @@ function check_required_vars() {
 }
 
 function check_folder_permission() {
-	kosaio_set_folder_permission \
-		"${DREAMCAST_SDK_EXTRAS}" \
-		"${DREAMCAST_SDK}" \
-		"${PROJECTS_DIR}" \
-		"${DREAMCAST_BIN_PATH}" \
-		"${KOSAIO_DIR}" \
-		"${KOS_BASE}" \
-		"${KOS_PORTS}" \
-		"${DC_TOOLS_BASE}"
+	chmod -R 755 ${TARGET_DIRS}
+	chown -R root:root "${TARGET_DIRS}"
 
 	kosaio_echo "SDK FOLDER PERMISSION CHECK."
 }

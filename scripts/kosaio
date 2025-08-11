@@ -20,8 +20,7 @@ function kosaio_set_folder_permission() {
 			echo "Error: Path not found: ${path}" >&2
 			exit 1
 		else
-			find "${path}" -type d -exec chmod 755 {} +
-			find "${path}" -type f -exec chmod 755 {} +
+			chmod -R 755 ${path}
 			chown -R root:root "${path}"
 			echo "Permissions set for ${path}"
 		fi

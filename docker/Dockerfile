@@ -35,8 +35,7 @@ RUN git clone https://github.com/Shockblast/kosaio.git "${KOSAIO_DIR}"
 RUN mkdir -p ${TARGET_DIRS}
 
 # Set Permissions
-RUN find ${TARGET_DIRS} -type d -exec chmod 755 {} + && \
-	find ${TARGET_DIRS} -type f -exec chmod 755 {} + && \
+RUN chmod -R 755 ${TARGET_DIRS} && \
 	chown -R root:root ${TARGET_DIRS}
 
 # Set working directory to /opt/projects
