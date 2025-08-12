@@ -53,6 +53,7 @@ function apply() {
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling mksdiso..."
+	cd "${MKSDISO_DIR}"
 	make uninstall
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso 0
 	kosaio_echo "mksdiso uninstallation complete."
