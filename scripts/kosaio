@@ -216,5 +216,3 @@ kosaio_echo "Executing: ${TOOL} ${ACTION}"
 
 # This calls the function from the sourced script, e.g., install()
 "${ACTION}"
-
-kosaio_echo "Action '${ACTION}' for tool '${TOOL}' completed."
