@@ -55,6 +55,8 @@ function uninstall() {
 	kosaio_echo "Uninstalling mksdiso..."
 	cd "${MKSDISO_DIR}"
 	make uninstall
+	cd ..
+	rm -rf "${MKSDISO_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso 0
 	kosaio_echo "mksdiso uninstallation complete."
 
