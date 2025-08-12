@@ -99,7 +99,7 @@ if [ ! -f "${KOSAIO_CONFIG}" ]; then
 		if [ -d "${KOSAIO_DIR}/scripts/sdk/" ]; then
 			for tool_script in "${KOSAIO_DIR}/scripts/sdk/"*.sh; do
 				tool_name=$(basename "${tool_script}" .sh)
-				crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_script}" 0
+				crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_name}" 0
 			done
 		else
 			kosaio_echo "Warning: Folder ${KOSAIO_DIR}/scripts/sdk/ doest exist, check kosaio installation."
@@ -112,8 +112,8 @@ else
 	if [ -d "${KOSAIO_DIR}/scripts/sdk/" ]; then
 		for tool_script in "${KOSAIO_DIR}/scripts/sdk/"*.sh; do
 			tool_name=$(basename "${tool_script}" .sh)
-			if ! crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_script}" >/dev/null 2>&1; then
-				crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_script}" 0
+			if ! crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_name}" >/dev/null 2>&1; then
+				crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk "${tool_name}" 0
 			fi
 		done
 	else
