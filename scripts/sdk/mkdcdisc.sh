@@ -74,7 +74,7 @@ function uninstall() {
 # Private functions
 
 function __check_requeriments() {
-	kosaio_require_packages git meson build-essential pkg-config libisofs libisofs-dev ninja-build
+	kosaio_require_packages git meson build-essential pkg-config libisofs-dev
 }
 
 function __is_installed() {

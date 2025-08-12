@@ -49,7 +49,7 @@ function install_all_dependencies() {
 	apt-get install -y \
 		bison build-essential bzip2 ca-certificates cmake curl \
 		diffutils flex gawk genisoimage gettext git \
-		libcurl4-openssl-dev libelf-dev libgmp-dev libisofs libisofs-dev libjpeg-dev \
+		libcurl4-openssl-dev libelf-dev libgmp-dev libisofs-dev libjpeg-dev \
 		libmpc-dev libmpfr-dev libpng-dev libsdl2-dev libvulkan-dev make meson \
 		nano ninja-build p7zip patch pkg-config python3 \
 		rake sed tar texinfo vim wget \
