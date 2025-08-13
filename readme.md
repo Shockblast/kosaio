@@ -24,6 +24,7 @@ You can install these tools with kosaio:
 * **makeip** its already included in KOS but this is more updated.
 * **flycast** emulator its compiles in container but works only in host and requires BIOS files installed in the host.
 * Dependencies are installed automatically depending on the tool to be installed. If you have problems compiling something, you can use `kosaio doctor install_all_dependencies`.
+* More tools will be implemented, if you want to help adapt them you can go to `scripts/in_progress`, if you know of a tool that is not there and you think it would be useful, you can suggest it in an issue.
 
 ### Prerequisites for creating the image
 Make sure you have Docker or Podman installed on your system host.
@@ -67,8 +68,12 @@ When install flycast, this create a copy of a executable in the projects folder 
 If everything went well, you should be able to see the message in the emulator and you are ready to continue on your own. If you need more tools or have problems, you can use kosaio or post an issue.
 
 Some examples of how to use kosaio:
+
 `kosaio sh4zam install`
+
 `kosaio doctor install_all_dependencies`
+
+`kosaio self-update`
 
 ### Debugging (Work in Progress, not ready yet)
 This setup is designed to support debugging both on real hardware and with the Flycast emulator. The GDB client (`sh-elf-gdb`) always runs inside the container, while the GDB server runs on the target (either the Dreamcast itself or Flycast on your host machine).
