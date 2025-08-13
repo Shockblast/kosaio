@@ -179,7 +179,7 @@ if [ "$1" = "self-update" ]; then
 	kosaio_git_common_update "${KOSAIO_DIR}"
 	kosaio_set_folder_permission "${KOSAIO_DIR}"
 	kosaio_echo "KOSAIO UPDATED"
-	exit 1
+	exit 0
 fi
 
 if [[ "$1" = "doctor" || "$1" = "project" ]]; then
@@ -187,7 +187,7 @@ if [[ "$1" = "doctor" || "$1" = "project" ]]; then
 fi
 
 # Check for correct number of arguments
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
 	show_usage
 fi
 
@@ -214,5 +214,6 @@ fi
 # Execute the action
 kosaio_echo "Executing: ${TOOL} ${ACTION}"
 
-# This calls the function from the sourced script, e.g., install()
-"${ACTION}"
+# This calls the function from the sourced script, passing any additional arguments
+shift 2
+"${ACTION}" "$@"
