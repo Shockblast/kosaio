@@ -117,6 +117,8 @@ function uninstall() {
 	local GLDC=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk gldc)
 	local ALDC=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk aldc)
 	local SH4ZAM=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam)
+	local DCLOADIP=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip)
+	local DCLOADSERIAL=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial)
 
 	if [ "${KOS_PORTS}" = "1" ]; then
 		kosaio_echo "Warning: You have installed KOS-PORTS, KOS is required to compile/use KOS-PORTS."
@@ -132,6 +134,14 @@ function uninstall() {
 
 	if [ "${SH4ZAM}" = "1" ]; then
 		kosaio_echo "Warning: You have installed Sh4zam, KOS is required to compile/use Sh4zam."
+	fi
+
+	if [ "${DCLOADIP}" = "1" ]; then
+		kosaio_echo "Warning: You have installed dcload-ip, KOS is required to compile/use dcload-ip."
+	fi
+
+	if [ "${DCLOADSERIAL}" = "1" ]; then
+		kosaio_echo "Warning: You have installed dcload-serial, KOS is required to compile/use dcload-serial."
 	fi
 
 	kosaio_echo "Uninstalling KOS..."

@@ -68,7 +68,12 @@ function uninstall() {
 # Private functions
 
 function __check_requeriments() {
-	# Nothing for now
+	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
+
+	if [ "${IS_INSTALLED}" = "0" ]; then
+		kosaio_echo "KOS is required to compile/use dcload-serial."
+		exit 1
+	fi
 }
 
 function __is_installed() {
