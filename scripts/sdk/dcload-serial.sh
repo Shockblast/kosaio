@@ -15,7 +15,7 @@ function clone() {
 	kosaio_echo "Cloning dcload-serial..."
 	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-serial.git "${DCLOADSERIAL_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial 1
-	kosaio_echo "dcload-serial has cloned"
+	kosaio_echo "dcload-serial has cloned."
 }
 
 function build() {
@@ -32,7 +32,7 @@ function update() {
 	__check_requeriments
 	kosaio_echo "Checking for dcload-serial updates..."
 	kosaio_git_common_update "${DCLOADSERIAL_DIR}"
-	kosaio_echo "dcload-serial updated"
+	kosaio_echo "dcload-serial updated."
 }
 
 function install() {
@@ -41,7 +41,7 @@ function install() {
 	clone
 	build
 	apply
-	kosaio_echo "dcload-serial has been installed"
+	kosaio_echo "dcload-serial has been installed."
 }
 
 function apply() {
@@ -62,7 +62,7 @@ function uninstall() {
 	fi
 
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial 0
-	kosaio_echo "dcload-serial has been uninstalled"
+	kosaio_echo "dcload-serial has been uninstalled."
 }
 
 # Private functions

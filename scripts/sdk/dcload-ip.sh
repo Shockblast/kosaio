@@ -15,7 +15,7 @@ function clone() {
 	kosaio_echo "Cloning dcload-ip..."
 	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-ip.git "${DCLOADIP_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip 1
-	kosaio_echo "dcload-ip has cloned"
+	kosaio_echo "dcload-ip has cloned."
 }
 
 function build() {
@@ -32,7 +32,7 @@ function update() {
 	__check_requeriments
 	kosaio_echo "Checking for dcload-ip updates..."
 	kosaio_git_common_update "${DCLOADIP_DIR}"
-	kosaio_echo "dcload-ip updated"
+	kosaio_echo "dcload-ip updated."
 }
 
 function install() {
@@ -62,7 +62,7 @@ function uninstall() {
 	fi
 
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip 0
-	kosaio_echo "dcload-ip has been uninstalled"
+	kosaio_echo "dcload-ip has been uninstalled."
 }
 
 # Private functions

@@ -33,7 +33,7 @@ function update() {
 	__check_requeriments
 	kosaio_echo "Checking for mkdcdisc updates..."
 	kosaio_git_common_update "${MKDCDISC_DIR}"
-	kosaio_echo "mkdcdisc updated"
+	kosaio_echo "mkdcdisc updated."
 }
 
 function install() {

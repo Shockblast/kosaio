@@ -14,7 +14,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning ALdc."
-	git clone --depth=1 --single-branch "https://gitlab.com/simulant/aldc.git" "${ALDC_DIR}"
+	git clone --depth=1 --single-branch https://gitlab.com/simulant/aldc.git "${ALDC_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk aldc 1
 	kosaio_echo "ALdc has been cloned."
 }
