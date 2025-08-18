@@ -46,7 +46,7 @@ function check_git_settings() {
 }
 
 function install_all_dependencies() {
-	apt-get install -y \
+	kosaio_require_packages \
 		bison build-essential bzip2 ca-certificates cmake curl \
 		diffutils flex gawk genisoimage gettext git \
 		libcurl4-openssl-dev libelf-dev libgmp-dev libisofs-dev libjpeg-dev \

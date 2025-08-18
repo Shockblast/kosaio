@@ -56,11 +56,11 @@ function kosaio_git_common_update() {
 		local local_rev=$(git rev-parse @)
 		local remote_rev=$(git rev-parse @{u})
 		local base_rev=$(git merge-base @ @{u})
-		git reset --hard
 
 		if [[ "${local_rev}" == "${remote_rev}" ]]; then
 			echo "Local branch is up-to-date with remote."
 		elif [[ "${local_rev}" == "${base_rev}" ]]; then
+			git reset --hard
 			echo "Local branch is behind '${upstream}'. Pulling changes..."
 			git pull
 			echo "New changes:"
@@ -68,6 +68,7 @@ function kosaio_git_common_update() {
 		elif [[ "${remote_rev}" == "${base_rev}" ]]; then
 			echo "Local branch is ahead of '${upstream}'. Nothing to pull."
 		else
+			git reset --hard
 			echo "Branches have diverged. Pulling changes..."
 			git pull
 			echo "New changes:"

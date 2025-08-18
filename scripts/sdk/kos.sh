@@ -77,7 +77,7 @@ function build() {
 	echo "Note: Source environ.sh to .bashrc."
 
 	# Build kos
-	source ${DREAMCAST_SDK}/kos/environ.sh
+	source "${DREAMCAST_SDK}/kos/environ.sh"
 	cd "${KOS_DIR}"
 	make -j$(nproc) || true
 
