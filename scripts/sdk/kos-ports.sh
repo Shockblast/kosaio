@@ -57,6 +57,9 @@ function apply() {
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling KOS-PORTS..."
+	cd "${KOS_PORTS_DIR}/utils"
+	./uninstall-all.sh
+	cd "/opt/projects"
 	rm -rf "${KOS_PORTS_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports 0
 	kosaio_echo "KOS-PORTS Uninstalled."
@@ -65,6 +68,8 @@ function uninstall() {
 # Private functions
 
 function __check_requeriments() {
+	kosaio_require_packages python3 python-is-python3
+
 	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
 
 	if [ "${IS_INSTALLED}" = "0" ]; then

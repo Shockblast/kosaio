@@ -50,10 +50,10 @@ function install_all_dependencies() {
 		bison build-essential bzip2 ca-certificates cmake curl \
 		diffutils flex gawk genisoimage gettext git \
 		libcurl4-openssl-dev libelf-dev libgmp-dev libisofs-dev libjpeg-dev \
-		libmpc-dev libmpfr-dev libpng-dev libsdl2-dev libvulkan-dev make meson \
-		nano ninja-build p7zip patch pkg-config python3 \
-		rake sed tar texinfo vim wget \
-		wodim crudini
+		libmpc-dev libmpfr-dev libpng-dev libsdl2-dev libvulkan-dev make \
+		meson nano ninja-build p7zip patch pkg-config \
+		python3 python-is-python3 rake sed tar texinfo \
+		vim wget wodim crudini
 
 	kosaio_echo "ALL DEPENDENCIES INSTALLED."
 }
