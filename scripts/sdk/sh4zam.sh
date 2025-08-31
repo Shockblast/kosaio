@@ -57,7 +57,6 @@ function apply() {
 	__is_installed
 	__check_requeriments
 	cd "${SH4ZAM_DIR}/build"
-	rm -rf build
 	make install
 	kosaio_echo "sh4zam installed by make..."
 }
