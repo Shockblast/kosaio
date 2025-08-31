@@ -64,16 +64,10 @@ function apply() {
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling sh4zam..."
+	cd "${SH4ZAM_DIR}"
+	make -f Makefile.kos uninstall
+	cd ..
 	rm -rf "${SH4ZAM_DIR}"
-
-	if [ -f "${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libsh4zam.a" ]; then
-		rm -f "${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libsh4zam.a"
-	fi
-
-	if [ -d "${DREAMCAST_SDK}/kos/addons/include/dreamcast" ]; then
-		rm -f "${DREAMCAST_SDK}/kos/addons/include/dreamcast/shz_*"
-	fi
-
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam 0
 	kosaio_echo "Sh4zam uninstallation complete."
 }
