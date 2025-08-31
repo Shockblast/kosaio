@@ -24,15 +24,11 @@ function build() {
 	__check_requeriments
 	kosaio_echo "Re/Building sh4zam..."
 	cd "${SH4ZAM_DIR}"
-
-	if [ -d "build" ]; then
-		rm -rf build
-	fi
-
+	make -f Makefile.kos clean
 	mkdir -p build
 	cd build
 	kos-cmake ..
-	make -j$(nproc)
+	make
 	kosaio_echo "sh4zam has been built."
 }
 
