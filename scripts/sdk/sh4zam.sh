@@ -24,7 +24,7 @@ function build() {
 	__check_requeriments
 	kosaio_echo "Re/Building sh4zam..."
 	cd "${SH4ZAM_DIR}"
-	make -f Makefile.kos clean
+	make -f Makefile clean
 	mkdir -p build
 	cd build
 	kos-cmake ..
@@ -61,7 +61,7 @@ function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling sh4zam..."
 	cd "${SH4ZAM_DIR}"
-	make -f Makefile.kos uninstall
+	make -f Makefile uninstall
 	cd ..
 	rm -rf "${SH4ZAM_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam 0
