@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM ubuntu:24.10
+FROM ubuntu:24.04
 SHELL ["/bin/bash", "-c"]
 
 LABEL maintainer="Shockblast <danielmaccomb@gmail.com>"
