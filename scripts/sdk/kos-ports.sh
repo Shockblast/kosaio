@@ -13,10 +13,10 @@ function info() {
 }
 
 function clone() {
-	kosaio_echo "Cloning KOS and KOS-PORTS..."
+	kosaio_echo "Cloning KOS-PORTS..."
 	git clone --depth=1 --single-branch --recursive https://github.com/KallistiOS/kos-ports "${KOS_PORTS_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports 1
-	kosaio_echo "KOS and KOS-PORTS has been cloned."
+	kosaio_echo "KOS-PORTS has been cloned."
 }
 
 function build() {
