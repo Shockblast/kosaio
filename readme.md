@@ -20,7 +20,7 @@ You can install these tools with kosaio:
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
 | **sh4zam**        | General-purpose library for math and linear algebra on Dreamcast.                                   |
 
-* **Aldc** and **GLdc** are already included in KOS-PORTS but its there for developers only.
+* **Sh4zam**, **Aldc** and **GLdc** are already included in KOS-PORTS but its there for developers only.
 * **makeip** its already included in KOS but this is more updated.
 * **flycast** emulator its compiles in container but works only in host and requires BIOS files installed in the host.
 * Dependencies are installed automatically depending on the tool to be installed. If you have problems compiling something, you can use `kosaio doctor install_all_dependencies`.
