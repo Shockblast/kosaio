@@ -15,7 +15,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning KOS..."
-	git clone --depth=1 --single-branch --recursive https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
+	git clone --depth=1 --single-branch --recursive -b v2.2.x https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
 	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos 1
 	kosaio_echo "KOS has been cloned."
 }
