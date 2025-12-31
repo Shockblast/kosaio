@@ -23,7 +23,7 @@ function build() {
 	__check_requeriments
 	kosaio_echo "Building dcaconv..."
 	cd "${DCACONV_DIR}"
-	make -j$(nproc)
+	make all -j$(nproc)
 	kosaio_echo "dcaconv has build."
 }
 
@@ -48,8 +48,8 @@ function apply() {
 	__is_installed
 	__check_requeriments
 	cd "${DCACONV_DIR}"
-	make install
-	kosaio_echo "dcaconv installed by make."
+	cp "dcaconv" "${DREAMCAST_BIN_PATH}"
+	kosaio_echo "dcaconv installed by copy."
 }
 
 function uninstall() {
