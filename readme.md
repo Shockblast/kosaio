@@ -12,6 +12,7 @@ You can install these tools with kosaio:
 | **KOS-PORTS**     | KOS-PORTS is a collection of third-party libraries ported to work with KOS.                         |
 | **aldc**          | An OpenAL implementation for Dreamcast, facilitating 3D audio programming.                          |
 | **gldc**          | An implementation of the OpenGL API for Dreamcast, facilitating 3D graphics development.            |
+| **dcaconv**       | dcaconv converts audio to a format for the Dreamcast's AICA.                                        |
 | **dcload-ip**     | Allows loading and executing binaries on the Dreamcast over a network (with a Broadband Adapter).   |
 | **dcload-serial** | Allows loading and executing binaries on the Dreamcast via the serial port (with a "Coders Cable"). |
 | **flycast**       | A Dreamcast emulator with GDB support, ideal for debugging and testing without real hardware.       |
