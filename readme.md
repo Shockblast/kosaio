@@ -2,6 +2,14 @@
 
 KOSAIO is an all-in-one Docker image with scripts to manage the installation and updating of the SDK tools designed to simplify homebrew development for the Sega Dreamcast. It contains a pre-configured development environment with KallistiOS (KOS) and a selection of essential tools, allowing you to start programming for the Dreamcast in the fastest and easiest way possible.
 
+## Core Features
+
+*   **Integrated Environment**: Comes with KOS and essential tools pre-configured.
+*   **Granular Developer Mode**: Switch any tool between **Stable** (official releases) and **Developer Mode** (custom source code) individually.
+*   **Smart Status Dashboard**: Use `kosaio list` to see instantly which tools are installed, which version is active, and their status.
+*   **Automated Management**: Handles cloning, compilation, and dependency checks automatically.
+*   **Project Scaffolding**: Create new projects ready to compile with a single command.
+
 ## Included Tools
 
 You can install these tools with kosaio:
@@ -21,58 +29,104 @@ You can install these tools with kosaio:
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
 | **sh4zam**        | General-purpose library for math and linear algebra on Dreamcast.                                   |
 
-* **Sh4zam**, **Aldc** and **GLdc** are already included in KOS-PORTS but its there for developers only.
+* **Sh4zam**, **Aldc**, and **GLdc** are typically included in **KOS-PORTS**, but KOSAIO manages them as standalone tools so you can control them individually.
 * **makeip** its already included in KOS but this is more updated.
 * **flycast** emulator its compiles in container but works only in host and requires BIOS files installed in the host.
 * Dependencies are installed automatically depending on the tool to be installed. If you have problems compiling something, you can use `kosaio doctor install_all_dependencies`.
 * More tools will be implemented, if you want to help adapt them you can go to `scripts/in_progress`, if you know of a tool that is not there and you think it would be useful, you can suggest it in an issue.
 
-### Prerequisites for creating the image
-Make sure you have Docker or Podman installed on your system host.
+### Quick Setup (Recommended)
+The easiest way to set up your environment is using the assistant script. It will build the image and create the container with the correct volume mounts for local development.
 
-#### Docker
-`sudo apt install docker`
+1.  Make the script executable:
+    ```bash
+    chmod +x kosaio-setup.sh
+    ```
+2.  Run the setup:
+    ```bash
+    ./kosaio-setup.sh
+    ```
+3.  Enter the environment:
+    ```bash
+    ./kosaio-shell
+    ```
 
-or
+> [!TIP]
+> This method mounts your local KOSAIO folder into the container, allowing you to edit scripts on your host and see changes instantly inside Podman/Docker.
 
-#### Podman
-`sudo apt install podman`
-
+### Manual Setup
 The internal container path must be `/opt/projects` when creating the container; and in the host `/home/user/documents/projects` <-- here, this is where you will create all your projects.
 
-
-Opening the ports is optional as it is not fully implemented/configured for debugging in flycast, gdb and vscode, more in 'Debug'.
-PORTS:
-  - 3263 for flycast with gdb
-  - 2159 for dcload-ip
-
-### First steps
-
-The first SDK you need to install is KallistiOS (KOS), you can install very easy with kosaio in you container, the installation and compilation will take a long time, so you can get up and take a break there.
+### First Steps
+The first SDK you need to install is KallistiOS (KOS). It is a long process, so be prepared for a break!
 
 Before installing kos, if you like, you can look at the Makefile.cfg file inside the dc-chain-settings folder and make adjustments if required.
 
-`kosaio kos install`
+```bash
+kosaio install kos
+```
 
 After that renember to exit terminal for refresh the enviroment.
 
 Now you are ready to develop a dreamcast application, you can use the basic-project to test if KOS its working.
 
-`kosaio project create mygame`
+`kosaio create project mygame`
 
-This creates a basic project in `/home/user/documents/projects/mygame` (host) and `/opt/projects/mygame` (container), you can go there in the container terminal and use `make`, this compiles the project and creates a file `mygame/release/game.elf` in this file is a basic hello world, you can use a emulator to test it.
+### Diagnostic and Health Checks
 
-`kosaio flycast install`
+KOSAIO provides a powerful diagnosis system to ensure your environment is correctly configured.
 
-When install flycast, this create a copy of a executable in the projects folder in the host `/home/user/documents/projects/` (renember to install dreamcast bios files in the host) open flycast and drag and drop the game.elf in the window or open bia flycast.
+*   **System Check**: `kosaio diagnose system` (Checks variable paths and toolchains).
+*   **KOSAIO Health**: `kosaio diagnose self` (Checks if KOSAIO scripts are intact and up to date).
+*   **SDK-Specific Check**: `kosaio diagnose kos` (Checks if KallistiOS is properly compiled).
 
-If everything went well, you should be able to see the message in the emulator and you are ready to continue on your own. If you need more tools or have problems, you can use kosaio or post an issue.
+### Developer Mode
+
+KOSAIO offers a granular Developer Mode for advanced users who want to modify tools like `sh4zam` or `kos` without breaking their main stable installation.
+
+#### Workflow:
+
+1.  **Check Tool Status**:
+    Use `list` to view the comprehensive status of all tools.
+    ```bash
+    kosaio list
+    # Output Example:
+    # sh4zam          Stable (Installed) / Dev (Installed - Active)
+    ```
+    This dashboard shows you at a glance:
+    *   **Active Mode**: Which version (Stable or Dev) is currently enabled (marked as `- Active`).
+    *   **Installation Status**: Whether the binary/library is actually present for each mode.
+
+2.  **Enable Developer Mode**:
+    Use `dev-switch` with `enable` to switch the tool's configuration to Developer Mode.
+    ```bash
+    kosaio dev-switch <tool> enable
+    # Example: kosaio dev-switch sh4zam enable
+    ```
+    *   **Note**: This only changes the configuration. You must run the install command to apply the changes.
+
+3.  **Apply Changes (Install Dev Version)**:
+    Run the install command to clone (if needed), build, and install the development version of the tool.
+    ```bash
+    kosaio install <tool>
+    ```
+
+4.  **Disable Developer Mode (Revert)**:
+    Use `dev-switch` with `disable` to switch the configuration back to Stable Mode.
+    ```bash
+    kosaio dev-switch <tool> disable
+    ```
+    *   **Note**: To restore the stable binary in your system, you must run `kosaio install <tool>` again.
+
+### Examples
 
 Some examples of how to use kosaio:
 
-`kosaio sh4zam install`
+`kosaio install sh4zam`
 
-`kosaio doctor install_all_dependencies`
+`kosaio diagnose system`
+
+`kosaio install-deps system`
 
 `kosaio self-update`
 
