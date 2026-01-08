@@ -1,0 +1,13 @@
+# KOSAIO Configuration File
+# -------------------------
+# You can use this file to pre-configure your setup.
+# If a value is left empty, the script will try to auto-detect or ask.
+
+# Path to your projects folder on the HOST (where your games live)
+PROJECTS_HOST_DIR="/home/user/my-dc-games"
+
+# Container tool to use (podman or docker)
+TOOL="podman"
+
+# Name for the container
+CONTAINER_NAME="kosaio"
