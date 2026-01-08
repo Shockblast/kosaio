@@ -16,7 +16,7 @@ function create() {
 
 	# Check if the template directory exists
 	if [ ! -d "${template_dir}" ]; then
-		kosaio_echo "Error: basic-project template folder doest exist, check kosaio installation."
+		kosaio_echo "Error: basic-project template folder doesn't exist, check kosaio installation."
 		exit 1
 	fi
 
@@ -30,6 +30,10 @@ function create() {
 
 	# Copy the template directory to the new project path
 	cp -a "${template_dir}" "${project_dir}"
+	
+	# Fix permissions to match the project directory parent
+	chown -R --reference="${PROJECTS_DIR}" "${project_dir}"
 
-	kosaio_echo "Created ${project_dir}, you are ready to go with vscode in you host"
+	kosaio_echo "Created ${project_name} in ${project_dir}. \n" \
+		"You can now run './build.sh' inside the container to build your project."
 }
