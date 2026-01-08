@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-DCLOADSERIAL_DIR="${DREAMCAST_SDK_EXTRAS}/dcload-serial"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	DCLOADSERIAL_DIR="${PROJECTS_DIR}/kosaio-dev/dcload-serial"
+else
+	DCLOADSERIAL_DIR="${DREAMCAST_SDK_EXTRAS}/dcload-serial"
+fi
 
 # Public functions
 
@@ -14,7 +18,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning dcload-serial..."
 	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-serial.git "${DCLOADSERIAL_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial 1
 	kosaio_echo "dcload-serial has cloned."
 }
 
@@ -52,6 +55,41 @@ function apply() {
 	kosaio_echo "dcload-serial installed by make."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing dcload-serial..."
+    local errors=0
+
+    if [ -d "${DCLOADSERIAL_DIR}" ]; then
+        kosaio_print_status "PASS" "dcload-serial source directory found."
+    else
+        kosaio_print_status "FAIL" "dcload-serial source directory missing."
+        ((errors++))
+    fi
+
+    if [ -x "${DREAMCAST_BIN_PATH}/dc-tool-serial" ]; then
+        kosaio_print_status "PASS" "dc-tool-serial found in PATH."
+    else
+        kosaio_print_status "FAIL" "dc-tool-serial MISSING from PATH."
+        ((errors++))
+    fi
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        kosaio_print_status "INFO" "Developer Mode active."
+        if [ -f "${DCLOADSERIAL_DIR}/target-src/1st_read/loader.bin" ] || [ -f "${DCLOADSERIAL_DIR}/host-src/tool/dc-tool" ]; then
+             kosaio_print_status "PASS" "Local source/build files found."
+        else
+             kosaio_print_status "FAIL" "Local build files MISSING."
+             ((errors++))
+        fi
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling dcload-serial."
@@ -61,31 +99,21 @@ function uninstall() {
 		rm -f "${DREAMCAST_BIN_PATH}/dc-tool-serial"
 	fi
 
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial 0
 	kosaio_echo "dcload-serial has been uninstalled."
 }
 
 # Private functions
 
 function __check_requeriments() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "KOS is required to compile/use dcload-serial."
+    if [ ! -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+		kosaio_echo "KOS is required to compile/use dcload-serial (environ.sh not found)."
 		exit 1
 	fi
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "dcload-serial is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${DCLOADSERIAL_DIR}" ]; then
-		kosaio_echo "dcload-serial folder not found, is dcload-serial installed?."
+		kosaio_echo "dcload-serial folder not found. Is it installed?"
 		exit 1
 	fi
 }

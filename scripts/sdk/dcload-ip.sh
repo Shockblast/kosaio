@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-DCLOADIP_DIR="${DREAMCAST_SDK_EXTRAS}/dcload-ip"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	DCLOADIP_DIR="${PROJECTS_DIR}/kosaio-dev/dcload-ip"
+else
+	DCLOADIP_DIR="${DREAMCAST_SDK_EXTRAS}/dcload-ip"
+fi
 
 # Public functions
 
@@ -14,7 +18,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning dcload-ip..."
 	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-ip.git "${DCLOADIP_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip 1
 	kosaio_echo "dcload-ip has cloned."
 }
 
@@ -23,7 +26,7 @@ function build() {
 	__check_requeriments
 	kosaio_echo "Building dcload-ip..."
 	cd "${DCLOADIP_DIR}"
-	make -j$(nproc)
+	make all -j$(nproc)
 	kosaio_echo "dcload-ip has build."
 }
 
@@ -52,6 +55,41 @@ function apply() {
 	kosaio_echo "dcload-ip installed by make."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing dcload-ip..."
+    local errors=0
+
+    if [ -d "${DCLOADIP_DIR}" ]; then
+        kosaio_print_status "PASS" "dcload-ip source directory found."
+    else
+        kosaio_print_status "FAIL" "dcload-ip source directory missing."
+        ((errors++))
+    fi
+
+    if [ -x "${DREAMCAST_BIN_PATH}/dc-tool-ip" ]; then
+        kosaio_print_status "PASS" "dc-tool-ip found in PATH."
+    else
+        kosaio_print_status "FAIL" "dc-tool-ip MISSING from PATH."
+        ((errors++))
+    fi
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        kosaio_print_status "INFO" "Developer Mode active."
+        if [ -f "${DCLOADIP_DIR}/target-src/1st_read/loader.bin" ] || [ -f "${DCLOADIP_DIR}/host-src/tool/dc-tool" ]; then
+             kosaio_print_status "PASS" "Local source/build files found."
+        else
+             kosaio_print_status "FAIL" "Local build files MISSING."
+             ((errors++))
+        fi
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling dcload-ip."
@@ -61,31 +99,23 @@ function uninstall() {
 		rm -f "${DREAMCAST_BIN_PATH}/dc-tool-ip"
 	fi
 
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip 0
 	kosaio_echo "dcload-ip has been uninstalled."
 }
 
 # Private functions
 
 function __check_requeriments() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
+	kosaio_require_packages wodim
 
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "KOS is required to compile/use dcload-ip."
+    if [ ! -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+		kosaio_echo "KOS is required to compile/use dcload-ip (environ.sh not found)."
 		exit 1
 	fi
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "dcload-ip is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${DCLOADIP_DIR}" ]; then
-		kosaio_echo "dcload-ip folder not found, is dcload-ip installed?."
+		kosaio_echo "dcload-ip folder not found. Is it installed?"
 		exit 1
 	fi
 }

@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-MKSDISO_DIR="${DREAMCAST_SDK_EXTRAS}/mksdiso"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	MKSDISO_DIR="${PROJECTS_DIR}/kosaio-dev/mksdiso"
+else
+	MKSDISO_DIR="${DREAMCAST_SDK_EXTRAS}/mksdiso"
+fi
 
 # Public functions
 
@@ -14,7 +18,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning mksdiso..."
 	git clone --depth=1 --single-branch https://github.com/Nold360/mksdiso.git "${MKSDISO_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso 1
 	kosaio_echo "mksdiso has been cloned."
 }
 
@@ -50,6 +53,35 @@ function apply() {
 	kosaio_echo "mksdiso installed by make."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing mksdiso..."
+    local errors=0
+
+    if [ -d "${MKSDISO_DIR}" ]; then
+        kosaio_print_status "PASS" "mksdiso source directory found."
+    else
+        kosaio_print_status "FAIL" "mksdiso source directory missing."
+        ((errors++))
+    fi
+
+    if [ -x "${DREAMCAST_BIN_PATH}/mksdiso" ]; then
+        kosaio_print_status "PASS" "mksdiso binary/script found in PATH."
+    else
+        kosaio_print_status "FAIL" "mksdiso MISSING from PATH."
+        ((errors++))
+    fi
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        kosaio_print_status "INFO" "Developer Mode active."
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling mksdiso..."
@@ -57,7 +89,6 @@ function uninstall() {
 	make uninstall
 	cd ..
 	rm -rf "${MKSDISO_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso 0
 	kosaio_echo "mksdiso uninstallation complete."
 
 }
@@ -69,15 +100,8 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk mksdiso)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "mksdiso is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${MKSDISO_DIR}" ]; then
-		kosaio_echo "mksdiso folder not found, is mksdiso installed?."
+		kosaio_echo "mksdiso folder not found. Is it installed?"
 		exit 1
 	fi
 }

@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-DCACONV_DIR="${DREAMCAST_SDK_EXTRAS}/dcaconv"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	DCACONV_DIR="${PROJECTS_DIR}/kosaio-dev/dcaconv"
+else
+	DCACONV_DIR="${DREAMCAST_SDK_EXTRAS}/dcaconv"
+fi
 
 # Public functions
 
@@ -14,7 +18,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning dcaconv..."
 	git clone --depth=1 --single-branch https://github.com/TapamN/dcaconv.git "${DCACONV_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcaconv 1
 	kosaio_echo "dcaconv has cloned."
 }
 
@@ -52,6 +55,44 @@ function apply() {
 	kosaio_echo "dcaconv installed by copy."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing dcaconv..."
+    local errors=0
+
+    # 1. Directory presence
+    if [ -d "${DCACONV_DIR}" ]; then
+        kosaio_print_status "PASS" "dcaconv source directory found."
+    else
+        kosaio_print_status "FAIL" "dcaconv source directory missing."
+        ((errors++))
+    fi
+
+    # 2. Binary presence
+    if [ -x "${DREAMCAST_BIN_PATH}/dcaconv" ]; then
+        kosaio_print_status "PASS" "dcaconv binary found in PATH."
+    else
+        kosaio_print_status "FAIL" "dcaconv binary MISSING or NOT EXECUTABLE."
+        ((errors++))
+    fi
+
+    # 3. Dev Mode check
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        kosaio_print_status "INFO" "Developer Mode active."
+        if [ -f "${DCACONV_DIR}/dcaconv" ]; then
+             kosaio_print_status "PASS" "Local compiled binary found."
+        else
+             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build dcaconv'."
+             ((errors++))
+        fi
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling dcaconv."
@@ -61,7 +102,6 @@ function uninstall() {
 		rm -f "${DREAMCAST_BIN_PATH}/dcaconv"
 	fi
 
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk dcaconv 0
 	kosaio_echo "dcaconv has been uninstalled."
 }
 
@@ -72,15 +112,8 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcaconv)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "dcaconv is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${DCACONV_DIR}" ]; then
-		kosaio_echo "dcaconv folder not found, is dcaconv installed?."
+		kosaio_echo "dcaconv folder not found. Is it installed?"
 		exit 1
 	fi
 }

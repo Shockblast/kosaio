@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
-KOS_DIR="${DREAMCAST_SDK}/kos"
-DCCHAIN_DIR="${DREAMCAST_SDK}/kos/utils/dc-chain"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	KOS_DIR="${PROJECTS_DIR}/kosaio-dev/kos"
+else
+	KOS_DIR="${DREAMCAST_SDK}/kos"
+fi
+DCCHAIN_DIR="${KOS_DIR}/utils/dc-chain"
 
 # Public functions
 
@@ -16,7 +20,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning KOS..."
 	git clone --depth=1 --single-branch --recursive -b v2.2.x https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos 1
 	kosaio_echo "KOS has been cloned."
 }
 
@@ -26,15 +29,15 @@ function build() {
 	kosaio_echo "Build KOS..."
 
 	# Copy dc-chain settings
-	echo "Note: Copy Makefile.cfg to ${DREAMCAST_SDK}/kos/utils/dc-chain"
+	echo "Note: Copy Makefile.cfg to ${DCCHAIN_DIR}"
 
-	if [ -f "${DREAMCAST_SDK}/kos/utils/dc-chain/Makefile.cfg" ]; then
-		echo "Note: Makefile.cfg file found in ${DREAMCAST_SDK}/kos/utils/dc-chain." >&2
+	if [ -f "${DCCHAIN_DIR}/Makefile.cfg" ]; then
+		echo "Note: Makefile.cfg file found in ${DCCHAIN_DIR}." >&2
 	else
-		cp "${KOSAIO_DIR}/dc-chain-settings/Makefile.cfg" "${DREAMCAST_SDK}/kos/utils/dc-chain"
+		cp "${KOSAIO_DIR}/dc-chain-settings/Makefile.cfg" "${DCCHAIN_DIR}"
 
-		if [ -f "${DREAMCAST_SDK}/kos/utils/dc-chain/Makefile.cfg" ]; then
-			echo "Note: Copied Makefile.cfg to ${DREAMCAST_SDK}/kos/utils/dc-chain."
+		if [ -f "${DCCHAIN_DIR}/Makefile.cfg" ]; then
+			echo "Note: Copied Makefile.cfg to ${DCCHAIN_DIR}."
 		else
 			echo "Error: Cant copy Makefile.cfg, check permissions."
 			exit 1
@@ -43,7 +46,7 @@ function build() {
 
 	# Build dc-chain
 	cd "${DCCHAIN_DIR}"
-	make -j$(nproc) || true
+	make -j$(nproc)
 	make clean
 
 	# Check file and Backup .bashrc
@@ -63,10 +66,14 @@ function build() {
 	fi
 
 	# Copy kos env, this replace the older in case of update
-	cp "${DREAMCAST_SDK}/kos/doc/environ.sh.sample" "${DREAMCAST_SDK}/kos/environ.sh"
+	cp "${KOS_DIR}/doc/environ.sh.sample" "${DREAMCAST_SDK}/kos/environ.sh"
 
 	if [ -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
 		echo "Note: Copied environ.sh to ${DREAMCAST_SDK}/kos."
+        # Update KOS_BASE to match the actual installation directory (critical for --dev mode)
+        sed -i "s|export KOS_BASE=.*|export KOS_BASE=\"${KOS_DIR}\"|g" "${DREAMCAST_SDK}/kos/environ.sh"
+        # Also uncomment it if it's commented out in the sample
+        sed -i "s|# export KOS_BASE=|export KOS_BASE=|g" "${DREAMCAST_SDK}/kos/environ.sh"
 	else
 		echo "Error: Cant copy environ.sh, check permissions."
 		exit 1
@@ -78,8 +85,8 @@ function build() {
 
 	# Build kos
 	source "${DREAMCAST_SDK}/kos/environ.sh"
-	cd "${KOS_DIR}"
-	make -j$(nproc) || true
+	cd "${KOS_DIR}" # KOS_DIR is dynamic based on dev mode
+	make -j$(nproc)
 
 	kosaio_echo "KOS builds."
 }
@@ -91,8 +98,9 @@ function update() {
 	kosaio_git_common_update "${KOS_DIR}"
 	cd "${KOS_DIR}"
 	git submodule update --init --recursive
-	kosaio_echo "KOS updated, now you can run 'kosaio kos build'.\n" \
-		"And now you can get up and go for coffee, this will take a while."
+    # Update logic might need rebuild, keeping previous message
+	kosaio_echo "KOS updated, now you can run 'kosaio install kos' to rebuild.\n" \
+		"Warning: This will require a full rebuild."
 }
 
 function install() {
@@ -104,6 +112,46 @@ function install() {
 	kosaio_echo "KOS Installed."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing KallistiOS (KOS)..."
+    local errors=0
+    
+    # 1. Directory presence
+    if [ -d "${KOS_DIR}" ]; then
+        kosaio_print_status "PASS" "KOS directory found at ${KOS_DIR}"
+    else
+        kosaio_print_status "FAIL" "KOS directory MISSING."
+        ((errors++))
+    fi
+
+    # 2. Environment script
+    if [ -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+        kosaio_print_status "PASS" "environ.sh found."
+    else
+        kosaio_print_status "FAIL" "environ.sh MISSING (Run 'kosaio build kos' or 'install kos')."
+        ((errors++))
+    fi
+
+    # 3. Compiled library
+    local lib_path="${KOS_DIR}/lib/dreamcast/libkallisti.a"
+    if [ -f "$lib_path" ]; then
+        kosaio_print_status "PASS" "Compiled library found: libkallisti.a"
+    else
+        kosaio_print_status "FAIL" "libkallisti.a NOT FOUND. KOS might not be compiled."
+        ((errors++))
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        echo ""
+        kosaio_print_status "INFO" "KOS looks healthy!"
+        return 0
+    else
+        echo ""
+        kosaio_print_status "FAIL" "KOS has issues. Please run 'kosaio install kos' to fix."
+        return 1
+    fi
+}
+
 function apply() {
 	__is_installed
 	__check_requeriments
@@ -113,36 +161,26 @@ function apply() {
 function uninstall() {
 	__is_installed
 
-	local KOS_PORTS=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports)
-	local GLDC=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk gldc)
-	local ALDC=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk aldc)
-	local SH4ZAM=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk sh4zam)
-	local DCLOADIP=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-ip)
-	local DCLOADSERIAL=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk dcload-serial)
-
-	if [ "${KOS_PORTS}" = "1" ]; then
-		kosaio_echo "Warning: You have installed KOS-PORTS, KOS is required to compile/use KOS-PORTS."
+    # Check for dependent ports by looking for their typical install locations or source folders
+	# This is a best-effort check.
+	
+	if [ -d "${DREAMCAST_SDK}/kos-ports" ]; then
+		kosaio_echo "Warning: KOS-PORTS detected. Uninstallation might break it."
 	fi
 
-	if [ "${GLDC}" = "1" ]; then
-		kosaio_echo "Warning: You have installed GLdc, KOS is required to compile/use GLdc."
+	if [ -f "${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libGLdc.a" ]; then
+		kosaio_echo "Warning: GLdc library detected."
 	fi
 
-	if [ "${ALDC}" = "1" ]; then
-		kosaio_echo "Warning: You have installed ALdc, KOS is required to compile/use ALdc."
+    if [ -f "${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libaldc.a" ]; then
+		kosaio_echo "Warning: ALdc library detected."
 	fi
 
-	if [ "${SH4ZAM}" = "1" ]; then
-		kosaio_echo "Warning: You have installed Sh4zam, KOS is required to compile/use Sh4zam."
-	fi
-
-	if [ "${DCLOADIP}" = "1" ]; then
-		kosaio_echo "Warning: You have installed dcload-ip, KOS is required to compile/use dcload-ip."
-	fi
-
-	if [ "${DCLOADSERIAL}" = "1" ]; then
-		kosaio_echo "Warning: You have installed dcload-serial, KOS is required to compile/use dcload-serial."
-	fi
+    # dcload-ip/serial are usually standalone binaries in bin, but rely on KOS to be built.
+    # Running them doesn't strictly require KOS source, but rebuilding them does.
+    if [ -f "${DREAMCAST_BIN_PATH}/dc-tool-ip" ]; then
+        kosaio_echo "Warning: dcload-ip detected. You won't be able to rebuild it without KOS."
+    fi
 
 	kosaio_echo "Uninstalling KOS..."
 	rm -rf "${KOS_DIR}"
@@ -153,28 +191,21 @@ function uninstall() {
 		cp "/root/.bashrc_og" "/root/.bashrc"
 	fi
 
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos 0
-	kosaio_echo "KOS Uninstallled."
+	kosaio_echo "KOS Uninstalled."
 }
 
 # Private functions
 
 function __check_requeriments() {
+    # Crudini removed from requirements
 	kosaio_require_packages bison build-essential bzip2 cmake curl diffutils flex gawk gettext git \
 		libelf-dev libgmp-dev libisofs-dev libjpeg-dev libmpc-dev libmpfr-dev libpng-dev \
 		make meson ninja-build patch pkg-config python3 rake sed tar texinfo wget
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "KOS is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${KOS_DIR}" ]; then
-		kosaio_echo "KOS folder not found, is KOS installed?."
+		kosaio_echo "KOS is not installed (directory missing)."
 		exit 1
 	fi
 }

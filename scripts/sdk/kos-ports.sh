@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-KOS_PORTS_DIR="${DREAMCAST_SDK}/kos-ports"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	KOS_PORTS_DIR="${PROJECTS_DIR}/kosaio-dev/kos-ports"
+else
+	KOS_PORTS_DIR="${DREAMCAST_SDK}/kos-ports"
+fi
 
 # Public functions
 
@@ -15,7 +19,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning KOS-PORTS..."
 	git clone --depth=1 --single-branch --recursive https://github.com/KallistiOS/kos-ports "${KOS_PORTS_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports 1
 	kosaio_echo "KOS-PORTS has been cloned."
 }
 
@@ -54,6 +57,31 @@ function apply() {
 	kosaio_echo "Nothing to copy..."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing KOS-PORTS..."
+    local errors=0
+
+    if [ -d "${KOS_PORTS_DIR}" ]; then
+        kosaio_print_status "PASS" "KOS-PORTS directory found."
+    else
+        kosaio_print_status "FAIL" "KOS-PORTS directory missing."
+        ((errors++))
+    fi
+
+    local indicator="${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libpng.a"
+    if [ -f "$indicator" ]; then
+        kosaio_print_status "PASS" "Ports health indicator found: libpng.a"
+    else
+        kosaio_print_status "WARN" "libpng.a not found. Some ports might not be compiled."
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling KOS-PORTS..."
@@ -61,7 +89,6 @@ function uninstall() {
 	./uninstall-all.sh
 	cd "/opt/projects"
 	rm -rf "${KOS_PORTS_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports 0
 	kosaio_echo "KOS-PORTS Uninstalled."
 }
 
@@ -70,24 +97,15 @@ function uninstall() {
 function __check_requeriments() {
 	kosaio_require_packages python3 python-is-python3
 
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "KOS is required to use/compile KOS-PORTS."
+	if [ ! -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+		kosaio_echo "KOS is required to use/compile KOS-PORTS (environ.sh not found)."
 		exit 1
 	fi
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos-ports)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "KOS-PORTS is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${KOS_PORTS_DIR}" ]; then
-		kosaio_echo "KOS-PORTS folder not found, is KOS-PORTS installed?."
+		kosaio_echo "KOS-PORTS folder not found. Is it installed?"
 		exit 1
 	fi
 }

@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-GLDC_DIR="${DREAMCAST_SDK_EXTRAS}/GLdc"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	GLDC_DIR="${PROJECTS_DIR}/kosaio-dev/gldc"
+else
+	GLDC_DIR="${DREAMCAST_SDK_EXTRAS}/GLdc"
+fi
 
 # Public functions
 
@@ -15,7 +19,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning GLdc."
 	git clone --depth=1 --single-branch https://gitlab.com/simulant/GLdc.git "${GLDC_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk gldc 1
 	kosaio_echo "GLdc has been cloned."
 }
 
@@ -59,35 +62,59 @@ function apply() {
 	kosaio_echo "Nothing to copy..."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing GLdc..."
+    local errors=0
+    local lib_path
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        lib_path="${GLDC_DIR}/dcbuild/libGLdc.a"
+        kosaio_print_status "INFO" "Developer Mode active."
+    else
+        lib_path="${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libGLdc.a"
+        kosaio_print_status "INFO" "Stable Mode active."
+    fi
+
+    if [ -d "${GLDC_DIR}" ]; then
+        kosaio_print_status "PASS" "GLdc source directory found."
+    else
+        kosaio_print_status "FAIL" "GLdc source directory missing."
+        ((errors++))
+    fi
+
+    if [ -f "$lib_path" ]; then
+        kosaio_print_status "PASS" "Compiled library found: $(basename "$lib_path")"
+    else
+        kosaio_print_status "FAIL" "Compiled library MISSING."
+        ((errors++))
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling GLdc..."
 	rm -rf "${GLDC_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk gldc 0
 	kosaio_echo "GLdc uninstallation complete."
 }
 
 # Private functions
 
 function __check_requeriments() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "KOS is required to use/compile GLdc."
+    if [ ! -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+		kosaio_echo "KOS is required to use/compile GLdc (environ.sh not found)."
 		exit 1
 	fi
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk gldc)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "GLdc is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${GLDC_DIR}" ]; then
-		kosaio_echo "GLdc folder not found, is GLdc installed?."
+		kosaio_echo "GLdc folder not found. Is it installed?"
 		exit 1
 	fi
 }

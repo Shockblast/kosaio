@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-MAKEIP_DIR="${DREAMCAST_SDK_EXTRAS}/makeip"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	MAKEIP_DIR="${PROJECTS_DIR}/kosaio-dev/makeip"
+else
+	MAKEIP_DIR="${DREAMCAST_SDK_EXTRAS}/makeip"
+fi
 
 # Public functions
 
@@ -15,7 +19,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning makeip."
 	git clone --depth=1 --single-branch https://github.com/Dreamcast-Projects/makeip.git "${MAKEIP_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk makeip 1
 	kosaio_echo "makeip has been cloned."
 }
 
@@ -53,16 +56,50 @@ function apply() {
 	kosaio_echo "makeip installed by make."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing makeip..."
+    local errors=0
+
+    if [ -d "${MAKEIP_DIR}" ]; then
+        kosaio_print_status "PASS" "makeip source directory found."
+    else
+        kosaio_print_status "FAIL" "makeip source directory missing."
+        ((errors++))
+    fi
+
+    if [ -x "${DREAMCAST_BIN_PATH}/makeip" ]; then
+        kosaio_print_status "PASS" "makeip binary found in PATH."
+    else
+        kosaio_print_status "FAIL" "makeip binary MISSING or NOT EXECUTABLE."
+        ((errors++))
+    fi
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        kosaio_print_status "INFO" "Developer Mode active."
+        if [ -f "${MAKEIP_DIR}/src/makeip" ]; then
+             kosaio_print_status "PASS" "Local compiled binary found."
+        else
+             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build makeip'."
+             ((errors++))
+        fi
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling makeip..."
 	rm -rf "${MAKEIP_DIR}"
 
-	if [ -d "${DREAMCAST_BIN_PATH}/makeip" ]; then
+	if [ -f "${DREAMCAST_BIN_PATH}/makeip" ]; then
 		rm -f "${DREAMCAST_BIN_PATH}/makeip"
 	fi
 
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk makeip 0
 	kosaio_echo "makeip uninstallation complete."
 }
 
@@ -73,15 +110,8 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk makeip)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "makeip is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${MAKEIP_DIR}" ]; then
-		kosaio_echo "makeip folder not found, is makeip installed?."
+		kosaio_echo "makeip folder not found. Is it installed?"
 		exit 1
 	fi
 }

@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-FLYCAST_DIR="${DREAMCAST_SDK_EXTRAS}/flycast"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	FLYCAST_DIR="${PROJECTS_DIR}/kosaio-dev/flycast"
+else
+	FLYCAST_DIR="${DREAMCAST_SDK_EXTRAS}/flycast"
+fi
 FLYCAST_BIN_PATH="${PROJECTS_DIR}"
 
 # Public functions
@@ -17,7 +21,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning Flycast (dev branch, very slow)..."
 	git clone --depth=1 --single-branch --recursive https://github.com/flyinghead/flycast.git -b dev "${FLYCAST_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk flycast 1
 	kosaio_echo "Flycast has been cloned."
 }
 
@@ -73,6 +76,41 @@ function apply() {
 	kosaio_echo "Copied flycast bin to folder projects (host)."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing Flycast..."
+    local errors=0
+
+    if [ -d "${FLYCAST_DIR}" ]; then
+        kosaio_print_status "PASS" "Flycast source directory found."
+    else
+        kosaio_print_status "FAIL" "Flycast source directory missing."
+        ((errors++))
+    fi
+
+    if [ -f "${FLYCAST_BIN_PATH}/build/flycast" ]; then
+        kosaio_print_status "PASS" "Flycast binary found in host projects folder."
+    else
+        kosaio_print_status "FAIL" "Flycast binary MISSING from projects folder."
+        ((errors++))
+    fi
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        kosaio_print_status "INFO" "Developer Mode active."
+        if [ -f "${FLYCAST_DIR}/build/flycast" ]; then
+             kosaio_print_status "PASS" "Local compiled binary found."
+        else
+             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build flycast'."
+             ((errors++))
+        fi
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling Flycast..."
@@ -82,7 +120,6 @@ function uninstall() {
 		rm -rf "${FLYCAST_BIN_PATH}"
 	fi
 
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk flycast 0
 	kosaio_echo "Flycast uninstallation complete."
 }
 
@@ -93,15 +130,8 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk flycast)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "flycast is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${FLYCAST_DIR}" ]; then
-		kosaio_echo "flycast folder not found, is flycast installed?."
+		kosaio_echo "flycast is not installed."
 		exit 1
 	fi
 }

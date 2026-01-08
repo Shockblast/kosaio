@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-MKDCDISC_DIR="${DREAMCAST_SDK_EXTRAS}/mkdcdisc"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	MKDCDISC_DIR="${PROJECTS_DIR}/kosaio-dev/mkdcdisc"
+else
+	MKDCDISC_DIR="${DREAMCAST_SDK_EXTRAS}/mkdcdisc"
+fi
 
 # Public functions
 
@@ -14,7 +18,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning mkdcdisc..."
 	git clone --depth=1 --single-branch https://gitlab.com/simulant/mkdcdisc.git "${MKDCDISC_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mkdcdisc 1
 	kosaio_echo "mkdcdisc has been cloned."
 }
 
@@ -57,6 +60,41 @@ function apply() {
 	cp "${MKDCDISC_DIR}/builddir/mkdcdisc" "${DREAMCAST_BIN_PATH}"
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing mkdcdisc..."
+    local errors=0
+
+    if [ -d "${MKDCDISC_DIR}" ]; then
+        kosaio_print_status "PASS" "mkdcdisc source directory found."
+    else
+        kosaio_print_status "FAIL" "mkdcdisc source directory missing."
+        ((errors++))
+    fi
+
+    if [ -x "${DREAMCAST_BIN_PATH}/mkdcdisc" ]; then
+        kosaio_print_status "PASS" "mkdcdisc binary found in PATH."
+    else
+        kosaio_print_status "FAIL" "mkdcdisc binary MISSING or NOT EXECUTABLE."
+        ((errors++))
+    fi
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        kosaio_print_status "INFO" "Developer Mode active."
+        if [ -f "${MKDCDISC_DIR}/builddir/mkdcdisc" ]; then
+             kosaio_print_status "PASS" "Local compiled binary found."
+        else
+             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build mkdcdisc'."
+             ((errors++))
+        fi
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling mkdcdisc..."
@@ -67,7 +105,6 @@ function uninstall() {
 		rm -f "${DREAMCAST_BIN_PATH}/mkdcdisc"
 	fi
 
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk mkdcdisc 0
 	kosaio_echo "mkdcdisc uninstallation complete."
 }
 
@@ -78,15 +115,8 @@ function __check_requeriments() {
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk mkdcdisc)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "mkdcdisc is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${MKDCDISC_DIR}" ]; then
-		kosaio_echo "mkdcdisc folder not found, is mkdcdisc installed?."
+		kosaio_echo "mkdcdisc folder not found. Is it installed?"
 		exit 1
 	fi
 }

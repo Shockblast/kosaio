@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-ALDC_DIR="${DREAMCAST_SDK_EXTRAS}/Aldc"
+if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+	ALDC_DIR="${PROJECTS_DIR}/kosaio-dev/aldc"
+else
+	ALDC_DIR="${DREAMCAST_SDK_EXTRAS}/Aldc"
+fi
 
 # Public functions
 
@@ -15,7 +19,6 @@ function info() {
 function clone() {
 	kosaio_echo "Cloning ALdc."
 	git clone --depth=1 --single-branch https://gitlab.com/simulant/aldc.git "${ALDC_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk aldc 1
 	kosaio_echo "ALdc has been cloned."
 }
 
@@ -59,35 +62,59 @@ function apply() {
 	kosaio_echo "Nothing to copy..."
 }
 
+function diagnose() {
+    kosaio_echo "Diagnosing ALdc..."
+    local errors=0
+    local lib_path
+
+    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+        lib_path="${ALDC_DIR}/builddir/libaldc.a"
+        kosaio_print_status "INFO" "Developer Mode active."
+    else
+        lib_path="${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libaldc.a"
+        kosaio_print_status "INFO" "Stable Mode active."
+    fi
+
+    if [ -d "${ALDC_DIR}" ]; then
+        kosaio_print_status "PASS" "ALdc source directory found."
+    else
+        kosaio_print_status "FAIL" "ALdc source directory missing."
+        ((errors++))
+    fi
+
+    if [ -f "$lib_path" ]; then
+        kosaio_print_status "PASS" "Compiled library found: $(basename "$lib_path")"
+    else
+        kosaio_print_status "FAIL" "Compiled library MISSING."
+        ((errors++))
+    fi
+
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function uninstall() {
 	__is_installed
 	kosaio_echo "Uninstalling ALdc..."
 	rm -rf "${ALDC_DIR}"
-	crudini --set "${KOSAIO_CONFIG}" dreamcast_sdk aldc 0
 	kosaio_echo "ALdc uninstallation complete."
 }
 
 # Private functions
 
 function __check_requeriments() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk kos)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "KOS is required to use/compile ALdc."
+	if [ ! -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+		kosaio_echo "KOS is required to use/compile ALdc (environ.sh not found)."
 		exit 1
 	fi
 }
 
 function __is_installed() {
-	local IS_INSTALLED=$(crudini --get "${KOSAIO_CONFIG}" dreamcast_sdk aldc)
-
-	if [ "${IS_INSTALLED}" = "0" ]; then
-		kosaio_echo "ALdc is not installled."
-		exit 1
-	fi
-
 	if [ ! -d "${ALDC_DIR}" ]; then
-		kosaio_echo "ALdc folder not found, is ALdc installed?."
+		kosaio_echo "ALdc folder not found. Is it installed?"
 		exit 1
 	fi
 }
