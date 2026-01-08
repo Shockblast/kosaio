@@ -29,13 +29,13 @@ function check_required_vars() {
 	for var_name in "${SDK_DIR_LIST[@]}"; do
 		local path_val="${!var_name}"
 		if [[ -z "$path_val" ]]; then
-			echo -e "[\033[1;31mFAIL\033[0m] $var_name is NOT set."
+			kosaio_print_status "FAIL" "$var_name is NOT set."
 			((errors++))
 		elif [[ ! -d "$path_val" ]]; then
-			echo -e "[\033[1;31mFAIL\033[0m] $var_name path does not exist: $path_val"
+			kosaio_print_status "FAIL" "$var_name path does not exist: $path_val"
 			((errors++))
 		else
-			echo "$var_name - OK"
+			kosaio_print_status "PASS" "$var_name - OK"
 		fi
 	done
 
