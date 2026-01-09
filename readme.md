@@ -32,7 +32,7 @@ You can install these tools with kosaio:
 * **Sh4zam**, **Aldc**, and **GLdc** are typically included in **KOS-PORTS**, but KOSAIO manages them as standalone tools so you can control them individually.
 * **makeip** its already included in KOS but this is more updated.
 * **flycast** emulator its compiles in container but works only in host and requires BIOS files installed in the host.
-* Dependencies are installed automatically depending on the tool to be installed. If you have problems compiling something, you can use `kosaio doctor install_all_dependencies`.
+* Dependencies are installed automatically depending on the tool to be installed. If you have problems compiling something, you can use `kosaio install-deps system`.
 * More tools will be implemented, if you want to help adapt them you can go to `scripts/in_progress`, if you know of a tool that is not there and you think it would be useful, you can suggest it in an issue.
 
 ## Prerequisites
@@ -41,6 +41,11 @@ To use KOSAIO, you must have **Podman** or **Docker** installed on your host sys
 
 ### Quick Setup (Recommended)
 The easiest way to set up your environment is using the assistant script. It will build the image and create the container with the correct volume mounts for local development.
+
+> [!IMPORTANT]  
+> Before running the setup, you must create your configuration file:
+> 1. Copy `kosaio.cfg.template` to `kosaio.cfg`.
+> 2. Edit `kosaio.cfg` and set your projects directory and preferred tool (Docker or Podman).
 
 1.  Make the script executable:
     ```bash
@@ -58,13 +63,11 @@ The easiest way to set up your environment is using the assistant script. It wil
 > [!TIP]
 > This method mounts your local KOSAIO folder into the container, allowing you to edit scripts on your host and see changes instantly inside Podman/Docker.
 
-### Manual Setup
-The internal container path must be `/opt/projects` when creating the container; and in the host `/home/user/documents/projects` <-- here, this is where you will create all your projects.
-
 ### First Steps
 The first SDK you need to install is KallistiOS (KOS). It is a long process, so be prepared for a break!
 
-Before installing kos, if you like, you can look at the Makefile.cfg file inside the dc-chain-settings folder and make adjustments if required.
+> [!TIP]
+> Before installing KOS, you can look at the `Makefile.cfg` file inside the `dc-chain-settings` folder and make adjustments if required (like changing GCC version).
 
 ```bash
 kosaio install kos
