@@ -35,6 +35,10 @@ You can install these tools with kosaio:
 * Dependencies are installed automatically depending on the tool to be installed. If you have problems compiling something, you can use `kosaio doctor install_all_dependencies`.
 * More tools will be implemented, if you want to help adapt them you can go to `scripts/in_progress`, if you know of a tool that is not there and you think it would be useful, you can suggest it in an issue.
 
+## Prerequisites
+
+To use KOSAIO, you must have **Podman** or **Docker** installed on your host system. The setup scripts will automatically detect and use either of these container engines.
+
 ### Quick Setup (Recommended)
 The easiest way to set up your environment is using the assistant script. It will build the image and create the container with the correct volume mounts for local development.
 
