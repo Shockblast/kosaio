@@ -18,7 +18,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning makeip."
-	git clone --depth=1 --single-branch https://github.com/Dreamcast-Projects/makeip.git "${MAKEIP_DIR}"
+	kosaio_git_clone https://github.com/Dreamcast-Projects/makeip.git "${MAKEIP_DIR}"
 	kosaio_echo "makeip has been cloned."
 }
 

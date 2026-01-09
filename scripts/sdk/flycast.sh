@@ -20,7 +20,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning Flycast (dev branch, very slow)..."
-	git clone --depth=1 --single-branch --recursive https://github.com/flyinghead/flycast.git -b dev "${FLYCAST_DIR}"
+	kosaio_git_clone --recursive https://github.com/flyinghead/flycast.git -b dev "${FLYCAST_DIR}"
 	kosaio_echo "Flycast has been cloned."
 }
 

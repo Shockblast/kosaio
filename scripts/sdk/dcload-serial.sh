@@ -17,7 +17,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning dcload-serial..."
-	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-serial.git "${DCLOADSERIAL_DIR}"
+	kosaio_git_clone https://github.com/KallistiOS/dcload-serial.git "${DCLOADSERIAL_DIR}"
 	kosaio_echo "dcload-serial has cloned."
 }
 

@@ -17,7 +17,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning dcaconv..."
-	git clone --depth=1 --single-branch https://github.com/TapamN/dcaconv.git "${DCACONV_DIR}"
+	kosaio_git_clone https://github.com/TapamN/dcaconv.git "${DCACONV_DIR}"
 	kosaio_echo "dcaconv has cloned."
 }
 

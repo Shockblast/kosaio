@@ -17,7 +17,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning dcload-ip..."
-	git clone --depth=1 --single-branch https://github.com/KallistiOS/dcload-ip.git "${DCLOADIP_DIR}"
+	kosaio_git_clone https://github.com/KallistiOS/dcload-ip.git "${DCLOADIP_DIR}"
 	kosaio_echo "dcload-ip has cloned."
 }
 

@@ -24,7 +24,7 @@ function install_bin() {
 
 function clone() {
 	kosaio_echo "Cloning img4dc."
-	git clone --depth=1 --single-branch "https://github.com/nextgeniuspro/img4dc.git" "${IMG4DC_DIR}"
+	kosaio_git_clone "https://github.com/nextgeniuspro/img4dc.git" "${IMG4DC_DIR}"
 	kosaio_echo "img4dc has been cloned."
 }
 

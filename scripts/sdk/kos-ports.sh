@@ -18,7 +18,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning KOS-PORTS..."
-	git clone --depth=1 --single-branch --recursive https://github.com/KallistiOS/kos-ports "${KOS_PORTS_DIR}"
+	kosaio_git_clone --recursive https://github.com/KallistiOS/kos-ports "${KOS_PORTS_DIR}"
 	kosaio_echo "KOS-PORTS has been cloned."
 }
 

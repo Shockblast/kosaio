@@ -18,7 +18,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning sh4zam..."
-	git clone --depth=1 --single-branch https://github.com/gyrovorbis/sh4zam.git "${SH4ZAM_DIR}"
+	kosaio_git_clone https://github.com/gyrovorbis/sh4zam.git "${SH4ZAM_DIR}"
 	kosaio_echo "sh4zam has been cloned."
 }
 

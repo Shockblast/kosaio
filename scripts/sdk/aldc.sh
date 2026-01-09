@@ -18,7 +18,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning ALdc."
-	git clone --depth=1 --single-branch https://gitlab.com/simulant/aldc.git "${ALDC_DIR}"
+	kosaio_git_clone https://gitlab.com/simulant/aldc.git "${ALDC_DIR}"
 	kosaio_echo "ALdc has been cloned."
 }
 

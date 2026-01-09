@@ -92,7 +92,11 @@ function kosaio_git_common_update() {
 		local old_head=$(git rev-parse HEAD)
 
 		# Fetch the latest changes from the remote without merging them
-		git fetch origin
+		if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+			git fetch origin
+		else
+			git fetch --depth=1 origin
+		fi
 
 		# Check if an upstream branch is configured to avoid errors
 		local upstream
@@ -123,6 +127,14 @@ function kosaio_git_common_update() {
 			echo "New changes:"
 			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
 		fi
+	fi
+}
+
+function kosaio_git_clone() {
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		git clone "$@"
+	else
+		git clone --depth=1 --single-branch "$@"
 	fi
 }
 

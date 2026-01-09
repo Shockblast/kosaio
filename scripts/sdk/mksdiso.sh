@@ -17,7 +17,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning mksdiso..."
-	git clone --depth=1 --single-branch https://github.com/Nold360/mksdiso.git "${MKSDISO_DIR}"
+	kosaio_git_clone https://github.com/Nold360/mksdiso.git "${MKSDISO_DIR}"
 	kosaio_echo "mksdiso has been cloned."
 }
 

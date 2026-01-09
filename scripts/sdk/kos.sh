@@ -19,7 +19,7 @@ function info() {
 
 function clone() {
 	kosaio_echo "Cloning KOS..."
-	git clone --depth=1 --single-branch --recursive -b v2.2.x https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
+	kosaio_git_clone --recursive -b v2.2.x https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
 	kosaio_echo "KOS has been cloned."
 }
 
