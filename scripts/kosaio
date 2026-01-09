@@ -287,7 +287,7 @@ if [ "$ACTION" = "list" ]; then
 fi
 
 if [ "$ACTION" = "dev-switch" ]; then
-    if [ -z "$TOOL" ] || [ -z "$3" ]; then
+    if [ -z "$TARGET" ] || [ -z "$3" ]; then
         echo "Usage: kosaio dev-switch <tool> [enable|disable]"
         exit 1
     fi
@@ -295,20 +295,20 @@ if [ "$ACTION" = "dev-switch" ]; then
     MODE="$3"
     STATE_DIR="${HOME}/.kosaio/states"
     mkdir -p "$STATE_DIR"
-    STATE_FILE="${STATE_DIR}/${TOOL}_dev"
+    STATE_FILE="${STATE_DIR}/${TARGET}_dev"
     
     # Validate tool actually exists before switching
-    if [ ! -f "${KOSAIO_DIR}/scripts/sdk/${TOOL}.sh" ]; then
-        echo "Error: Tool '${TOOL}' not found in SDK scripts."
+    if [ ! -f "${KOSAIO_DIR}/scripts/sdk/${TARGET}.sh" ]; then
+        echo "Error: Tool '${TARGET}' not found in SDK scripts."
         exit 1
     fi
 
     if [ "$MODE" == "enable" ]; then
         touch "$STATE_FILE"
-        kosaio_echo "Dev Mode ENABLED for ${TOOL}. Run 'kosaio install ${TOOL}' to build/install dev version."
+        kosaio_echo "Dev Mode ENABLED for ${TARGET}. Run 'kosaio install ${TARGET}' to build/install dev version."
     elif [ "$MODE" == "disable" ]; then
         rm -f "$STATE_FILE"
-        kosaio_echo "Dev Mode DISABLED for ${TOOL}. Run 'kosaio install ${TOOL}' to restore stable version."
+        kosaio_echo "Dev Mode DISABLED for ${TARGET}. Run 'kosaio install ${TARGET}' to restore stable version."
     else
         echo "Usage: kosaio dev-switch <tool> [enable|disable]"
         exit 1
