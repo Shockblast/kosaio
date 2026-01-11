@@ -110,20 +110,29 @@ KOSAIO offers a granular Developer Mode for advanced users who want to modify to
     kosaio dev-switch <tool> enable
     # Example: kosaio dev-switch sh4zam enable
     ```
-    *   **Note**: This only changes the configuration. You must run the install command to apply the changes.
+    *   **Note**: This only changes the configuration. Proceed to the next step to apply the changes.
 
 3.  **Apply Changes (Install Dev Version)**:
-    Run the install command to clone (if needed), build, and install the development version of the tool.
-    ```bash
-    kosaio install <tool>
-    ```
+    *   **First Time**: Run `install` to clone, build, and install the tool.
+        ```bash
+        kosaio install <tool>
+        ```
+    *   **Updates**:
+        1. Use `build` to recompile your changes.
+           ```bash
+           kosaio build <tool>
+           ```
+        2. Use `apply` to install the compiled binaries to the system (if required).
+           ```bash
+           kosaio apply <tool>
+           ```
 
 4.  **Disable Developer Mode (Revert)**:
     Use `dev-switch` with `disable` to switch the configuration back to Stable Mode.
     ```bash
     kosaio dev-switch <tool> disable
     ```
-    *   **Note**: To restore the stable binary in your system, you must run `kosaio install <tool>` again.
+    *   **Note**: To restore the stable binary in your system, you must run `kosaio install <tool>` (to rebuild stable) or `kosaio apply <tool>` (if you already have the stable build ready).
 
 ### Examples
 
