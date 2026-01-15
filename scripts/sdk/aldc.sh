@@ -63,37 +63,37 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing ALdc..."
-    local errors=0
-    local lib_path
+	kosaio_echo "Diagnosing ALdc..."
+	local errors=0
+	local lib_path
 
-    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-        lib_path="${ALDC_DIR}/builddir/libaldc.a"
-        kosaio_print_status "INFO" "Developer Mode active."
-    else
-        lib_path="${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libaldc.a"
-        kosaio_print_status "INFO" "Stable Mode active."
-    fi
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		lib_path="${ALDC_DIR}/builddir/libaldc.a"
+		kosaio_print_status "INFO" "Developer Mode active."
+	else
+		lib_path="${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libaldc.a"
+		kosaio_print_status "INFO" "Stable Mode active."
+	fi
 
-    if [ -d "${ALDC_DIR}" ]; then
-        kosaio_print_status "PASS" "ALdc source directory found."
-    else
-        kosaio_print_status "FAIL" "ALdc source directory missing."
-        ((errors++))
-    fi
+	if [ -d "${ALDC_DIR}" ]; then
+		kosaio_print_status "PASS" "ALdc source directory found."
+	else
+		kosaio_print_status "FAIL" "ALdc source directory missing."
+		((errors++))
+	fi
 
-    if [ -f "$lib_path" ]; then
-        kosaio_print_status "PASS" "Compiled library found: $(basename "$lib_path")"
-    else
-        kosaio_print_status "FAIL" "Compiled library MISSING."
-        ((errors++))
-    fi
+	if [ -f "$lib_path" ]; then
+		kosaio_print_status "PASS" "Compiled library found: $(basename "$lib_path")"
+	else
+		kosaio_print_status "FAIL" "Compiled library MISSING."
+		((errors++))
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {

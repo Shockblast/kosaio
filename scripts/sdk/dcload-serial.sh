@@ -56,38 +56,38 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing dcload-serial..."
-    local errors=0
+	kosaio_echo "Diagnosing dcload-serial..."
+	local errors=0
 
-    if [ -d "${DCLOADSERIAL_DIR}" ]; then
-        kosaio_print_status "PASS" "dcload-serial source directory found."
-    else
-        kosaio_print_status "FAIL" "dcload-serial source directory missing."
-        ((errors++))
-    fi
+	if [ -d "${DCLOADSERIAL_DIR}" ]; then
+		kosaio_print_status "PASS" "dcload-serial source directory found."
+	else
+		kosaio_print_status "FAIL" "dcload-serial source directory missing."
+		((errors++))
+	fi
 
-    if [ -x "${DREAMCAST_BIN_PATH}/dc-tool-serial" ]; then
-        kosaio_print_status "PASS" "dc-tool-serial found in PATH."
-    else
-        kosaio_print_status "FAIL" "dc-tool-serial MISSING from PATH."
-        ((errors++))
-    fi
+	if [ -x "${DREAMCAST_BIN_PATH}/dc-tool-serial" ]; then
+		kosaio_print_status "PASS" "dc-tool-serial found in PATH."
+	else
+		kosaio_print_status "FAIL" "dc-tool-serial MISSING from PATH."
+		((errors++))
+	fi
 
-    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-        kosaio_print_status "INFO" "Developer Mode active."
-        if [ -f "${DCLOADSERIAL_DIR}/target-src/1st_read/loader.bin" ] || [ -f "${DCLOADSERIAL_DIR}/host-src/tool/dc-tool" ]; then
-             kosaio_print_status "PASS" "Local source/build files found."
-        else
-             kosaio_print_status "FAIL" "Local build files MISSING."
-             ((errors++))
-        fi
-    fi
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		kosaio_print_status "INFO" "Developer Mode active."
+		if [ -f "${DCLOADSERIAL_DIR}/target-src/1st_read/loader.bin" ] || [ -f "${DCLOADSERIAL_DIR}/host-src/tool/dc-tool" ]; then
+			 kosaio_print_status "PASS" "Local source/build files found."
+		else
+			 kosaio_print_status "FAIL" "Local build files MISSING."
+			 ((errors++))
+		fi
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {
@@ -105,7 +105,7 @@ function uninstall() {
 # Private functions
 
 function __check_requeriments() {
-    if [ ! -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+	if [ ! -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
 		kosaio_echo "KOS is required to compile/use dcload-serial (environ.sh not found)."
 		exit 1
 	fi

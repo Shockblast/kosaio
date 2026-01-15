@@ -56,41 +56,41 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing dcaconv..."
-    local errors=0
+	kosaio_echo "Diagnosing dcaconv..."
+	local errors=0
 
-    # 1. Directory presence
-    if [ -d "${DCACONV_DIR}" ]; then
-        kosaio_print_status "PASS" "dcaconv source directory found."
-    else
-        kosaio_print_status "FAIL" "dcaconv source directory missing."
-        ((errors++))
-    fi
+	# 1. Directory presence
+	if [ -d "${DCACONV_DIR}" ]; then
+		kosaio_print_status "PASS" "dcaconv source directory found."
+	else
+		kosaio_print_status "FAIL" "dcaconv source directory missing."
+		((errors++))
+	fi
 
-    # 2. Binary presence
-    if [ -x "${DREAMCAST_BIN_PATH}/dcaconv" ]; then
-        kosaio_print_status "PASS" "dcaconv binary found in PATH."
-    else
-        kosaio_print_status "FAIL" "dcaconv binary MISSING or NOT EXECUTABLE."
-        ((errors++))
-    fi
+	# 2. Binary presence
+	if [ -x "${DREAMCAST_BIN_PATH}/dcaconv" ]; then
+		kosaio_print_status "PASS" "dcaconv binary found in PATH."
+	else
+		kosaio_print_status "FAIL" "dcaconv binary MISSING or NOT EXECUTABLE."
+		((errors++))
+	fi
 
-    # 3. Dev Mode check
-    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-        kosaio_print_status "INFO" "Developer Mode active."
-        if [ -f "${DCACONV_DIR}/dcaconv" ]; then
-             kosaio_print_status "PASS" "Local compiled binary found."
-        else
-             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build dcaconv'."
-             ((errors++))
-        fi
-    fi
+	# 3. Dev Mode check
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		kosaio_print_status "INFO" "Developer Mode active."
+		if [ -f "${DCACONV_DIR}/dcaconv" ]; then
+			 kosaio_print_status "PASS" "Local compiled binary found."
+		else
+			 kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build dcaconv'."
+			 ((errors++))
+		fi
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {

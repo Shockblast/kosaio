@@ -61,38 +61,38 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing mkdcdisc..."
-    local errors=0
+	kosaio_echo "Diagnosing mkdcdisc..."
+	local errors=0
 
-    if [ -d "${MKDCDISC_DIR}" ]; then
-        kosaio_print_status "PASS" "mkdcdisc source directory found."
-    else
-        kosaio_print_status "FAIL" "mkdcdisc source directory missing."
-        ((errors++))
-    fi
+	if [ -d "${MKDCDISC_DIR}" ]; then
+		kosaio_print_status "PASS" "mkdcdisc source directory found."
+	else
+		kosaio_print_status "FAIL" "mkdcdisc source directory missing."
+		((errors++))
+	fi
 
-    if [ -x "${DREAMCAST_BIN_PATH}/mkdcdisc" ]; then
-        kosaio_print_status "PASS" "mkdcdisc binary found in PATH."
-    else
-        kosaio_print_status "FAIL" "mkdcdisc binary MISSING or NOT EXECUTABLE."
-        ((errors++))
-    fi
+	if [ -x "${DREAMCAST_BIN_PATH}/mkdcdisc" ]; then
+		kosaio_print_status "PASS" "mkdcdisc binary found in PATH."
+	else
+		kosaio_print_status "FAIL" "mkdcdisc binary MISSING or NOT EXECUTABLE."
+		((errors++))
+	fi
 
-    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-        kosaio_print_status "INFO" "Developer Mode active."
-        if [ -f "${MKDCDISC_DIR}/builddir/mkdcdisc" ]; then
-             kosaio_print_status "PASS" "Local compiled binary found."
-        else
-             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build mkdcdisc'."
-             ((errors++))
-        fi
-    fi
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		kosaio_print_status "INFO" "Developer Mode active."
+		if [ -f "${MKDCDISC_DIR}/builddir/mkdcdisc" ]; then
+			 kosaio_print_status "PASS" "Local compiled binary found."
+		else
+			 kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build mkdcdisc'."
+			 ((errors++))
+		fi
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {

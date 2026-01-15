@@ -58,28 +58,28 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing KOS-PORTS..."
-    local errors=0
+	kosaio_echo "Diagnosing KOS-PORTS..."
+	local errors=0
 
-    if [ -d "${KOS_PORTS_DIR}" ]; then
-        kosaio_print_status "PASS" "KOS-PORTS directory found."
-    else
-        kosaio_print_status "FAIL" "KOS-PORTS directory missing."
-        ((errors++))
-    fi
+	if [ -d "${KOS_PORTS_DIR}" ]; then
+		kosaio_print_status "PASS" "KOS-PORTS directory found."
+	else
+		kosaio_print_status "FAIL" "KOS-PORTS directory missing."
+		((errors++))
+	fi
 
-    local indicator="${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libpng.a"
-    if [ -f "$indicator" ]; then
-        kosaio_print_status "PASS" "Ports health indicator found: libpng.a"
-    else
-        kosaio_print_status "WARN" "libpng.a not found. Some ports might not be compiled."
-    fi
+	local indicator="${DREAMCAST_SDK}/kos/addons/lib/dreamcast/libpng.a"
+	if [ -f "$indicator" ]; then
+		kosaio_print_status "PASS" "Ports health indicator found: libpng.a"
+	else
+		kosaio_print_status "WARN" "libpng.a not found. Some ports might not be compiled."
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {

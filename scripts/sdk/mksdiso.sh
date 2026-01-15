@@ -54,32 +54,32 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing mksdiso..."
-    local errors=0
+	kosaio_echo "Diagnosing mksdiso..."
+	local errors=0
 
-    if [ -d "${MKSDISO_DIR}" ]; then
-        kosaio_print_status "PASS" "mksdiso source directory found."
-    else
-        kosaio_print_status "FAIL" "mksdiso source directory missing."
-        ((errors++))
-    fi
+	if [ -d "${MKSDISO_DIR}" ]; then
+		kosaio_print_status "PASS" "mksdiso source directory found."
+	else
+		kosaio_print_status "FAIL" "mksdiso source directory missing."
+		((errors++))
+	fi
 
-    if [ -x "${DREAMCAST_BIN_PATH}/mksdiso" ]; then
-        kosaio_print_status "PASS" "mksdiso binary/script found in PATH."
-    else
-        kosaio_print_status "FAIL" "mksdiso MISSING from PATH."
-        ((errors++))
-    fi
+	if [ -x "${DREAMCAST_BIN_PATH}/mksdiso" ]; then
+		kosaio_print_status "PASS" "mksdiso binary/script found in PATH."
+	else
+		kosaio_print_status "FAIL" "mksdiso MISSING from PATH."
+		((errors++))
+	fi
 
-    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-        kosaio_print_status "INFO" "Developer Mode active."
-    fi
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		kosaio_print_status "INFO" "Developer Mode active."
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {

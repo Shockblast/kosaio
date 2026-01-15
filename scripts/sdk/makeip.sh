@@ -57,38 +57,38 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing makeip..."
-    local errors=0
+	kosaio_echo "Diagnosing makeip..."
+	local errors=0
 
-    if [ -d "${MAKEIP_DIR}" ]; then
-        kosaio_print_status "PASS" "makeip source directory found."
-    else
-        kosaio_print_status "FAIL" "makeip source directory missing."
-        ((errors++))
-    fi
+	if [ -d "${MAKEIP_DIR}" ]; then
+		kosaio_print_status "PASS" "makeip source directory found."
+	else
+		kosaio_print_status "FAIL" "makeip source directory missing."
+		((errors++))
+	fi
 
-    if [ -x "${DREAMCAST_BIN_PATH}/makeip" ]; then
-        kosaio_print_status "PASS" "makeip binary found in PATH."
-    else
-        kosaio_print_status "FAIL" "makeip binary MISSING or NOT EXECUTABLE."
-        ((errors++))
-    fi
+	if [ -x "${DREAMCAST_BIN_PATH}/makeip" ]; then
+		kosaio_print_status "PASS" "makeip binary found in PATH."
+	else
+		kosaio_print_status "FAIL" "makeip binary MISSING or NOT EXECUTABLE."
+		((errors++))
+	fi
 
-    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-        kosaio_print_status "INFO" "Developer Mode active."
-        if [ -f "${MAKEIP_DIR}/src/makeip" ]; then
-             kosaio_print_status "PASS" "Local compiled binary found."
-        else
-             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build makeip'."
-             ((errors++))
-        fi
-    fi
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		kosaio_print_status "INFO" "Developer Mode active."
+		if [ -f "${MAKEIP_DIR}/src/makeip" ]; then
+			 kosaio_print_status "PASS" "Local compiled binary found."
+		else
+			 kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build makeip'."
+			 ((errors++))
+		fi
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {

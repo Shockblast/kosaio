@@ -77,38 +77,38 @@ function apply() {
 }
 
 function diagnose() {
-    kosaio_echo "Diagnosing Flycast..."
-    local errors=0
+	kosaio_echo "Diagnosing Flycast..."
+	local errors=0
 
-    if [ -d "${FLYCAST_DIR}" ]; then
-        kosaio_print_status "PASS" "Flycast source directory found."
-    else
-        kosaio_print_status "FAIL" "Flycast source directory missing."
-        ((errors++))
-    fi
+	if [ -d "${FLYCAST_DIR}" ]; then
+		kosaio_print_status "PASS" "Flycast source directory found."
+	else
+		kosaio_print_status "FAIL" "Flycast source directory missing."
+		((errors++))
+	fi
 
-    if [ -f "${FLYCAST_BIN_PATH}/build/flycast" ]; then
-        kosaio_print_status "PASS" "Flycast binary found in host projects folder."
-    else
-        kosaio_print_status "FAIL" "Flycast binary MISSING from projects folder."
-        ((errors++))
-    fi
+	if [ -f "${FLYCAST_BIN_PATH}/build/flycast" ]; then
+		kosaio_print_status "PASS" "Flycast binary found in host projects folder."
+	else
+		kosaio_print_status "FAIL" "Flycast binary MISSING from projects folder."
+		((errors++))
+	fi
 
-    if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-        kosaio_print_status "INFO" "Developer Mode active."
-        if [ -f "${FLYCAST_DIR}/build/flycast" ]; then
-             kosaio_print_status "PASS" "Local compiled binary found."
-        else
-             kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build flycast'."
-             ((errors++))
-        fi
-    fi
+	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
+		kosaio_print_status "INFO" "Developer Mode active."
+		if [ -f "${FLYCAST_DIR}/build/flycast" ]; then
+			 kosaio_print_status "PASS" "Local compiled binary found."
+		else
+			 kosaio_print_status "FAIL" "Local compiled binary MISSING. Run 'kosaio build flycast'."
+			 ((errors++))
+		fi
+	fi
 
-    if [ "$errors" -eq 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+	if [ "$errors" -eq 0 ]; then
+		return 0
+	else
+		return 1
+	fi
 }
 
 function uninstall() {
