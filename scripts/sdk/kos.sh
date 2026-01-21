@@ -49,39 +49,8 @@ function build() {
 	make -j$(nproc)
 	make clean
 
-	# Check file and Backup .bashrc
-	if [ ! -f "/root/.bashrc" ]; then
-		echo "Error: /root/.bashrc file not found, this file is required." >&2
-		exit 1
-	else
-		# This is for avoid duplicate source kos_enviroment.sh every time execute build
-		if [ ! -f "/root/.bashrc_og" ]; then
-			# Create Backup
-			cp "/root/.bashrc" "/root/.bashrc_og"
-		else
-			# Restore the fresh backup
-			rm -f "/root/.bashrc"
-			cp "/root/.bashrc_og" "/root/.bashrc"
-		fi
-	fi
-
-	# Copy kos env, this replace the older in case of update
-	cp "${KOS_DIR}/doc/environ.sh.sample" "${DREAMCAST_SDK}/kos/environ.sh"
-
-	if [ -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
-		echo "Note: Copied environ.sh to ${DREAMCAST_SDK}/kos."
-		# Update KOS_BASE to match the actual installation directory (critical for --dev mode)
-		sed -i "s|export KOS_BASE=.*|export KOS_BASE=\"${KOS_DIR}\"|g" "${DREAMCAST_SDK}/kos/environ.sh"
-		# Also uncomment it if it's commented out in the sample
-		sed -i "s|# export KOS_BASE=|export KOS_BASE=|g" "${DREAMCAST_SDK}/kos/environ.sh"
-	else
-		echo "Error: Cant copy environ.sh, check permissions."
-		exit 1
-	fi
-
-	# Include kos env to .bashrc
-	echo "source ${DREAMCAST_SDK}/kos/environ.sh" >>/root/.bashrc
-	echo "Note: Source environ.sh to .bashrc."
+	# Setup environment (required for building KOS itself)
+	__setup_environ
 
 	# Build kos
 	source "${DREAMCAST_SDK}/kos/environ.sh"
@@ -155,7 +124,7 @@ function diagnose() {
 function apply() {
 	__is_installed
 	__check_requeriments
-	kosaio_echo "Nothing to copy..."
+	__setup_environ
 }
 
 function uninstall() {
@@ -207,5 +176,43 @@ function __is_installed() {
 	if [ ! -d "${KOS_DIR}" ]; then
 		kosaio_echo "KOS is not installed (directory missing)."
 		exit 1
+	fi
+}
+
+function __setup_environ() {
+	# Check file and Backup .bashrc
+	if [ ! -f "/root/.bashrc" ]; then
+		echo "Error: /root/.bashrc file not found, this file is required." >&2
+		exit 1
+	fi
+
+	if [ ! -f "/root/.bashrc_og" ]; then
+		# Create Backup
+		cp "/root/.bashrc" "/root/.bashrc_og"
+		echo "Note: Created backup of /root/.bashrc as /root/.bashrc_og"
+	fi
+
+	# Copy kos env, this replace the older in case of update
+	mkdir -p "${DREAMCAST_SDK}/kos"
+	if [ -f "${KOS_DIR}/doc/environ.sh.sample" ]; then
+		cp "${KOS_DIR}/doc/environ.sh.sample" "${DREAMCAST_SDK}/kos/environ.sh"
+		echo "Note: Copied environ.sh to ${DREAMCAST_SDK}/kos."
+
+		# Update KOS_BASE to match the actual installation directory (critical for --dev mode)
+		sed -i "s|export KOS_BASE=.*|export KOS_BASE=\"${KOS_DIR}\"|g" "${DREAMCAST_SDK}/kos/environ.sh"
+		# Also uncomment it if it's commented out in the sample
+		sed -i "s|# export KOS_BASE=|export KOS_BASE=|g" "${DREAMCAST_SDK}/kos/environ.sh"
+	else
+		echo "Error: KOS sample environment file not found at ${KOS_DIR}/doc/environ.sh.sample" >&2
+		exit 1
+	fi
+
+	# Include kos env to .bashrc if not already there
+	local source_line="source ${DREAMCAST_SDK}/kos/environ.sh"
+	if ! grep -Fxq "${source_line}" /root/.bashrc; then
+		echo "${source_line}" >>/root/.bashrc
+		echo "Note: Added source line to /root/.bashrc"
+	else
+		echo "Note: Source line already exists in /root/.bashrc"
 	fi
 }
