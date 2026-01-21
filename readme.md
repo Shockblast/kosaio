@@ -1,4 +1,4 @@
-# KOSAIO (Kallistios All In One)
+# KOSAIO (KallistiOS All In One)
 
 KOSAIO is an all-in-one Docker image with scripts to manage the installation and updating of the SDK tools designed to simplify homebrew development for the Sega Dreamcast. It contains a pre-configured development environment with KallistiOS (KOS) and a selection of essential tools, allowing you to start programming for the Dreamcast in the fastest and easiest way possible.
 
