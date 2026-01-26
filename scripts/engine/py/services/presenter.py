@@ -43,8 +43,8 @@ class Presenter:
                 if status["c_inst"] == "x" and status["h_inst"] == "x":
                     continue
 
-            c_pill = UI.status_pill(status["c_inst"], status["c_active"])
-            h_pill = UI.status_pill(status["h_inst"], status["h_active"])
+            c_pill = UI.status_pill(status["c_inst"], status["c_active"], active_color=UI.GREEN)
+            h_pill = UI.status_pill(status["h_inst"], status["h_active"], active_color=UI.YELLOW)
 
             rows.append([
                 (f"[{m.type.upper()}]", UI.CYAN),
@@ -90,8 +90,8 @@ class Presenter:
         rows = []
         for lib in ports:
             status = StatusService.get_status_data(lib, "port")
-            c_pill = UI.status_pill(status["c_inst"], status["c_active"])
-            h_pill = UI.status_pill(status["h_inst"], status["h_active"])
+            c_pill = UI.status_pill(status["c_inst"], status["c_active"], active_color=UI.GREEN)
+            h_pill = UI.status_pill(status["h_inst"], status["h_active"], active_color=UI.YELLOW)
 
             m = ManifestParser.parse_port_makefile(ports_path / lib / "Makefile")
             desc = m.desc if m else "No description"

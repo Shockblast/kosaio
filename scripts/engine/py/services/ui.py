@@ -37,14 +37,14 @@ class UI:
         return s
 
     @staticmethod
-    def status_pill(installed: Union[str, bool], is_active: bool) -> str:
+    def status_pill(installed: Union[str, bool], is_active: bool, active_color: str = YELLOW) -> str:
         char = "x"
         color = UI.GRAY
 
         if installed == "o" or installed is True:
             char = "✓"
             color = UI.GREEN
-            if is_active: color = UI.YELLOW
+            if is_active: color = active_color
         elif installed == "c":
             char = "S" # Source available
             color = UI.BLUE

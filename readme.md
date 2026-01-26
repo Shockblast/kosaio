@@ -103,11 +103,11 @@ KOSAIO provides a powerful diagnosis system to ensure your environment is correc
 *   **KOSAIO Health**: `kosaio diagnose self` (Checks if KOSAIO scripts are intact and up to date).
 *   **SDK-Specific Check**: `kosaio diagnose kos` (Checks if KallistiOS is properly compiled).
 
-KOSAIO offers a granular **Hybrid Mode** for advanced users who want to modify tools like `kos` or libraries like `GLdc` directly from their Host OS.
+KOSAIO offers a granular **Hybrid Mode** for advanced users who want to modify tools like `kos` or libraries like `libGL` directly from their Host OS.
 
 #### Terminology:
-- **CONTAINER (System)**: Uses the pre-installed, stable version inside the Docker image. Marked in **Orange ◎** (US Style).
-- **HOST (Workspace)**: Uses the source code and binaries from your local `/opt/projects/kosaio-dev/` folder. Marked in **Blue ◎** (JP/EU Style).
+- **CONTAINER (System)**: Uses the pre-installed, stable version inside the Docker image.
+- **HOST (Workspace)**: Uses the source code and binaries from your local `/opt/projects/kosaio-dev/` folder, visible in the host.
 
 #### Workflow:
 
@@ -143,11 +143,15 @@ Some examples of how to use kosaio:
 
 `kosaio install kos`
 
+`kosaio clone kos-ports` # clone kos-ports to the host (recommended)
+
 `kosaio diagnose system`
 
 `kosaio install-deps system`
 
-`kosaio self-update`
+`kosaio update self`
+
+`kosaio update libwav`
 
 #### Advanced Interactive Shell
 Enabling the KOSAIO shell provides a series of productivity helpers:
@@ -172,7 +176,7 @@ kosaio install sh4zam
 kosaio install libpng zlib
 
 # Update a specific library
-kosaio update sh4zam
+kosaio update libgl
 
 # Uninstall a library
 kosaio uninstall sh4zam
@@ -187,6 +191,7 @@ For detailed technical information:
 - **[Development Workflow](docs/DEVELOPMENT_WORKFLOW.md)** - Hybrid mode guide (Host vs Container).
 - **[Terminal HUD](docs/TERMINAL_HUD.md)** - Details about the interactive shell prompts.
 - **[Contributing](docs/INDEX.md)** - Documentation index and contributing guidelines.
+- **[Future Ideas](docs/FUTURE_IDEAS.md)** - List of candidate tools and libraries for future integration.
 
 ### Debugging (Work in Progress, not ready yet)
 

@@ -131,17 +131,17 @@ if [ -d "${KOSAIO_DIR}/.git" ]; then
 fi
 
 
-# Using printf for reliable logo output
-printf "\n"
-printf "  ${C_B_CYAN}██   ██  ██████  ███████  █████  ██  ██████${C_RESET}\n"
-printf "  ${C_B_CYAN}██  ██  ██    ██ ██      ██   ██ ██ ██    ██${C_RESET}\n"
-printf "  ${C_B_CYAN}█████   ██    ██ ███████ ███████ ██ ██    ██${C_RESET}\n"
-printf "  ${C_B_CYAN}██  ██  ██    ██      ██ ██   ██ ██ ██    ██${C_RESET}\n"
-printf "  ${C_B_CYAN}██   ██  ██████  ███████ ██   ██ ██  ██████${C_RESET}\n"
-printf "\n"
-
 # Render the perfectly aligned HUD via Python Engine (Once per session unless forced)
 if [ -z "${KOSAIO_BANNER_SHOWN:-}" ]; then
+	# Using printf for reliable logo output
+	printf "\n"
+	printf "  ${C_B_CYAN}██   ██  ██████  ███████  █████  ██  ██████${C_RESET}\n"
+	printf "  ${C_B_CYAN}██  ██  ██    ██ ██      ██   ██ ██ ██    ██${C_RESET}\n"
+	printf "  ${C_B_CYAN}█████   ██    ██ ███████ ███████ ██ ██    ██${C_RESET}\n"
+	printf "  ${C_B_CYAN}██  ██  ██    ██      ██ ██   ██ ██ ██    ██${C_RESET}\n"
+	printf "  ${C_B_CYAN}██   ██  ██████  ███████ ██   ██ ██  ██████${C_RESET}\n"
+	printf "\n"
+
 	python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" render_banner "${KOSAIO_BRANCH}" "${KOSAIO_COMMIT}" "${KOSAIO_DATE}"
 	printf "\n"
 	export KOSAIO_BANNER_SHOWN=1
