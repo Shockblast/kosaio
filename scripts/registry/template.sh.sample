@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# KOSAIO Registry Item Template
+# ID: Unique identifier for the tool
+# NAME: Human readable name
+# DESC: Short description for search/list
+# TAGS: Keywords for discovery (comma separated)
+# TYPE: core | tool | lib | emulator | loader
+# DEPS: List of apt packages required (system packages)
+
+ID="template"
+NAME="Template Tool"
+DESC="This is a sample registry item."
+TAGS="sample,template"
+TYPE="tool"
+DEPS="build-essential git"
+
+# --- Health Check ---
+# Returns: 
+# 0: OK
+# 1: Not Installed (Missing Source)
+# 2: Partially Installed (Missing Binary / Broken)
+# 3: System dependencies missing
+function reg_check_health() {
+	local tool_dir=$(validate_get_tool_path "$ID")
+	[ -d "$tool_dir" ] || return 1
+	# Add binary check here (e.g., [ -f "$tool_dir/bin/tool" ])
+	return 0
+}
+
+# --- Actions ---
+
+function reg_install() {
+	# Logic to clone, build and apply
+	# Use helpers from common/git-utils.sh, etc.
+	return 0
+}
+
+function reg_uninstall() {
+	# Logic to remove the tool
+	return 0
+}
+
+function reg_update() {
+	# Logic to pull latest changes and rebuild
+	return 0
+}
+
+function reg_build() {
+	# Logic to build the tool
+	return 0
+}
+
+function reg_apply() {
+	# Logic to apply the tool
+	return 0
+}
+
+function reg_clean() {
+	# Logic to clean the tool
+	return 0
+}

@@ -2,13 +2,25 @@
 
 KOSAIO is an all-in-one Docker image with scripts to manage the installation and updating of the SDK tools designed to simplify homebrew development for the Sega Dreamcast. It contains a pre-configured development environment with KallistiOS (KOS) and a selection of essential tools, allowing you to start programming for the Dreamcast in the fastest and easiest way possible.
 
+> [!WARNING]  
+> **Legacy Version Notice (January 2026)**  
+> This version introduces a new **Hybrid Python-based architecture**.  
+> If you wish to remain on the legacy version to avoid changes to your current workflow, please run:
+> ```bash
+> git fetch
+> git checkout v1.x
+> ```
+> *If you have local changes preventing the switch, use `git stash` to save them or `git checkout -f v1.x` to force the transition and discard local script modifications.*
+
+
 ## Core Features
 
 *   **Integrated Environment**: Comes with KOS and essential tools pre-configured.
-*   **Granular Developer Mode**: Switch any tool between **Stable** (official releases) and **Developer Mode** (custom source code) individually.
-*   **Smart Status Dashboard**: Use `kosaio list` to see instantly which tools are installed, which version is active, and their status.
-*   **Automated Management**: Handles cloning, compilation, and dependency checks automatically.
-*   **Project Scaffolding**: Create new projects ready to compile with a single command.
+*   **Granular Hybrid Mode**: Switch any tool between **Container** (system) and **Host** (workspace) individually.
+*   **Smart Status Dashboard**: Use `kosaio list` to see instantly which tools are installed and which mode is active.
+*   **Hot-Swap Environment**: Refresh your SDK variables instantly with `kos-env` without restarting the shell.
+*   **Project Scaffolding**: Create new projects ready to compile with `kosaio create-project <name>`.
+*   **Terminal HUD**: A dynamic prompt that shows your current region (Host/Container) and system health.
 
 ## Included Tools
 
@@ -18,8 +30,6 @@ You can install these tools with kosaio:
 | ----------------- | --------------------------------------------------------------------------------------------------- |
 | **KOS**           | KallistiOS, is the main open-source SDK for the Dreamcast.                                          |
 | **KOS-PORTS**     | KOS-PORTS is a collection of third-party libraries ported to work with KOS.                         |
-| **aldc**          | An OpenAL implementation for Dreamcast, facilitating 3D audio programming.                          |
-| **gldc**          | An implementation of the OpenGL API for Dreamcast, facilitating 3D graphics development.            |
 | **dcaconv**       | dcaconv converts audio to a format for the Dreamcast's AICA.                                        |
 | **dcload-ip**     | Allows loading and executing binaries on the Dreamcast over a network (with a Broadband Adapter).   |
 | **dcload-serial** | Allows loading and executing binaries on the Dreamcast via the serial port (with a "Coders Cable"). |
@@ -28,13 +38,13 @@ You can install these tools with kosaio:
 | **makeip**        | Tool for creating 'IP.BIN' boot files for Dreamcast executables.                                    |
 | **mkdcdisc**      | Allows creating disc images in CDI format, compatible with emulators and for burning to CD-R.       |
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
-| **sh4zam**        | General-purpose library for math and linear algebra on Dreamcast.                                   |
+| **img4dc**        | Tools for working with Dreamcast disc images (CDI/MDS).                                             |
 
-* **Sh4zam**, **Aldc**, and **GLdc** are typically included in **KOS-PORTS**, but KOSAIO manages them as standalone tools so you can control them individually.
-* **makeip** its already included in KOS but this is more updated.
-* **flycast** and **lxdream-nitro** emulators compile in the container but work only in the host. both require BIOS files installed in the host.
-* Dependencies are installed automatically depending on the tool to be installed. If you have problems compiling something, you can use `kosaio install-deps system`.
-* More tools will be implemented, if you want to help adapt them you can go to `scripts/in_progress`, if you know of a tool that is not there and you think it would be useful, you can suggest it in an issue.
+* **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio install <library>`.
+* **makeip** is already included in KOS, but this version is more updated.
+* **flycast** and **lxdream-nitro** emulators compile in the container but run on the host. Both require BIOS files installed on the host.
+* Dependencies are installed automatically when a tool is requested. If you need to manually refresh them, use `kosaio install-deps system`.
+* More tools will be implemented. If you want to contribute, check the `scripts/registry` structure. If you have a tool suggestion, please open an issue!
 
 ## Prerequisites
 
@@ -74,11 +84,14 @@ The first SDK you need to install is KallistiOS (KOS). It is a long process, so 
 kosaio install kos
 ```
 
-After that renember to exit terminal for refresh the enviroment.
+> [!IMPORTANT]
+> After installing KOS, you don't need to exit! Just run **`kos-env`** (or the shortcut **`kenv`**) to activate the new environment instantly.
 
-Now you are ready to develop a dreamcast application, you can use the basic-project to test if KOS its working.
+Now you are ready to develop a Dreamcast application. You can create a new project from a template:
 
-`kosaio create project mygame`
+```bash
+kosaio create-project mygame
+```
 
 ### Diagnostic and Health Checks
 
@@ -88,58 +101,45 @@ KOSAIO provides a powerful diagnosis system to ensure your environment is correc
 *   **KOSAIO Health**: `kosaio diagnose self` (Checks if KOSAIO scripts are intact and up to date).
 *   **SDK-Specific Check**: `kosaio diagnose kos` (Checks if KallistiOS is properly compiled).
 
-### Developer Mode
+KOSAIO offers a granular **Hybrid Mode** for advanced users who want to modify tools like `kos` or libraries like `GLdc` directly from their Host OS.
 
-KOSAIO offers a granular Developer Mode for advanced users who want to modify tools like `sh4zam` or `kos` without breaking their main stable installation.
+#### Terminology:
+- **CONTAINER (System)**: Uses the pre-installed, stable version inside the Docker image. Marked in **Orange ◎** (US Style).
+- **HOST (Workspace)**: Uses the source code and binaries from your local `/opt/projects/kosaio-dev/` folder. Marked in **Blue ◎** (JP/EU Style).
 
 #### Workflow:
 
-1.  **Check Tool Status**:
-    Use `list` to view the comprehensive status of all tools.
+1.  **Check Status**:
     ```bash
     kosaio list
-    # Output Example:
-    # sh4zam          Stable (Installed) / Dev (Installed - Active)
     ```
-    This dashboard shows you at a glance:
-    *   **Active Mode**: Which version (Stable or Dev) is currently enabled (marked as `- Active`).
-    *   **Installation Status**: Whether the binary/library is actually present for each mode.
+    Shows which mode is active and if the tool is installed in that mode.
 
-2.  **Enable Developer Mode**:
-    Use `dev-switch` with `enable` to switch the tool's configuration to Developer Mode.
+2.  **Switch Mode**:
     ```bash
-    kosaio dev-switch <tool> enable
-    # Example: kosaio dev-switch sh4zam enable
+    # Move KOS to your workspace
+    kosaio dev-switch kos host
+    
+    # Refresh the variables in your current shell
+    kenv
     ```
-    *   **Note**: This only changes the configuration. Proceed to the next step to apply the changes.
 
-3.  **Apply Changes (Install Dev Version)**:
-    *   **First Time**: Run `install` to clone, build, and install the tool.
-        ```bash
-        kosaio install <tool>
-        ```
-    *   **Updates**:
-        1. Use `build` to recompile your changes.
-           ```bash
-           kosaio build <tool>
-           ```
-        2. Use `apply` to install the compiled binaries to the system (if required).
-           ```bash
-           kosaio apply <tool>
-           ```
+3.  **Manage Sources**:
+    - `kosaio clone <tool>`: Downloade source code to the host.
+    - `kosaio build <tool>`: Compile from source.
+    - `kosaio apply <tool>`: Register the built binaries.
 
-4.  **Disable Developer Mode (Revert)**:
-    Use `dev-switch` with `disable` to switch the configuration back to Stable Mode.
+4.  **Back to Stable**:
     ```bash
-    kosaio dev-switch <tool> disable
+    kosaio dev-switch kos container
+    kenv
     ```
-    *   **Note**: To restore the stable binary in your system, you must run `kosaio install <tool>` (to rebuild stable) or `kosaio apply <tool>` (if you already have the stable build ready).
 
 ### Examples
 
 Some examples of how to use kosaio:
 
-`kosaio install sh4zam`
+`kosaio install kos`
 
 `kosaio diagnose system`
 
@@ -147,7 +147,47 @@ Some examples of how to use kosaio:
 
 `kosaio self-update`
 
+#### Advanced Interactive Shell
+Enabling the KOSAIO shell provides a series of productivity helpers:
+- **`kosaio list`**: Find libraries by name or description.
+- **`kcd <project>`**: Fast jump to any project in your workspace.
+- **`kenv`**: Hot-swap environment variables after a `dev-switch`.
+- **Tab-Completions**: Full support for all `kosaio` commands.
+
+#### Managing KOS-PORTS Libraries
+
+Instead of building all kos-ports libraries, you can install only what you need:
+
+```bash
+# List all available libraries
+kosaio list
+
+# Get info about a specific library
+kosaio info sh4zam
+
+# Install only specific libraries
+kosaio install sh4zam
+kosaio install libpng zlib
+
+# Update a specific library
+kosaio update sh4zam
+
+# Uninstall a library
+kosaio uninstall sh4zam
+```
+
+
+### Advanced Documentation
+
+For detailed technical information:
+
+- **[Architecture](docs/ARCHITECTURE.md)** - System design, SSoT principles, and directory structure.
+- **[Development Workflow](docs/DEVELOPMENT_WORKFLOW.md)** - Hybrid mode guide (Host vs Container).
+- **[Terminal HUD](docs/TERMINAL_HUD.md)** - Details about the interactive shell prompts.
+- **[Contributing](docs/INDEX.md)** - Documentation index and contributing guidelines.
+
 ### Debugging (Work in Progress, not ready yet)
+
 This setup is designed to support debugging both on real hardware and with the Flycast emulator. The GDB client (`sh-elf-gdb`) always runs inside the container, while the GDB server runs on the target (either the Dreamcast itself or Flycast on your host machine).
 
 -   **Flycast (Emulator)**: Since Flycast is a GUI application, it's best to run it on your host OS, not inside the container.
@@ -156,5 +196,9 @@ This setup is designed to support debugging both on real hardware and with the F
 
 ### TODO
 
-- [ ] Complete the implementation of the tools in the `in_progress` folder, structuring them like the other scripts.
 - [ ] Refine the debugging workflow to be even more seamless.
+
+---
+
+### [Legal Disclaimer & Notices](DISCLAIMER.md)
+*Dreamcast and SEGA are trademarks of SEGA Corporation. This project is AI-assisted and not affiliated with SEGA.*

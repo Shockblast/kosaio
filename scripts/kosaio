@@ -1,365 +1,93 @@
 #!/bin/bash
-set -e
 
-# Detect KOSAIO_DIR if not set (useful for local development/testing)
+# KOSAIO - The Dreamcast SDK Master Orchestrator (Refactored Overlord 5D)
+# This script is the main entry point (Capa de Orquestación).
+# It delegates logic to specialized engines in scripts/engine/
+
+set -Eeuo pipefail
+
 if [ -z "${KOSAIO_DIR}" ]; then
-    # Assume script is located in <KOSAIO_DIR>/scripts/kosaio
-    # Resolve symlinks to find the real source location
-    SOURCE="${BASH_SOURCE[0]}"
-    while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-      DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-      SOURCE="$(readlink "$SOURCE")"
-      [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-    done
-    SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-    # SCRIPT_DIR is now .../kosaio/scripts (if script is inside scripts folder)
-    
-    # Check if we are in 'scripts' folder
-    if [[ "$(basename "$SCRIPT_DIR")" == "scripts" ]]; then
-         export KOSAIO_DIR="$(dirname "$SCRIPT_DIR")"
-    else
-         # Fallback default or assume current dir
-         export KOSAIO_DIR="/opt/kosaio" 
-    fi
+	SOURCE="${BASH_SOURCE[0]}"
+	while [ -h "$SOURCE" ]; do
+	  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+	  SOURCE="$(readlink "$SOURCE")"
+	  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+	done
+	DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+	export KOSAIO_DIR="$(dirname "$DIR")"
 fi
+ENGINE_DIR="${KOSAIO_DIR}/scripts/engine"
 
-# Private Functions
+# Load essential UI and Environment
+source "${KOSAIO_DIR}/scripts/common/env.sh"
+source "${KOSAIO_DIR}/scripts/common/ui.sh"
+source "${KOSAIO_DIR}/scripts/common/deps.sh"
+source "${KOSAIO_DIR}/scripts/common/errors.sh"
 
-function kosaio_echo() {
-	echo -e "======================================== \n"
-	echo -e "$@"
-	echo -e "======================================== \n"
-}
 
-function kosaio_print_status() {
-	local type="$1"
-	local message="$2"
-	local color=""
-	local reset="\033[0m"
 
-	case "$type" in
-		"PASS") color="\033[1;32m" ;;
-		"FAIL") color="\033[1;31m" ;;
-		"WARN") color="\033[1;33m" ;;
-		"INFO") color="\033[1;36m" ;;
-	esac
-
-	if [ -t 1 ]; then
-		printf "[${color}%-4s${reset}] %s\n" "$type" "$message"
-	else
-		printf "[%-4s] %s\n" "$type" "$message"
-	fi
-}
-
-function kosaio_set_folder_permission() {
-	if [ "$#" -eq 0 ]; then
-		echo "Error: kosaio_set_folder_permission requires at least one path." >&2
-		exit 1
-	fi
-
-	for path in "$@"; do
-		if [ ! -e "${path}" ]; then
-			echo "Error: Path not found: ${path}" >&2
-			exit 1
-		else
-			local parent_dir=$(dirname "${path}")
-			chmod -R 755 "${path}"
-			if [ -d "${parent_dir}" ]; then
-				chown -R --reference="${parent_dir}" "${path}"
-				echo "Permissions set for ${path} (matched parent directory)"
-			else
-				# Fallback if parent doesn't exist (unlikely) or isn't a dir
-				chown -R root:root "${path}"
-				echo "Permissions set for ${path} (default root:root)"
-			fi
-		fi
-	done
-}
-
-function kosaio_git_common_update() {
-	local repo_dir="$1"
-
-	if [[ -z "${repo_dir}" ]]; then
-		echo "Usage: kosaio_git_common_update <path_to_repo>" >&2
-		return 1
-	fi
-
-	if [[ -d "${repo_dir}" ]]; then
-		cd "${repo_dir}" || return 1
-		echo "Checking for updates in $(basename "${repo_dir}")..."
-
-		# Store the original HEAD to show the log of new commits later
-		local old_head=$(git rev-parse HEAD)
-
-		# Fetch the latest changes from the remote without merging them
-		if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-			git fetch origin
-		else
-			git fetch --depth=1 origin
-		fi
-
-		# Check if an upstream branch is configured to avoid errors
-		local upstream
-		upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-		if [[ -z "$upstream" ]]; then
-			echo "No upstream branch is configured for the current branch. Skipping pull."
-			return 0
-		fi
-
-		local local_rev=$(git rev-parse @)
-		local remote_rev=$(git rev-parse @{u})
-		local base_rev=$(git merge-base @ @{u})
-
-		if [[ "${local_rev}" == "${remote_rev}" ]]; then
-			echo "Local branch is up-to-date with remote."
-		elif [[ "${local_rev}" == "${base_rev}" ]]; then
-			git reset --hard
-			echo -e "Local branch is behind '${upstream}'. Pulling changes...\n"
-			git pull
-			echo "New changes:"
-			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
-		elif [[ "${remote_rev}" == "${base_rev}" ]]; then
-			echo "Local branch is ahead of '${upstream}'. Nothing to pull."
-		else
-			git reset --hard
-			echo -e "Branches have diverged. Pulling changes...\n"
-			git pull
-			echo "New changes:"
-			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
-		fi
-	fi
-}
-
-function kosaio_git_clone() {
-	if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-		git clone "$@"
-	else
-		git clone --depth=1 --single-branch "$@"
-	fi
-}
-
-function kosaio_require_packages() {
-	local missing=()
-	for pkg in "$@"; do
-		if ! dpkg -s "$pkg" &>/dev/null; then
-			missing+=("$pkg")
-		fi
-	done
-
-	if [[ ${#missing[@]} -gt 0 ]]; then
-		echo "Installing missing packages: ${missing[*]}"
-		apt-get install -y "${missing[@]}"
-	fi
-}
+# Load common utilities
+source "${KOSAIO_DIR}/scripts/common/git_utils.sh"
+source "${KOSAIO_DIR}/scripts/common/port_utils.sh"
 
 function show_usage() {
-	kosaio_echo "Usage: kosaio <action> <target>"
-	echo "A master script to manage various Dreamcast SDK tools and system components."
-	echo "It acts as a dispatcher using a consistent <action> <target> pattern."
-	echo
-	echo "Targets can be SDK tools or system components."
-	echo
-	echo "Available SDK Targets:"
-	if [ -d "${KOSAIO_DIR}/scripts/sdk/" ]; then
-		for tool_script in "${KOSAIO_DIR}/scripts/sdk/"*.sh; do
-			tool_name=$(basename "${tool_script}" .sh)
-			echo "	- ${tool_name}"
-		done
-	fi
+	echo -e "${C_B_CYAN}KOSAIO - THE DREAMCAST SDK Master Orchestrator${C_RESET}"
+	echo -e "${C_GRAY}Refactored Overlord 5D | Engine Powered discovery${C_RESET}"
+	echo ""
+	
+	echo -e "${C_BOLD}USAGE:${C_RESET}"
+	echo -e "  ${C_BLUE}kosaio${C_RESET} ${C_CYAN}<action>${C_RESET} ${C_YELLOW}[target/query]${C_RESET} ${C_GRAY}[arguments]${C_RESET}\n"
+	
+	echo -e "${C_BOLD}DISCOVERY:${C_RESET}"
+	local lrow="${C_CYAN}%-12s${C_RESET} ${C_YELLOW}%-15s${C_RESET}"
+	printf "  ${lrow} %s\n" "list" "[query]" "Search tools/ports and see their status"
+	printf "  ${lrow} %s\n" "search" "<query>" "Quick alias for 'list' discovery"
+	printf "  ${lrow} %s\n" "info" "<id>" "Show detailed metadata about a tool/port"
+	printf "  ${lrow} %s\n" "diagnose" "<id|self|sys>" "Health check (Tool, KOSAIO itself, or System)"
+	echo ""
 
-	echo
-	echo "Available System Targets:"
-	if [ -d "${KOSAIO_DIR}/scripts/tools/" ]; then
-		for tool_script in "${KOSAIO_DIR}/scripts/tools/"*.sh; do
-			tool_name=$(basename "${tool_script}" .sh)
-			echo "	- ${tool_name}"
-		done
-	fi
+	echo -e "${C_BOLD}TOOL LIFECYCLE:${C_RESET}"
+	local lrow_life="${C_CYAN}%-12s${C_RESET} ${C_YELLOW}%-10s${C_RESET} ${C_GRAY}%-10s${C_RESET}"
+	printf "  ${lrow_life} %s\n" "install" "<id>" "[args...]" "Complete setup (Clone, Build, Apply)"
+	printf "  ${lrow_life} %s\n" "update" "<id>" "[args...]" "Pull latest source and rebuild"
+	printf "  ${lrow_life} %s\n" "uninstall" "<id>" "" "Remove tool/sdk from the system"
+	printf "  ${lrow_life} %s\n" "clone" "<id>" "[args...]" "Download source code only"
+	printf "  ${lrow_life} %s\n" "build" "<id>" "[args...]" "Run compilation on local source"
+	printf "  ${lrow_life} %s\n" "apply" "<id>" "" "Register local build binaries"
+	printf "  ${lrow_life} %s\n" "checkout" "<id>" "<ref>" "Switch to git branch/tag/commit"
+	printf "  ${lrow_life} %s\n" "clean" "<id>" "" "Clean build artifacts"
+	echo ""
 
-	echo
-	echo "Common Actions:"
-	echo "	- info          - Get detailed notes and info about the target."
-	echo "	- install       - Full installation (clone, build, apply)."
-	echo "	- uninstall     - Remove the target."
-	echo "	- update        - Update target from source."
-	echo "	- diagnose      - Run health checks on the target."
-	echo "	- create        - Create new items (usually for 'project' target)."
-	echo
-	echo "Global Commands:"
-	echo "	- kosaio list            - List all tools and their current status."
-	echo "	- kosaio dev-switch      - Toggle Developer Mode for a tool."
-	echo "	- kosaio self-update     - Update KOSAIO itself."
-	echo
-	echo "Examples:"
-	echo "	$ kosaio install kos"
-	echo "	$ kosaio diagnose system"
-	echo "	$ kosaio diagnose self"
-	echo "	$ kosaio create project mygame"
-	echo
+	echo -e "${C_BOLD}SYSTEM WORKFLOW:${C_RESET}"
+	printf "  ${lrow} %s\n" "dev-switch" "<id> [mode]" "Toggle between CONTAINER and HOST mode"
+	printf "  ${lrow} %s\n" "create-proj" "<name>" "Initialize a new project folder"
+	printf "  ${lrow} %s\n" "install-deps" "system" "Install core SDK dependencies (GCC, Make, etc)"
+	printf "  ${lrow} %s\n" "self-update" "" "Update KOSAIO framework and scripts"
+	echo ""
 	exit 1
 }
 
-# --- Main Logic ---
+# --- Action Handlers ---
 
+# Load internal drivers
+source "${ENGINE_DIR}/driver_search.sh"
+source "${ENGINE_DIR}/ports/__init__.sh"
+source "${ENGINE_DIR}/driver_manager.sh"
+source "${ENGINE_DIR}/driver_health.sh"
+source "${ENGINE_DIR}/driver_validator.sh"
+source "${ENGINE_DIR}/error_handler.sh"
 
+# Load Router
+source "${KOSAIO_DIR}/scripts/controllers/router.sh"
 
+# --- Main Initialization ---
 
-# Check for correct number of arguments
-if [ "$#" -lt 1 ]; then
-	show_usage
-fi
+ACTION="${1:-}"
+ACTION="${ACTION,,}"
+TARGET="${2:-}"
+TARGET="${TARGET,,}"
 
-ACTION="$1"
-TARGET="$2"
-SHIFT_COUNT=2
+[ -z "$ACTION" ] && show_usage
 
-# Handle special commands first
-if [ "$ACTION" = "self-update" ]; then
-	kosaio_git_common_update "${KOSAIO_DIR}"
-	kosaio_set_folder_permission "${KOSAIO_DIR}"
-	kosaio_echo "KOSAIO UPDATED"
-	exit 0
-fi
-
-if [ "$ACTION" = "list" ]; then
-    kosaio_echo "Available KOSAIO Tools:"
-    
-    # Header
-    printf "%-15s %-50s\n" "TOOL" "STATUS"
-    printf "%-15s %-50s\n" "----" "------"
-    
-    for tool_script in "${KOSAIO_DIR}/scripts/sdk/"*.sh; do
-        tool_name=$(basename "${tool_script}" .sh)
-        
-        # Determine Active Mode
-        if [ -f "${HOME}/.kosaio/states/${tool_name}_dev" ]; then
-            active_mode="dev"
-        else
-            active_mode="stable"
-        fi
-        
-        # Check Stable Installation (Run in subshell to isolate env)
-        stable_check=$( (
-            export KOSAIO_DEV_MODE=0
-            source "${tool_script}" >/dev/null 2>&1
-            if ( __is_installed >/dev/null 2>&1 ); then echo "yes"; else echo "no"; fi
-        ) )
-        
-        if [ "$stable_check" == "yes" ]; then
-            stable_str="Stable (Installed"
-        else
-            stable_str="Stable (Not Installed"
-        fi
-        
-        if [ "$active_mode" == "stable" ]; then
-            stable_str="${stable_str} - Active)"
-        else
-            stable_str="${stable_str})"
-        fi
-
-        # Check Dev Installation
-        dev_check=$( (
-            export KOSAIO_DEV_MODE=1
-            source "${tool_script}" >/dev/null 2>&1
-            if ( __is_installed >/dev/null 2>&1 ); then echo "yes"; else echo "no"; fi
-        ) )
-        
-        if [ "$dev_check" == "yes" ]; then
-            dev_str="Dev (Installed"
-        else
-            dev_str="Dev (Not Installed"
-        fi
-        
-        if [ "$active_mode" == "dev" ]; then
-             dev_str="${dev_str} - Active)"
-             # Highlight Dev Active (Only if TTY)
-             if [ -t 1 ]; then
-                 dev_str="\033[1;33m${dev_str}\033[0m"
-             fi
-        else
-             dev_str="${dev_str})"
-        fi
-        
-        printf "%-15s %-50s\n" "${tool_name}" "${stable_str} / ${dev_str}"
-    done
-    echo
-    exit 0
-fi
-
-if [ "$ACTION" = "dev-switch" ]; then
-    if [ -z "$TARGET" ] || [ -z "$3" ]; then
-        echo "Usage: kosaio dev-switch <tool> [enable|disable]"
-        exit 1
-    fi
-    
-    MODE="$3"
-    STATE_DIR="${HOME}/.kosaio/states"
-    mkdir -p "$STATE_DIR"
-    STATE_FILE="${STATE_DIR}/${TARGET}_dev"
-    
-    # Validate tool actually exists before switching
-    if [ ! -f "${KOSAIO_DIR}/scripts/sdk/${TARGET}.sh" ]; then
-        echo "Error: Tool '${TARGET}' not found in SDK scripts."
-        exit 1
-    fi
-
-    if [ "$MODE" == "enable" ]; then
-        touch "$STATE_FILE"
-        kosaio_echo "Dev Mode ENABLED for ${TARGET}. Run 'kosaio install ${TARGET}' to build/install dev version."
-    elif [ "$MODE" == "disable" ]; then
-        rm -f "$STATE_FILE"
-        kosaio_echo "Dev Mode DISABLED for ${TARGET}. Run 'kosaio install ${TARGET}' to restore stable version."
-    else
-        echo "Usage: kosaio dev-switch <tool> [enable|disable]"
-        exit 1
-    fi
-    exit 0
-fi
-
-if [ -z "$TARGET" ]; then
-    show_usage
-fi
-
-# Search for the target script in sdk then tools
-if [ -f "${KOSAIO_DIR}/scripts/sdk/${TARGET}.sh" ]; then
-    TOOL_SCRIPT="${KOSAIO_DIR}/scripts/sdk/${TARGET}.sh"
-elif [ -f "${KOSAIO_DIR}/scripts/tools/${TARGET}.sh" ]; then
-    TOOL_SCRIPT="${KOSAIO_DIR}/scripts/tools/${TARGET}.sh"
-else
-	kosaio_echo "Error: Target '${TARGET}' not found."
-	echo "No script found in scripts/sdk/ or scripts/tools/ for '${TARGET}'."
-	show_usage
-fi
-
-# INJECT DEV MODE STATE (Only for SDK tools)
-if [[ "${TOOL_SCRIPT}" == *"/scripts/sdk/"* ]] && [ -f "${HOME}/.kosaio/states/${TARGET}_dev" ]; then
-    export KOSAIO_DEV_MODE=1
-	if [ -n "${PROJECTS_DIR}" ]; then
-		mkdir -p "${PROJECTS_DIR}/kosaio-dev"
-	fi
-else
-    export KOSAIO_DEV_MODE=0
-fi
-
-# Source target script
-source "${TOOL_SCRIPT}"
-
-# Check action
-if ! [ "$(type -t ${ACTION})" == "function" ]; then
-	echo "Error: Action '${ACTION}' is not supported by the target '${TARGET}'."
-	echo "Function '${ACTION}' is not defined in '$(basename "${TOOL_SCRIPT}")'."
-	exit 1
-fi
-
-# Execute
-kosaio_echo "Executing: ${ACTION} ${TARGET}"
-
-if [ "$KOSAIO_DEV_MODE" == "1" ]; then
-    echo ""
-    kosaio_print_status "WARN" "RUNNING IN DEVELOPER MODE"
-    echo "You are operating on the development version of ${TARGET}."
-    echo ""
-fi
-
-shift $SHIFT_COUNT
-"${ACTION}" "$@"
+# Dispatch to Router
+kosaio_router_dispatch "$ACTION" "$TARGET" "${@:3}"

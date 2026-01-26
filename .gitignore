@@ -3,3 +3,5 @@ imgname
 kosaio.cfg
 kosaio-shell
 kosaio-setup.sh
+__init__.py
+__pycache__/

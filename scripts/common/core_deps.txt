@@ -1,0 +1,62 @@
+# --- KOSAIO MASTER DEPENDENCY LIST ---
+# This file contains all system packages required for the Dreamcast SDK Toolchain,
+# emulators, and supporting tools. Lines starting with # are ignored.
+
+# Build Essentials & Compilers
+build-essential
+cmake
+make
+patch
+pkg-config
+ninja-build
+meson
+rake
+
+# Version Control
+git
+
+# Download & Connectivity
+curl
+wget
+ca-certificates
+
+# System Utilities & Archiving
+bzip2
+tar
+sed
+gawk
+diffutils
+p7zip
+nano
+vim
+
+# Formatting & Documentation
+gettext
+texinfo
+
+# Toolchain Requirements (GCC/Binutils)
+bison
+flex
+libgmp-dev
+libmpc-dev
+libmpfr-dev
+
+# SDK Libraries & Extras
+libcurl4-openssl-dev
+libelf-dev
+libisofs-dev
+libjpeg-dev
+libpng-dev
+
+# Graphics & Sound
+libgtk-3-dev
+libsdl2-dev
+libvulkan-dev
+
+# Scripting
+python3
+python-is-python3
+
+# Disc Image Tools
+genisoimage
+wodim
