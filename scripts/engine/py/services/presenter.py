@@ -26,8 +26,8 @@ class Presenter:
         headers = [
             ("TYPE", 12, UI.B_CYAN),
             ("ID", 20, UI.B_CYAN),
-            ("CONT", 10, UI.B_CYAN),
-            ("HOST", 10, UI.B_CYAN),
+            ("CONT", 4, UI.B_CYAN),
+            ("HOST", 4, UI.B_CYAN),
             ("DESCRIPTION", 40, UI.B_CYAN)
         ]
 
@@ -82,8 +82,8 @@ class Presenter:
 
         headers = [
             ("LIBRARY", 20, UI.B_CYAN),
-            ("CONT", 10, UI.B_CYAN),
-            ("HOST", 10, UI.B_CYAN),
+            ("CONT", 6, UI.B_CYAN),
+            ("HOST", 6, UI.B_CYAN),
             ("DESCRIPTION", 40, UI.B_CYAN)
         ]
 
@@ -106,7 +106,7 @@ class Presenter:
         print(UI.render_table(headers, rows))
 
     @staticmethod
-    def render_banner(branch: str, commit: str) -> None:
+    def render_banner(branch: str, commit: str, date: str) -> None:
         """Renders a perfectly aligned HUD banner box."""
         width = 60
         
@@ -119,7 +119,7 @@ class Presenter:
         
         # Line 1: Title and Versioning
         title = f"{UI.B_CYAN}KOSAIO{UI.RESET} {UI.CYAN}MASTER HUD{UI.RESET}"
-        version = f"{UI.B_MAGENTA}{branch}{UI.RESET} {UI.GRAY}@{UI.RESET} {UI.MAGENTA}{commit[:7]}{UI.RESET}"
+        version = f"{UI.B_MAGENTA}{branch}{UI.RESET} {UI.GRAY}@{UI.RESET} {UI.MAGENTA}{commit[:7]}{UI.RESET} {UI.GRAY}({date}){UI.RESET}"
         
         vlen_1 = UI.strlen(title) + 2 + UI.strlen(version)
         pad_1 = " " * max(0, width - vlen_1 - 2)

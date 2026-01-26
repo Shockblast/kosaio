@@ -2,8 +2,29 @@
 # KOSAIO Shell Initialization
 # This script is sourced when entering the container via kosaio-shell
 
-# 1. Source standard bashrc
-[ -f /root/.bashrc ] && source /root/.bashrc
+# 1. Source standard bashrc (With Recursive Guard)
+# If we are already running via shell-init source, skip to avoid infinite loop.
+if [ -z "${KOSAIO_SHELL_GUARD:-}" ]; then
+	export KOSAIO_SHELL_GUARD=1
+	
+	function _kosaio_guard_init() {
+		# Only source system bashrc if we aren't already inside it
+		# Check the call stack to see if .bashrc is an ancestor
+		local sourcing_bashrc=0
+		for source_file in "${BASH_SOURCE[@]}"; do
+			if [[ "$source_file" == *".bashrc" ]]; then
+				sourcing_bashrc=1
+				break
+			fi
+		done
+
+		if [ "$sourcing_bashrc" -eq 0 ] && [ -f /root/.bashrc ]; then
+			source /root/.bashrc
+		fi
+	}
+	_kosaio_guard_init
+	unset -f _kosaio_guard_init
+fi
 
 # 2. Setup KOSAIO Environment
 export KOSAIO_DIR="/opt/kosaio"
@@ -25,7 +46,7 @@ alias ksdk='cd /opt/toolchains/dc'
 alias kkos='cd ${KOS_BASE}'
 alias kports='cd ${KOS_PORTS_DIR}'
 alias kproj='cd /opt/projects'
-alias reload='source ${KOSAIO_DIR}/scripts/shell-init.sh'
+alias reload='unset KOSAIO_BANNER_SHOWN; source ${KOSAIO_DIR}/scripts/shell-init.sh'
 
 # --- Dynamic Prompt (PS1) ---
 # Contextual prompt: [CONTEXT(:BRANCH) : MODE] /path/to/dir #
@@ -106,7 +127,9 @@ KOSAIO_COMMIT="unknown"
 if [ -d "${KOSAIO_DIR}/.git" ]; then
 	KOSAIO_BRANCH=$(git -C "${KOSAIO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
 	KOSAIO_COMMIT=$(git -C "${KOSAIO_DIR}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+	KOSAIO_DATE=$(git -C "${KOSAIO_DIR}" show -s --format=%cd --date=short HEAD 2>/dev/null || echo "unknown")
 fi
+
 
 # Using printf for reliable logo output
 printf "\n"
@@ -117,6 +140,9 @@ printf "  ${C_B_CYAN}██  ██  ██    ██      ██ ██   █�
 printf "  ${C_B_CYAN}██   ██  ██████  ███████ ██   ██ ██  ██████${C_RESET}\n"
 printf "\n"
 
-# Render the perfectly aligned HUD via Python Engine
-python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" render_banner "${KOSAIO_BRANCH}" "${KOSAIO_COMMIT}"
-printf "\n"
+# Render the perfectly aligned HUD via Python Engine (Once per session unless forced)
+if [ -z "${KOSAIO_BANNER_SHOWN:-}" ]; then
+	python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" render_banner "${KOSAIO_BRANCH}" "${KOSAIO_COMMIT}" "${KOSAIO_DATE}"
+	printf "\n"
+	export KOSAIO_BANNER_SHOWN=1
+fi

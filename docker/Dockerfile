@@ -18,6 +18,9 @@ COPY ./scripts/ /opt/kosaio/scripts/
 RUN chmod +x /opt/kosaio/scripts/provision.sh && \
     /opt/kosaio/scripts/provision.sh
 
+# Global Shell Setup
+RUN echo "source /opt/kosaio/scripts/shell-init.sh" >> /root/.bashrc
+
 # Set Working Directory
 WORKDIR ${PROJECTS_DIR}
 

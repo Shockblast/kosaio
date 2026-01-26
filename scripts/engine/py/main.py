@@ -140,7 +140,7 @@ def cmd_render_banner(args):
     """
     Renders the HUD banner with perfect alignment.
     """
-    Presenter.render_banner(args.branch, args.commit)
+    Presenter.render_banner(args.branch, args.commit, args.date)
     sys.exit(0)
 
 # --- Main Dispatch ---
@@ -210,6 +210,7 @@ def main():
     p_banner = subparsers.add_parser("render_banner")
     p_banner.add_argument("branch")
     p_banner.add_argument("commit")
+    p_banner.add_argument("date")
     p_banner.set_defaults(func=cmd_render_banner)
     # Parse args
     if len(sys.argv) == 1:

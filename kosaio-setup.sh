@@ -224,7 +224,7 @@ function create_helper_script() {
 	cat <<EOF > "${shell_helper}"
 #!/bin/bash
 # Simple helper to enter the KOSAIO container with environment ready
-${TOOL} exec -it ${CONTAINER_NAME} /bin/bash --rcfile /opt/kosaio/scripts/shell-init.sh
+${TOOL} exec -it ${CONTAINER_NAME} /bin/bash
 EOF
 	chmod +x "${shell_helper}"
 	

@@ -20,6 +20,10 @@ ENGINE_DIR="${KOSAIO_DIR}/scripts/engine"
 
 # Load essential UI and Environment
 source "${KOSAIO_DIR}/scripts/common/env.sh"
+
+# Self-Heal Environment Configuration
+ensure_bashrc_config
+
 source "${KOSAIO_DIR}/scripts/common/ui.sh"
 source "${KOSAIO_DIR}/scripts/common/deps.sh"
 source "${KOSAIO_DIR}/scripts/common/errors.sh"
@@ -31,7 +35,18 @@ source "${KOSAIO_DIR}/scripts/common/git_utils.sh"
 source "${KOSAIO_DIR}/scripts/common/port_utils.sh"
 
 function show_usage() {
+	# Version Extraction
+	local K_BRANCH="unknown"
+	local K_COMMIT="unknown"
+	local K_DATE="unknown"
+	if [ -d "${KOSAIO_DIR}/.git" ]; then
+		K_BRANCH=$(git -C "${KOSAIO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+		K_COMMIT=$(git -C "${KOSAIO_DIR}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+		K_DATE=$(git -C "${KOSAIO_DIR}" show -s --format=%cd --date=short HEAD 2>/dev/null || echo "unknown")
+	fi
+
 	echo -e "${C_B_CYAN}KOSAIO - THE DREAMCAST SDK Master Orchestrator${C_RESET}"
+	echo -e "${C_B_CYAN}Version:${C_RESET} ${C_B_MAGENTA}${K_BRANCH}${C_RESET} ${C_GRAY}@${C_RESET} ${C_MAGENTA}${K_COMMIT}${C_RESET} ${C_GRAY}(${K_DATE})${C_RESET}"
 	echo -e "${C_GRAY}Refactored Overlord 5D | Engine Powered discovery${C_RESET}"
 	echo ""
 	

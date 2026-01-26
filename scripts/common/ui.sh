@@ -10,6 +10,9 @@ C_GREEN="${ESC}[1;32m"
 C_YELLOW="${ESC}[1;33m"
 C_RED="${ESC}[1;31m"
 C_GRAY="${ESC}[0;90m"
+C_MAGENTA="${ESC}[0;35m"
+C_B_MAGENTA="${ESC}[1;35m"
+
 
 # --- Logging Functions ---
 

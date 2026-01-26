@@ -2,6 +2,8 @@
 
 KOSAIO is an all-in-one Docker image with scripts to manage the installation and updating of the SDK tools designed to simplify homebrew development for the Sega Dreamcast. It contains a pre-configured development environment with KallistiOS (KOS) and a selection of essential tools, allowing you to start programming for the Dreamcast in the fastest and easiest way possible.
 
+![KOSAIO Capture](capture.png)
+
 > [!WARNING]  
 > **Legacy Version Notice (January 2026)**  
 > This version introduces a new **Hybrid Python-based architecture**.  
@@ -40,7 +42,7 @@ You can install these tools with kosaio:
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
 | **img4dc**        | Tools for working with Dreamcast disc images (CDI/MDS).                                             |
 
-* **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio install <library>`.
+* **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.
 * **makeip** is already included in KOS, but this version is more updated.
 * **flycast** and **lxdream-nitro** emulators compile in the container but run on the host. Both require BIOS files installed on the host.
 * Dependencies are installed automatically when a tool is requested. If you need to manually refresh them, use `kosaio install-deps system`.

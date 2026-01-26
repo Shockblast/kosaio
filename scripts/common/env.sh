@@ -153,3 +153,23 @@ function kosaio_check_toolchain() {
 	fi
 	return 0
 }
+
+# --- Configuration Self-Healing ---
+
+function ensure_bashrc_config() {
+	local INIT_LINE="source ${KOSAIO_DIR}/scripts/shell-init.sh"
+	local BASHRC="/root/.bashrc"
+	
+	if [ -f "$BASHRC" ]; then
+		# Check if the line exists
+		if ! grep -Fxq "$INIT_LINE" "$BASHRC"; then
+			# If we are root (inside container), we can fix it
+			if [ "$(id -u)" -eq 0 ]; then
+				echo "" >> "$BASHRC"
+				echo "# KOSAIO Auto-Init" >> "$BASHRC"
+				echo "$INIT_LINE" >> "$BASHRC"
+				# Quietly fixed
+			fi
+		fi
+	fi
+}
