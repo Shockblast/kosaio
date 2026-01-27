@@ -64,7 +64,7 @@ function show_usage() {
 	echo -e "${C_BOLD}TOOL LIFECYCLE:${C_RESET}"
 	local lrow_life="${C_CYAN}%-12s${C_RESET} ${C_YELLOW}%-10s${C_RESET} ${C_GRAY}%-10s${C_RESET}"
 	printf "  ${lrow_life} %s\n" "install" "<id>" "[args...]" "Complete setup (Clone, Build, Apply)"
-	printf "  ${lrow_life} %s\n" "update" "<id>" "[args...]" "Pull latest source and rebuild"
+	printf "  ${lrow_life} %s\n" "update" "<id>|all" "[args...]" "Pull latest source and rebuild (all ignores prompts)"
 	printf "  ${lrow_life} %s\n" "uninstall" "<id>" "" "Remove tool/sdk from the system"
 	printf "  ${lrow_life} %s\n" "clone" "<id>" "[args...]" "Download source code only"
 	printf "  ${lrow_life} %s\n" "build" "<id>" "[args...]" "Run compilation on local source"

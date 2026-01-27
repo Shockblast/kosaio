@@ -50,14 +50,41 @@ function ports_install() {
 
 	log_info "Resolving dependency tree..."
 	local final_targets=()
+	local dependencies=()
 
 	if [ -f "$python_engine" ]; then
 		# Bulk resolve all targets at once
 		local resolved_string
 		resolved_string=$(python3 "$python_engine" resolve_deps "${targets[@]}")
 		read -r -a final_targets <<< "$resolved_string"
+		
+		# Identify which ones are dependencies (not in the original targets list)
+		for t in "${final_targets[@]}"; do
+			local is_direct=false
+			for orig in "${targets[@]}"; do
+				# Check direct match or case-insensitive match
+				if [[ "${t,,}" == "${orig,,}" ]]; then
+					is_direct=true
+					break
+				fi
+			done
+			if [ "$is_direct" = false ]; then
+				dependencies+=("$t")
+			fi
+		done
 	else
 		final_targets=("${targets[@]}")
+	fi
+
+	# If there are dependencies, warn the user
+	if [ ${#dependencies[@]} -gt 0 ]; then
+		log_warn "The following dependencies will also be installed:"
+		printf "  ${C_GRAY}→ %s${C_RESET}\n" "${dependencies[@]}"
+		echo ""
+		if ! confirm "Do you want to continue with the installation?" "Y"; then
+			log_info "Installation cancelled."
+			return 0
+		fi
 	fi
 
 	for lib_name in "${final_targets[@]}"; do
@@ -136,36 +163,48 @@ function ports_uninstall() {
 	local success_libs=()
 
 	for lib_name in "$@"; do
-		if ! _ports_validate_library "${lib_name}"; then
+		local resolved_name
+		if resolved_name=$(ports_resolve_name "${lib_name}"); then
+			lib_name="${resolved_name}"
+		else
 			log_error "Library '${lib_name}' not found."
 			continue
 		fi
 
 		log_info --draw-line "Uninstalling ${lib_name}..."
 		local lib_dir="${KOS_PORTS_DIR}/${lib_name}"
+		local manifest_file="${KOS_BASE}/.kos-manifest/${lib_name}.manifest"
 		local tracking_file="${KOS_PORTS_DIR}/lib/.kos-ports/${lib_name}"
 
-		# 1. Try standard uninstall (Best Effort) + Clean (Deep Cleanup)
-		# We force 'clean' to remove the source repository (dist/build) as requested by user.
-		local make_targets="uninstall clean"
-		# [ "${KOSAIO_CLEAN_AFTER:-false}" = true ] && make_targets="uninstall clean"
-		(cd "${lib_dir}" && ${KOS_MAKE} ${make_targets} 2>/dev/null) || true
+		# 1. Try standard uninstall (Best Effort) + Deep Cleanup
+		# Use 'distclean' to remove downloaded source tarballs/folders
+		local make_targets="uninstall distclean"
+		if [ -d "${lib_dir}" ]; then
+			log_info "Running port cleanup..."
+			(cd "${lib_dir}" && ${KOS_MAKE} ${make_targets} 2>/dev/null) || true
+			
+			# Fallback: Manual cleanup of KOS-PORTS specific artifacts
+			# This ensures the [S] (Source) icon disappears from 'kosaio list'
+			rm -rf "${lib_dir}/dist" "${lib_dir}/build" "${lib_dir}/inst" 2>/dev/null
+		fi
 
-		# 2. Manifest Cleanup (Surgical Removal)
-		local manifest_file="${KOS_BASE}/.kos-manifest/${lib_name}.manifest"
+		# 2. Manifest Cleanup (Surgical Removal of installed files)
 		if [ -f "${manifest_file}" ]; then
-			log_info --draw-line "Removing files from manifest..."
+			log_info "Removing installed files via manifest..."
 			while IFS= read -r file; do
 				if [ -f "$file" ]; then
 					rm -f "$file"
 				fi
 			done < "${manifest_file}"
 			rm -f "${manifest_file}"
+		else
+			log_warn "No manifest file found for ${lib_name}. Manual cleanup might be needed."
 		fi
 
-		# 3. Cleanup tracking
+		# 3. Cleanup tracking and common include dirs
 		rm -f "${tracking_file}"
 		rm -rf "${KOS_PORTS_DIR}/include/${lib_name}" 2>/dev/null || true
+		rm -rf "${KOS_BASE}/include/${lib_name}" 2>/dev/null || true
 
 		log_success "${lib_name} uninstalled."
 		success_libs+=("${lib_name}")

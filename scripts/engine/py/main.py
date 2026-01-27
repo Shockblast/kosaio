@@ -136,6 +136,19 @@ def cmd_resolve_port_name(args):
         # Don't print error to stdout to keep it clean for shell capture
         sys.exit(1)
 
+def cmd_get_installed_ids(args):
+    """
+    Returns a space-separated list of all installed target IDs.
+    """
+    results = SearchService.search_all("")
+    installed_ids = []
+    for m in results:
+        status = StatusService.get_status_data(m.id, m.type)
+        if status["c_inst"] == "o" or status["h_inst"] == "o":
+            installed_ids.append(m.id)
+    print(" ".join(installed_ids))
+    sys.exit(0)
+
 def cmd_render_banner(args):
     """
     Renders the HUD banner with perfect alignment.
@@ -205,6 +218,10 @@ def main():
     p_resolve_name = subparsers.add_parser("resolve_port_name")
     p_resolve_name.add_argument("name", help="Port name to resolve")
     p_resolve_name.set_defaults(func=cmd_resolve_port_name)
+
+    # Get Installed IDs Command
+    p_inst_ids = subparsers.add_parser("get_installed_ids")
+    p_inst_ids.set_defaults(func=cmd_get_installed_ids)
 
     # Render Banner Command (NEW)
     p_banner = subparsers.add_parser("render_banner")

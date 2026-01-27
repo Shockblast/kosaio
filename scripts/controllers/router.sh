@@ -20,7 +20,15 @@ function kosaio_router_dispatch() {
 			controller_dev_handle "$TARGET" "${ARGS[0]:-}"
 			;;
 
-		"install"|"update"|"uninstall"|"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"info") 
+		"update")
+			if [ "$TARGET" == "all" ] || [[ " ${ARGS[*]} " =~ " --all " ]]; then
+				_router_handle_update_all "${ARGS[@]}"
+			else
+				_router_handle_lifecycle "$ACTION" "$TARGET" "${ARGS[@]}"
+			fi
+			;;
+
+		"install"|"uninstall"|"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"info") 
 			_router_handle_lifecycle "$ACTION" "$TARGET" "${ARGS[@]}"
 			;;
 
@@ -134,4 +142,85 @@ function _router_handle_self_update() {
 	log_info --draw-line "Updating KOSAIO..."
 	kosaio_git_fix_permissions
 	kosaio_git_common_update "${KOSAIO_DIR}" --branch "${KOSAIO_BRANCH}"
+}
+
+function _router_handle_update_all() {
+	log_info --draw-line "Updating all installed tools and ports..."
+	
+	# Get list of installed IDs from Python engine
+	local installed_ids
+	installed_ids=$(python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" get_installed_ids) || {
+		log_error "Failed to retrieve installed targets."
+		return 1
+	}
+
+	if [ -z "$installed_ids" ]; then
+		log_warn "No installed targets found to update."
+		return 0
+	fi
+
+	# Force non-interactive mode for bulk update
+	export KOSAIO_NON_INTERACTIVE=1
+	
+	local results=()
+
+	for id in $installed_ids; do
+		log_info "Updating: $id"
+		local status=0
+		_router_handle_lifecycle "update" "$id" "$@" || status=$?
+		results+=("${id}:${status}")
+	done
+	
+	# Restore interactive mode
+	unset KOSAIO_NON_INTERACTIVE
+	
+	echo ""
+	log_info --draw-line "BULK UPDATE SUMMARY"
+	
+	local count_uptodate=0
+	local count_updated=0
+	local count_skipped=0
+	local count_error=0
+
+	for res in "${results[@]}"; do
+		local id="${res%%:*}"
+		local code="${res#*:}"
+		local log_file="/tmp/kosaio_update_${id}.log"
+		
+		case $code in
+			10) 
+				printf "  ${C_GRAY}[UP-TO-DATE]${C_RESET}  %-15s %s\n" "$id" "No changes found."
+				((count_uptodate++))
+				;;
+			11)
+				printf "  ${C_B_CYAN}[UPDATED]   ${C_RESET}  %-15s ${C_GREEN}%s${C_RESET}\n" "$id" "Rebuilt & Deployed"
+				# Print changelog if it exists
+				if [ -f "$log_file" ]; then
+					while read -r line; do
+						printf "                    ${C_GRAY}* %s${C_RESET}\n" "$line"
+					done < <(head -n 3 "$log_file") # Show only top 3 commits
+				fi
+				((count_updated++))
+				;;
+			12)
+				printf "  ${C_YELLOW}[SKIPPED]   ${C_RESET}  %-15s %s\n" "$id" "Code updated, build skipped."
+				((count_skipped++))
+				;;
+			0)
+				# Handle targets that don't return our special codes yet but succeeded
+				printf "  ${C_GRAY}[SUCCESS]   ${C_RESET}  %-15s %s\n" "$id" "Completed."
+				((count_uptodate++))
+				;;
+			*)
+				printf "  ${C_RED}[ERROR]     ${C_RESET}  %-15s %s\n" "$id" "Failed with code $code"
+				((count_error++))
+				;;
+		esac
+		rm -f "$log_file"
+	done
+
+	echo ""
+	log_info "Summary: ${C_B_CYAN}$count_updated${C_RESET} updated, ${C_GRAY}$count_uptodate${C_RESET} up-to-date, ${C_RED}$count_error${C_RESET} failed."
+	
+	[ $count_error -eq 0 ] && log_success "Bulk update complete." || log_error "Bulk update finished with some errors."
 }

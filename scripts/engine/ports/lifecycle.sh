@@ -98,19 +98,24 @@ function ports_update() {
 
 	log_info --draw-line "Updating kos-ports repository..."
 	
-	# If there are arguments, we want to run ports_install specifically for them
-	# If no arguments, we just update the repo.
+	# If there are arguments, we use the standard flow helper
 	if [ "$#" -gt 0 ]; then
 		kosaio_standard_update_flow "kos-ports" "kos-ports" "${KOS_PORTS_DIR}" "ports_install" "" "$@"
+		return $?
 	else
-		# Just pull changes
+		# Just pull changes for the main repo
 		local status=0
 		kosaio_git_common_update "${KOS_PORTS_DIR}" || status=$?
 		if [ $status -eq 1 ]; then
 			(cd "${KOS_PORTS_DIR}" && git submodule update --init --recursive)
 			log_success "kos-ports updated successfully."
+			return 11
+		elif [ $status -eq 0 ]; then
+			log_info "kos-ports is already up-to-date."
+			return 10
 		fi
 	fi
+	return 1
 }
 
 function ports_build() {
@@ -119,7 +124,10 @@ function ports_build() {
 	local success_libs=()
 
 	for lib_name in "$@"; do
-		if ! _ports_validate_library "${lib_name}"; then
+		local resolved_name
+		if resolved_name=$(ports_resolve_name "${lib_name}"); then
+			lib_name="${resolved_name}"
+		else
 			log_error "Library '${lib_name}' not found."
 			continue
 		fi
@@ -146,7 +154,10 @@ function ports_apply() {
 	local success_libs=()
 
 	for lib_name in "$@"; do
-		if ! _ports_validate_library "${lib_name}"; then
+		local resolved_name
+		if resolved_name=$(ports_resolve_name "${lib_name}"); then
+			lib_name="${resolved_name}"
+		else
 			log_error "Library '${lib_name}' not found."
 			continue
 		fi

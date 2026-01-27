@@ -74,7 +74,7 @@ function confirm() {
 	local prompt
 
 	if [[ "${KOSAIO_NON_INTERACTIVE:-0}" == "1" ]]; then
-		return 0
+		[[ "$default" == "Y" ]] && return 0 || return 1
 	fi
 
 	if [[ "$default" == "Y" ]]; then

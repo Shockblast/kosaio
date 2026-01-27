@@ -57,6 +57,8 @@ function kosaio_git_common_update() {
 		fi
 
 		local base_rev=$(git merge-base HEAD "${upstream}")
+		local log_file="/tmp/kosaio_update_${id:-unknown}.log"
+		rm -f "$log_file"
 
 		if [[ "${local_rev}" == "${remote_rev}" ]]; then
 			log_success "Code is already up-to-date."
@@ -64,9 +66,10 @@ function kosaio_git_common_update() {
 		elif [[ "${local_rev}" == "${base_rev}" ]]; then
 			git reset --hard
 			log_info "Local branch is behind '${upstream}'. Pulling changes..."
+			git log --pretty=format:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
 			git pull || return 2
 			log_info "New changes:"
-			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
+			cat "$log_file"
 			return 1
 		elif [[ "${remote_rev}" == "${base_rev}" ]]; then
 			log_success "Local branch is ahead of '${upstream}'. Nothing to pull."
@@ -74,9 +77,10 @@ function kosaio_git_common_update() {
 		else
 			git reset --hard
 			log_warn "Branches have diverged. Resetting to remote '${upstream}'..."
+			git log --pretty=format:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
 			git pull || return 2
 			log_info "New changes:"
-			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
+			cat "$log_file"
 			return 1
 		fi
 	fi
@@ -90,11 +94,28 @@ function kosaio_standard_update_flow() {
 	local repo_dir="$3"
 	local build_cmd="${4:-}"
 	local apply_cmd="${5:-}"
-	# Note: any additional parameters via "$@" are passed to the build/apply commands
+	local original_args=("$@")
 	shift 5 || shift 3 # Handle 3 or 5 positional args
-	local status=0
+	
+	local force_build=0
+	for arg in "$@"; do
+		[[ "$arg" == "--build" ]] && force_build=1
+	done
 
+	local status=0
 	kosaio_git_common_update "${repo_dir}" || status=$?
+
+	# If forced build, we treat it as if changes were found (status 1)
+	local default_confirm="Y"
+	if [ $force_build -eq 1 ]; then
+		status=1
+	else
+		# By default, in updates we might want to ask. 
+		# If non-interactive, update-all will skip building unless --build is passed.
+		if [[ "${KOSAIO_NON_INTERACTIVE:-0}" == "1" ]]; then
+			default_confirm="N"
+		fi
+	fi
 
 	if [ $status -eq 1 ]; then
 		# Try to update submodules if any
@@ -103,7 +124,10 @@ function kosaio_standard_update_flow() {
 			(cd "${repo_dir}" && git submodule update --init --recursive 2>/dev/null || true)
 		fi
 
-		if confirm "New changes detected in ${name}. Do you want to rebuild and apply?" "Y"; then
+		local prompt_msg="Changes/Update detected for ${name}. Do you want to rebuild and apply?"
+		[ $force_build -eq 1 ] && prompt_msg="Forcing rebuild for ${name}. Proceed?"
+
+		if confirm "$prompt_msg" "$default_confirm"; then
 			# Case A: Custom commands provided
 			if [ -n "$build_cmd" ]; then
 				$build_cmd "$@"
@@ -117,12 +141,16 @@ function kosaio_standard_update_flow() {
 					reg_apply "$@"
 				fi
 			fi
+			return 11 # SUCCESS - UPDATED
 		else
 			log_info "Skipping build for ${name}."
+			return 12 # SUCCESS - CODE UPDATED BUT NOT BUILT
 		fi
 	elif [ $status -eq 0 ]; then
 		log_info "${name} is already up-to-date."
+		return 10 # SUCCESS - ALREADY UP TO DATE
 	fi
+	return 1 # ERROR
 }
 
 function kosaio_git_clone() {
