@@ -28,9 +28,9 @@ This document contains a list of tools and libraries that were previously in the
   * Description: raylib port for Dreamcast.
   * URL: [https://github.com/raylib4Consoles/raylib4Dreamcast.git](https://github.com/raylib4Consoles/raylib4Dreamcast.git)
 
-- **libfastmem**
-  * Description: Memory management and performance optimization library for Sega Dreamcast.
-  * URL: [https://github.com/sega-dreamcast/libfastmem](https://github.com/sega-dreamcast/libfastmem)
+- ~~**libfastmem**~~ (DONE)
+  * ~~Description: Memory management and performance optimization library for Sega Dreamcast.~~
+  * ~~URL: [https://github.com/sega-dreamcast/libfastmem](https://github.com/sega-dreamcast/libfastmem)~~
 
 ## Tools & Utilities
 
