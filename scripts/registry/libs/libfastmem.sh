@@ -31,25 +31,27 @@ function reg_build() {
 
 	log_info --draw-line "Building libfastmem..."
 	
-	# Fix: libfastmem Makefile expects ../include to exist for the symlink it creates
-	mkdir -p "$(dirname "$tool_dir")/include"
-
 	# We need KOS environment to build
 	(cd "${tool_dir}" && source "${KOS_BASE}/environ.sh" && make clean && make)
 }
 
 function reg_apply() {
-	# NOTE: The 'make' command in reg_build already installs the .a to addons/lib/dreamcast
-	# and the symlink in reg_build handled the include.
-	# But to be safe and consistent with KOSAIO registry, we ensure the headers are properly placed.
-	
 	local tool_dir=$(kosaio_get_tool_dir "$ID")
-	log_info "Ensuring libfastmem headers are in KOS addons..."
+	log_info "Installing libfastmem headers and library to KOS addons..."
 	
+	# Ensure directory exists
 	mkdir -p "${KOS_BASE}/addons/include/fastmem"
-	cp -v "${tool_dir}/include/fastmem.h" "${KOS_BASE}/addons/include/fastmem/"
+	mkdir -p "${KOS_BASE}/addons/lib/dreamcast"
+
+	# Install Headers
+	cp -v "${tool_dir}/include/"*.h "${KOS_BASE}/addons/include/fastmem/"
 	
-	log_success "libfastmem integration complete (KOS addons)."
+	# Install Library (if not already there by Makefile)
+	if [ -f "${tool_dir}/libfastmem.a" ]; then
+		cp -v "${tool_dir}/libfastmem.a" "${KOS_BASE}/addons/lib/dreamcast/"
+	fi
+	
+	log_success "libfastmem integrated complete (KOS addons)."
 }
 
 function reg_install() {

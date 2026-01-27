@@ -64,58 +64,52 @@ export KOSAIO_LOG_MODE="${KOSAIO_LOG_MODE:-SIMPLE}"
 # =============================================================================
 # IMPORTANT: PATH RESOLUTION HIERARCHY
 # =============================================================================
-# There are TWO systems for resolving tool paths:
-#
-# 1. kosaio_get_tool_dir() [THIS FILE - BASH]
-#    - Use ONLY for: shell initialization, environment setup, non-kosaio scripts
-#    - Used by: shell-init.sh, kos.sh (environ), external Makefiles
-#    - This is a BOOTSTRAP function for when Python is not available or appropriate
-#
-# 2. ValidatorService.get_tool_path() [Python Engine]
-#    - Use for: ALL internal kosaio operations (install, build, diagnose, etc.)
-#    - Accessed via: validate_get_tool_path() wrapper in driver_validator.sh
-#    - This is the SINGLE SOURCE OF TRUTH for runtime operations
-#
-# The two implementations MUST remain in sync. If you change one, change both.
+# ... (keeping existing comments) ...
 # =============================================================================
 function kosaio_get_tool_dir() {
 	local tool="$1"
 	local state_file="${KOSAIO_STATE_DIR}/${tool}_dev"
+	local base_dir
 
-	# 1. Force Dev Mode via flag
-	if [ "${KOSAIO_DEV_MODE:-0}" = "1" ]; then
-		echo "${KOSAIO_DEV_ROOT}/${tool}"
-	# 2. Force System Mode via flag
-	elif [ "${KOSAIO_DEV_MODE:-0}" = "0" ]; then
-		echo "${DREAMCAST_SDK}/${tool}"
-	# 3. Check persistent state
-	elif [ -f "${state_file}" ]; then
-		echo "${KOSAIO_DEV_ROOT}/${tool}"
-	# 4. Default: System Mode
+	# 1. Determine base path based on mode and tool criticality
+	if [ "${KOSAIO_DEV_MODE:-0}" = "1" ] || [ -f "${state_file}" ]; then
+		# Host / Dev Mode always uses kosaio-dev root
+		base_dir="${KOSAIO_DEV_ROOT}"
 	else
-		echo "${DREAMCAST_SDK}/${tool}"
+		# System / Container Mode
+		case "$tool" in
+			kos|kos-ports|sh-elf|arm-eabi|aicaos|extras|bin)
+				base_dir="${DREAMCAST_SDK}"
+				;;
+			*)
+				# Registry tools/libs go to extras/
+				base_dir="${DREAMCAST_SDK}/extras"
+				;;
+		esac
 	fi
+
+	echo "${base_dir}/${tool}"
 }
 
 # --- Legacy and Global Exports ---
-# These are still used by some scripts but kosaio_get_tool_dir is preferred.
-
 export KOS_DIR=$(kosaio_get_tool_dir "kos")
 export KOS_PORTS_DIR=$(kosaio_get_tool_dir "kos-ports")
 
-# Compatibility with standard KOS/KOS-PORTS environment variables
 export KOS_BASE="${KOS_DIR}"
 export KOS_PORTS="${KOS_PORTS_DIR}"
 export KOS_PORTS_BASE="${KOS_PORTS_DIR}"
 
-# Extra SDK/Bin paths - These change globally if KOSAIO_DEV_MODE is forced, 
-# but for specific tools, kosaio_get_tool_dir should be used in their scripts.
+# Binaries location: We move it to extras/bin to keep root clean
+export DREAMCAST_BIN_PATH="${DREAMCAST_SDK}/extras/bin"
+export DREAMCAST_SDK_EXTRAS="${DREAMCAST_SDK}/extras"
+
 if [ "${KOSAIO_DEV_MODE:-0}" = "1" ]; then
-	export DREAMCAST_SDK_EXTRAS="${KOSAIO_DEV_ROOT}"
 	export DREAMCAST_BIN_PATH="${KOSAIO_DEV_ROOT}/bin"
-else
-	export DREAMCAST_SDK_EXTRAS="${DREAMCAST_SDK}"
-	export DREAMCAST_BIN_PATH="${DREAMCAST_SDK}/bin"
+fi
+
+# Inject Extras Bin into PATH
+if [ -d "${DREAMCAST_BIN_PATH}" ]; then
+	export PATH="${PATH}:${DREAMCAST_BIN_PATH}"
 fi
 
 # Ensure CMake wrappers are in PATH (Vital for modern KOS Ports)

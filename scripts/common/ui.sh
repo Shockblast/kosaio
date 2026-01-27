@@ -97,3 +97,22 @@ function confirm() {
 		return 1
 	fi
 }
+
+# --- Visual Components ---
+
+# Draw a warning/alert box
+# Usage: log_alert_box "TITLE" "Line 1" "Line 2" ...
+function log_alert_box() {
+	local title="$1"
+	shift
+	
+	if [[ -f "${KOSAIO_DIR}/scripts/engine/py/main.py" ]]; then
+		python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" render_alert "$title" "$@" >&2
+	else
+		# Fallback if engine is missing
+		log_warn "[$title]"
+		for line in "$@"; do
+			echo "  - $line" >&2
+		done
+	fi
+}

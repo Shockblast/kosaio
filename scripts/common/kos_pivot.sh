@@ -35,7 +35,12 @@ function kosaio_kos_pivot() {
 	# Standard KOS environ.sh will populate PATH and variables
 	source "${target_environ}" > /dev/null 2>&1
 
-	# 5. Success Message
+	# 5. Re-inject KOSAIO Extras Bin (it might have been wiped by cleanup)
+	if [ -d "${DREAMCAST_BIN_PATH:-}" ]; then
+		export PATH="${PATH}:${DREAMCAST_BIN_PATH}"
+	fi
+
+	# 6. Success Message
 	if [ "$KOSAIO_DEV_MODE" == "1" ] || [ -f "${HOME}/.kosaio/states/kos_dev" ]; then
 		log_success "KOS Environment pivoted to: ${C_YELLOW}HOST (Workspace)${C_RESET}"
 		log_info "Path: ${KOS_DIR}"

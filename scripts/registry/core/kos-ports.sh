@@ -54,7 +54,6 @@ function reg_install() {
 function reg_update() {
 	kosaio_git_common_update "${KOS_PORTS_DIR}"
 	(cd "${KOS_PORTS_DIR}" && git submodule update --init --recursive)
-	reg_build
 }
 
 function reg_uninstall() {

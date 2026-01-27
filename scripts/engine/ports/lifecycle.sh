@@ -98,9 +98,14 @@ function ports_update() {
 
 	log_info --draw-line "Updating kos-ports repository..."
 	
-	# If there are arguments, we use the standard flow helper
+	# If there are arguments, we handle them individually
 	if [ "$#" -gt 0 ]; then
-		kosaio_standard_update_flow "kos-ports" "kos-ports" "${KOS_PORTS_DIR}" "ports_install" "" "$@"
+		# Always update the recipe repository first
+		kosaio_git_common_update "${KOS_PORTS_DIR}" || true
+		
+		# Now run install for each target. 
+		# Our new smart ports_install will detect version changes.
+		ports_install "$@"
 		return $?
 	else
 		# Just pull changes for the main repo

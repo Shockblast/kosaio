@@ -55,6 +55,12 @@ function manager_execute() {
 			printf "${C_CYAN}Tags:        ${C_RESET}%s\n" "${TAGS}"
 			printf "${C_CYAN}Description: ${C_RESET}%s\n" "${DESC}"
 			[ -z "${REPO:-}" ] || printf "${C_CYAN}Repository:  ${C_RESET}%s\n" "${REPO}"
+			
+			# Call custom info if available
+			if [ "$(type -t reg_info)" == "function" ]; then
+				echo ""
+				reg_info "$@"
+			fi
 			;;
 		"build"|"apply"|"reset"|"checkout"|"clone"|"clean")
 			FUNC_NAME="reg_${COMMAND}"

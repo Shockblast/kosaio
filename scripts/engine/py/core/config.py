@@ -21,14 +21,17 @@ class Config:
 
         state_file = self.state_dir / f"{tool}_dev"
 
-        if mode == "1":
+        # 1. Host / Dev Mode (Always in kosaio-dev root)
+        if mode == "1" or state_file.exists():
             return Path(self.dev_root) / tool
-        elif mode == "0":
+
+        # 2. System / Container Mode (Shared SDK)
+        holy_list = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "extras", "bin"}
+        if tool in holy_list:
             return Path(self.sdk_root) / tool
-        elif state_file.exists():
-            return Path(self.dev_root) / tool
         else:
-            return Path(self.sdk_root) / tool
+            # Everything else (Registry items) goes to extras/
+            return Path(self.sdk_root) / "extras" / tool
 
     @property
     def kos_ports_dir(self) -> Path:

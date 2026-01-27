@@ -1,0 +1,11 @@
+--- scripts/init.mk
++++ scripts/init.mk
+@@ -64,6 +64,8 @@
+ 
+ # ARM toolchain
+ arm_target = arm-eabi
++ARM_CC_FOR_TARGET = $(arm_target)-$(GCC)
++ARM_CXX_FOR_TARGET = $(arm_target)-$(GXX)
+ 
+ # Handle macOS
+ ifdef MACOS

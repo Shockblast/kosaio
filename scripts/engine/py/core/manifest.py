@@ -61,7 +61,23 @@ class ManifestParser:
             if match_desc:
                 short_desc = match_desc.group(1).strip().replace('|', ' ')
 
-            return Manifest(
+            # Extract more technical fields for updates
+            version = "unknown"
+            match_ver = re.search(r'^PORTVERSION\s*=\s*(.*)$', content, re.MULTILINE)
+            if match_ver:
+                version = match_ver.group(1).strip()
+            
+            repo = ""
+            match_repo = re.search(r'^GIT_REPOSITORY\s*=\s*(.*)$', content, re.MULTILINE)
+            if match_repo:
+                repo = match_repo.group(1).strip()
+            
+            branch = ""
+            match_branch = re.search(r'^GIT_BRANCH\s*=\s*(.*)$', content, re.MULTILINE)
+            if match_branch:
+                branch = match_branch.group(1).strip()
+
+            m = Manifest(
                 lib_name,
                 lib_name,
                 short_desc,
@@ -69,6 +85,12 @@ class ManifestParser:
                 "port",
                 str(path)
             )
+            # Add extra fields (dynamically attached for now to avoid changing __init__ signature)
+            m.version = version
+            m.repo = repo
+            m.branch = branch
+
+            return m
         except Exception:
             return None
 

@@ -6,82 +6,67 @@ set -Eeuo pipefail
 
 ID="kos"
 NAME="KallistiOS"
-DESC="Main Dreamcast SDK Core"
-TAGS="core,sdk,dreamcast"
+DESC="The main open-source SDK for the Sega Dreamcast (Libraries & SDK Core)."
+TAGS="core,sdk,kallistios,os"
 TYPE="core"
-DEPS="bison build-essential bzip2 cmake curl diffutils flex gawk gettext git libelf-dev libgmp-dev libisofs-dev libjpeg-dev libmpc-dev libmpfr-dev libpng-dev make meson ninja-build patch pkg-config python3 rake sed tar texinfo wget"
+# Dependency: 'toolchain' (handled internally in reg_build)
+DEPS=""
 
+# --- Health Check ---
 function reg_check_health() {
-	[ -d "${KOS_DIR}" ] || return 1
-	[ -f "${KOS_DIR}/environ.sh" ] || return 2
-	[ -f "${KOS_DIR}/lib/dreamcast/libkallisti.a" ] || return 2
+	local kos_dir=$(kosaio_get_tool_dir "kos")
+	[ -d "$kos_dir" ] || return 1
+	
+	# Check if toolchain exists (minimal check)
+	[ -f "/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc" ] || return 3 # Toolchain missing
+	
+	# Check if KOS libraries are built
+	[ -f "$kos_dir/lib/dreamcast/libkallisti.a" ] || return 2 # Not built
+	
 	return 0
 }
 
-function reg_clone() {
-	log_info --draw-line "Cloning KOS repository..."
-	kosaio_git_clone --recursive -b v2.2.x https://github.com/KallistiOS/KallistiOS.git "${KOS_DIR}"
+# --- Metadata Extension (Used by kosaio info) ---
+function reg_info() {
+	local kos_dir=$(kosaio_get_tool_dir "kos")
+	echo "KOS SDK STATUS:"
+	echo "  Source Dir:    $kos_dir"
+	echo "  Libraries:     $( [ -f "$kos_dir/lib/dreamcast/libkallisti.a" ] && echo "Compiled" || echo "Missing" )"
+	echo ""
+	echo "MANAGEMENT:"
+	echo "  Use 'kosaio build toolchain' to manage compilers."
+	echo "  Use 'kosaio build kos' to rebuild KOS libraries."
 }
 
-function _build_toolchain() {
-	local dc_chain="${KOS_DIR}/utils/dc-chain"
-	mkdir -p "${dc_chain}"
-	cp "${KOSAIO_DIR}/dc-chain-settings/Makefile.cfg" "${dc_chain}/"
+# --- External Helpers ---
 
-	log_info --draw-line "Phase 1: Building dc-chain..."
-	(cd "${dc_chain}" && make -j$(nproc))
+function reg_clone() {
+	local kos_dir=$(kosaio_get_tool_dir "kos")
+	log_info --draw-line "Cloning KOS repository..."
+	kosaio_git_clone --recursive -b v2.2.x https://github.com/KallistiOS/KallistiOS.git "${kos_dir}"
 }
 
 function reg_build() {
-	[ -d "${KOS_DIR}" ] || { log_error "KOS source missing. Run 'kosaio clone kos' first."; return 1; }
+	local kos_dir=$(kosaio_get_tool_dir "kos")
+	[ -d "$kos_dir" ] || { log_error "KOS source missing."; return 1; }
 
-	local force_toolchain=false
-	local only_kos=false
+	# Ensure toolchain is at least present
+	if [ ! -f "/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc" ]; then
+		log_error "SH4 Toolchain not found! Please run: kosaio build toolchain"
+		return 3
+	fi
 
-	# Parse args
-	for arg in "$@"; do
-		case $arg in
-			--force-toolchain) force_toolchain=true ;;
-			--only-kos) only_kos=true ;;
-		esac
-	done
-
-
-	if [ "${force_toolchain}" = false ]; then
-		log_info --draw-line "Building KOS..."
+	log_info --draw-line "Building KOS Libraries..."
+	
+	# Load environment
+	if [ -f "${kos_dir}/environ.sh" ]; then
+		source "${kos_dir}/environ.sh"
 	else
-		log_info --draw-line "Building KOS & Toolchain..."
+		log_error "environ.sh not found. Have you initialized KOS?"
+		return 1
 	fi
 
-	# Load environment to ensure KOS_DIR and others are set
-	source "${KOSAIO_DIR}/scripts/common/env.sh"
-
-	# 1. Toolchain Check
-	local toolchain_ok=false
-	if [ -x "/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc" ]; then
-		toolchain_ok=true
-	fi
-
-	if [ "$only_kos" = true ]; then
-		log_info --draw-line "Skipping Toolchain (--only-kos)..."
-	elif [ "$force_toolchain" = true ]; then
-		log_info --draw-line "Forcing Toolchain rebuild..."
-		_build_toolchain
-	elif [ "$toolchain_ok" = true ]; then
-		log_info --draw-line "Toolchain detected at /opt/toolchains/dc. Skipping build (Use --force-toolchain to rebuild)."
-	else
-		log_info --draw-line "Toolchain not found. Building..."
-		_build_toolchain
-	fi
-
-	# 2. Build KOS core
-	log_info --draw-line "Phase 2: Building KOS core..."
-	# Force load the new environment headers directly to guarantee 'make' has them
-	if [ -f "${KOS_DIR}/environ.sh" ]; then
-		source "${KOS_DIR}/environ.sh"
-	fi
-
-	(cd "${KOS_DIR}" && make -j$(nproc))
+	(cd "${kos_dir}" && make -j$(nproc))
 }
 
 

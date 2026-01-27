@@ -80,6 +80,9 @@ def cmd_port_info(args):
         if m:
             print(f"PORTNAME={m.id}")
             print(f"SHORT_DESC={m.desc}")
+            print(f"PORTVERSION={getattr(m, 'version', 'unknown')}")
+            print(f"GIT_REPOSITORY={getattr(m, 'repo', '')}")
+            print(f"GIT_BRANCH={getattr(m, 'branch', '')}")
             print(f"DEPENDENCIES={' '.join(ManifestParser.get_port_dependencies(args.query))}")
             sys.exit(0)
     sys.exit(1)
@@ -156,6 +159,13 @@ def cmd_render_banner(args):
     Presenter.render_banner(args.branch, args.commit, args.date)
     sys.exit(0)
 
+def cmd_render_alert(args):
+    """
+    Renders a visually striking alert box.
+    """
+    print(UI.render_alert_box(args.title, args.lines))
+    sys.exit(0)
+
 # --- Main Dispatch ---
 
 def main():
@@ -229,6 +239,13 @@ def main():
     p_banner.add_argument("commit")
     p_banner.add_argument("date")
     p_banner.set_defaults(func=cmd_render_banner)
+
+    # Render Alert Command
+    p_alert = subparsers.add_parser("render_alert")
+    p_alert.add_argument("title")
+    p_alert.add_argument("lines", nargs="+")
+    p_alert.set_defaults(func=cmd_render_alert)
+
     # Parse args
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
