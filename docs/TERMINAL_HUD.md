@@ -6,15 +6,15 @@ KOSAIO features a custom-built interactive shell designed to maximize productivi
 
 The command prompt is inspired by the iconic SEGA Dreamcast visual language:
 
-### 🌀 Region Swirl (The Logo)
-The swirl symbol indicates where your current environment variables are pointing:
-- **Orange Swirl ◎**: **CONTAINER** mode (US Style). You are using the stable system SDK.
-- **Blue Swirl ◎**: **HOST** mode (JP/EU Style). You are using your local workspace/developer SDK.
+### 🌀 Region Swirl (The Environment)
+The swirl symbol remains constant, but the **MODE** indicator next to it reflects your environment:
+- **Orange [SYS]**: **CONTAINER** mode (US Style). You are using the stable system SDK.
+- **Blue [DEV]**: **HOST** mode (JP/EU Style). You are using your local workspace/developer SDK.
 
 ### 🔻 Power LED (The Status)
-The triangle below the swirl represents the console's "Power LED" and indicates system health:
-- **Orange LED ▼**: **HEALTHY**. Your environment is ready and the last command succeeded.
-- **Red LED ▼**: **ERROR/PANIC**. The last command execution failed.
+The triangle indicates system health based on the last command's exit code:
+- **Orange LED 🔻**: **HEALTHY**. Your environment is ready and the last command succeeded.
+- **Red LED 🛑**: **ERROR/PANIC**. The last command execution failed.
 
 ## Shell Helpers
 
@@ -33,5 +33,5 @@ The shell includes smart tab-completions for:
 
 ---
 
-## Technical Note: Font Support
-By default, KOSAIO uses standard Unicode symbols (**◎** and **▼**) to ensure compatibility. For a more authentic experience, it is recommended to use a pixel-art font like **Pixelify Sans** (included in `assets/font`) in your terminal settings.
+## Technical Note: Asset Fidelity
+KOSAIO uses standard Unicode Emojis (**🌀** and **🔻**) to provide an authentic SEGA-inspired experience across most modern terminal emulators without requiring custom icon patches (Nerd Fonts). 

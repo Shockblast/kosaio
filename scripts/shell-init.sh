@@ -53,67 +53,54 @@ alias reload='unset KOSAIO_BANNER_SHOWN; source ${KOSAIO_DIR}/scripts/shell-init
 function _kosaio_set_prompt() {
 	local EXIT="$?"
 	# PS1 requires \[ \] wrappers for non-printing characters
-	local P_RESET="\[${ESC}[0m\]"
-	local P_GRAY="\[${ESC}[0;90m\]"
-	local P_MAGENTA="\[${ESC}[1;35m\]"
-	local P_BLUE="\[${ESC}[1;34m\]"
-	local P_CYAN="\[${ESC}[1;36m\]"
-	local P_GREEN="\[${ESC}[1;32m\]"
-	local P_RED="\[${ESC}[1;31m\]"
-	local P_YELLOW="\[${ESC}[1;33m\]"
+	local P_RESET="\[\033[0m\]"
+	local P_GRAY="\[\033[38;5;242m\]"
+	local P_WHITE="\[\033[38;5;253m\]"
+	local P_PATH="\[\033[38;5;33m\]"
+	
+	# Sega Colors (256-bit)
+	local SEGA_ORANGE="\[\033[38;5;208m\]"
+	local SEGA_BLUE="\[\033[38;5;33m\]"
+	local SEGA_RED="\[\033[38;5;196m\]"
 
-	# 1. Determine Context (Project Awareness)
+	# 1. Determine Context & Path
 	local CONTEXT="KOS"
-	# Remove /opt/projects/ prefix if present
 	local REL_PATH="${PWD#/opt/projects/}"
-
-	# If we are effectively inside /opt/projects (and not just at the root of it)
 	if [[ "$PWD" == "/opt/projects/"* ]] && [[ "$REL_PATH" != "" ]]; then
-		# Extract the first directory component as the project name
 		CONTEXT="${REL_PATH%%/*}"
 	fi
 
 	# 2. Determine Git Status
 	local GIT_INFO=""
 	if command -v git >/dev/null 2>&1; then
-		local BRANCH
-		if BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
-			if [ "$BRANCH" == "HEAD" ]; then
-				BRANCH=$(git rev-parse --short HEAD 2>/dev/null)
-			fi
-			GIT_INFO="${P_GRAY}:${P_CYAN}${BRANCH}"
+		local BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+		if [ -n "$BRANCH" ]; then
+			[ "$BRANCH" == "HEAD" ] && BRANCH=$(git rev-parse --short HEAD 2>/dev/null)
+			GIT_INFO="${P_GRAY}:${P_WHITE}${BRANCH}"
 		fi
 	fi
 
-	# 3. Status Configuration
-	local MODE_COLOR="${P_GREEN}"      # Green for Container
-	local MODE_TEXT="SYS"              # Shortened from CONTAINER to save space
+	# 3. Logo & Mode Configuration (Spiral 🌀)
+	local MODE_COLOR="${SEGA_ORANGE}" # Default: System (US Style)
+	local MODE_TEXT="SYS"
 
 	if [ -f "${HOME}/.kosaio/states/kos_dev" ]; then
-		MODE_COLOR="${P_YELLOW}"       # Yellow for Host
-		MODE_TEXT="DEV"                # Shortened from HOST/WORKSPACE
-	elif [ "$CONTEXT" == "KOS" ]; then
-		MODE_TEXT="SYS"
-	else
-		# If we are in a project, the 'Environment' is what matters (Container vs Host libs)
-		MODE_TEXT="ENV"
-	fi
-
-	# Check specific override again to be sure (UI consistency)
-	if [ -f "${HOME}/.kosaio/states/kos_dev" ]; then
+		MODE_COLOR="${SEGA_BLUE}"      # Host/Dev (JP/EU Style)
 		MODE_TEXT="DEV"
-	else
-		MODE_TEXT="SYS"
 	fi
 
-	# Prompt Character (Signal Error)
-	local PROMPT_CHAR="${P_GREEN}➜${P_RESET}"
-	[ $EXIT -ne 0 ] && PROMPT_CHAR="${P_RED}➜${P_RESET}"
+	# 4. Status Indicator (Power LED 🔻)
+	# For unhealthy states we can use a different emoji or just stay red.
+	local LED_SYMBOL="🔻"
+	[ $EXIT -ne 0 ] && LED_SYMBOL="🛑"
 
-	# Construction: 2-Line Prompt (OMZ Style)
-	# Line 1: [ CONTEXT : BRANCH ] path
-	# Line 2: ➜ input
-	PS1="${P_GRAY}[${P_MAGENTA}${CONTEXT}${GIT_INFO}${P_GRAY}:${MODE_COLOR}${MODE_TEXT}${P_GRAY}] ${P_BLUE}\w${P_RESET}\n${PROMPT_CHAR} "
+	# Construction: Two-Line HUD (Compact Style)
+	# Line 1: 🌀 [CONTEXT:BRANCH : MODE] /path/to/dir
+	# Line 2: 🔻 ➜ command
+	local LINE1="🌀 ${P_GRAY}[${P_WHITE}${CONTEXT}${GIT_INFO}${P_GRAY} : ${MODE_COLOR}${MODE_TEXT}${P_GRAY}] ${P_PATH}\w${P_RESET}"
+	local LINE2="${LED_SYMBOL}  ${MODE_COLOR}➜${P_RESET} "
+	
+	PS1="\n${LINE1}\n${LINE2}"
 }
 PROMPT_COMMAND=_kosaio_set_prompt
 
