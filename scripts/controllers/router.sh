@@ -21,11 +21,11 @@ function kosaio_router_dispatch() {
 			;;
 
 		"update")
-			if [ "$TARGET" == "all" ] || [[ " ${ARGS[*]} " =~ " --all " ]]; then
-				_router_handle_update_all "${ARGS[@]}"
-			else
-				_router_handle_lifecycle "$ACTION" "$TARGET" "${ARGS[@]}"
-			fi
+			case "$TARGET" in
+				self|kosaio) _router_handle_self_update ;;
+				all)         _router_handle_update_all "${ARGS[@]}" ;;
+				*)           _router_handle_lifecycle "$ACTION" "$TARGET" "${ARGS[@]}" ;;
+			esac
 			;;
 
 		"install"|"uninstall"|"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"info") 

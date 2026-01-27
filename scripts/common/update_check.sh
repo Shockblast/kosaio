@@ -5,18 +5,23 @@
 function kosaio_check_updates() {
 	[ "${KOSAIO_DISABLE_UPDATE_CHECK:-0}" = "1" ] && return 0
 
-	local update_file="${HOME}/.kosaio/last_update_check"
+	# 1. Identify current context
+	local current_branch
+	current_branch=$(git -C "${KOSAIO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
+	
+	# Skip if detached HEAD
+	[ "${current_branch}" = "HEAD" ] && return 0
+
+	local update_file="${HOME}/.kosaio/last_update_check_${current_branch}"
 	local epoch_target=0
 
 	# Ensure state directory exists
 	mkdir -p "$(dirname "$update_file")"
 
-	# Check timestamp
+	# 2. Check cached timestamp (24h as a reasonable default, but we check branch change)
 	if [ -f "$update_file" ]; then
-		local last_check
-		last_check=$(cat "$update_file")
-		local current_time
-		current_time=$(date +%s)
+		local last_check=$(cat "$update_file")
+		local current_time=$(date +%s)
 		
 		# 24 hours = 86400 seconds
 		epoch_target=$((last_check + 86400))
@@ -26,47 +31,34 @@ function kosaio_check_updates() {
 		fi
 	fi
 
-	# Perform Check
-	# Run in subshell to avoid changing CWD
+	# 3. Fast Remote Check via ls-remote (only reads headers, no full fetch)
 	(
 		cd "${KOSAIO_DIR}" || exit 0
 		
-		# Check if it's a git repo
-		[ -d ".git" ] || exit 0
-		
-		# If branch is HEAD (detached), we don't notify
-		[ "${KOSAIO_BRANCH}" = "HEAD" ] && exit 0
-
-		# Fetch updates for the core branch
-		git fetch origin "${KOSAIO_BRANCH}" --quiet 2>/dev/null
-
-		local local_rev
-		local_rev=$(git rev-parse HEAD)
+		local local_rev=$(git rev-parse HEAD 2>/dev/null)
 		local remote_rev
-		remote_rev=$(git rev-parse "origin/${KOSAIO_BRANCH}" 2>/dev/null)
 		
-		if [ -n "$remote_rev" ]; then
-			local base_rev
-			base_rev=$(git merge-base HEAD "origin/${KOSAIO_BRANCH}" 2>/dev/null)
-
-			if [ "$local_rev" != "$remote_rev" ] && [ "$local_rev" = "$base_rev" ]; then
-				# We are behind!
-				# Use direct colors since this runs in subshell, might miss ui.sh scope if not careful, 
-				# but ui.sh exports globally so it should be fine.
-				# Using raw ANSI just in case.
-				printf "\n"
-				printf "\033[1;33m[KOSAIO] \033[1;36mUpdate available!\033[0m\n"
-				printf "\033[0;90mRun \033[1;33mkosaio self-update\033[0;90m to upgrade.\033[0m\n"
-				printf "\n"
-			fi
+		# Get remote HEAD for the current branch
+		remote_rev=$(git ls-remote --heads origin "${current_branch}" 2>/dev/null | awk '{print $1}')
+		
+		if [ -z "$remote_rev" ]; then
+			# Error or network down, just silently exit and wait 1 hour for next check
+			echo $(( $(date +%s) - 86400 + 3600 )) > "$update_file"
+			exit 0
 		fi
+
+		if [ "$local_rev" != "$remote_rev" ]; then
+			# DOUBLE CHECK: only notify if we are strictly behind
+			# (using merge-base would require a fetch, so we just check inequality for now
+			# as we assume users won't force-push ahead of origin on managed branches usually)
+			
+			printf "\n"
+			printf "  ${C_B_YELLOW}[KOSAIO] ${C_B_CYAN}Update available in branch ${current_branch}!${C_RESET}\n"
+			printf "  ${C_GRAY}Run ${C_YELLOW}kosaio update self${C_GRAY} to see the changelog and upgrade.${C_RESET}\n"
+			printf "\n"
+		fi
+		
+		# Update timestamp
+		date +%s > "$update_file"
 	)
-	# Run synchronously to ensure message visibility before banner
-	# Git fetch can be slow. OMZ asyncs it.
-	# But wait, if we background it, the message might pop up in the middle of typing.
-	# Let's run synchronously but with a timeout or just accept the fetch time (usually fast).
-	# For now, synchronous to ensure message visibility at startup.
-	
-	# Update timestamp
-	date +%s > "$update_file"
 }
