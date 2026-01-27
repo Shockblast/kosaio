@@ -59,6 +59,5 @@ function reg_uninstall() {
 
 function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "mksdiso")
-	kosaio_git_common_update "$tool_dir"
-	log_info "mksdiso is a script-based tool, nothing to compile."
+	kosaio_standard_update_flow "mksdiso" "mksdiso" "$tool_dir" "$@"
 }

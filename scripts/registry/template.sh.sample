@@ -42,8 +42,8 @@ function reg_uninstall() {
 }
 
 function reg_update() {
-	# Logic to pull latest changes and rebuild
-	return 0
+	local tool_dir=$(validate_get_tool_path "$ID")
+	kosaio_standard_update_flow "$ID" "$NAME" "$tool_dir" "$@"
 }
 
 function reg_build() {

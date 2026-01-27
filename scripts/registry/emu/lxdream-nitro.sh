@@ -63,7 +63,5 @@ function reg_uninstall() {
 
 function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "lxdream-nitro")
-	kosaio_git_common_update "$tool_dir"
-	(cd "$tool_dir" && git submodule update --init --recursive)
-	log_info "Building lxdream-nitro..."
+	kosaio_standard_update_flow "lxdream-nitro" "lxdream-nitro" "$tool_dir" "$@"
 }

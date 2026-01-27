@@ -63,10 +63,7 @@ function reg_uninstall() {
 
 function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "flycast")
-	kosaio_git_common_update "$tool_dir"
-	log_info "Updating submodules..."
-	(cd "$tool_dir" && git submodule update --init --recursive)
-	log_success "Flycast updated."
+	kosaio_standard_update_flow "flycast" "Flycast" "$tool_dir" "$@"
 }
 function reg_clean() {
 	local tool_dir=$(kosaio_get_tool_dir "flycast")

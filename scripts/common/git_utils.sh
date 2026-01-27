@@ -36,7 +36,7 @@ function kosaio_git_common_update() {
 			else
 				log_error "Local changes detected in $(basename "${repo_dir}")."
 				log_info "To overwrite your changes and update, use: ${C_YELLOW}--force${C_RESET}"
-				return 1
+				return 2
 			fi
 		fi
 
@@ -45,7 +45,7 @@ function kosaio_git_common_update() {
 		local branch_to_update="${target_branch:-$current_branch}"
 
 		log_info "Fetching ${branch_to_update} from origin..."
-		git fetch origin "${branch_to_update}" --depth=1
+		git fetch origin "${branch_to_update}" --depth=1 || return 2
 
 		local upstream="origin/${branch_to_update}"
 		local local_rev=$(git rev-parse HEAD)
@@ -60,21 +60,68 @@ function kosaio_git_common_update() {
 
 		if [[ "${local_rev}" == "${remote_rev}" ]]; then
 			log_success "Code is already up-to-date."
+			return 0
 		elif [[ "${local_rev}" == "${base_rev}" ]]; then
 			git reset --hard
 			log_info "Local branch is behind '${upstream}'. Pulling changes..."
-			git pull
+			git pull || return 2
 			log_info "New changes:"
 			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
+			return 1
 		elif [[ "${remote_rev}" == "${base_rev}" ]]; then
 			log_success "Local branch is ahead of '${upstream}'. Nothing to pull."
+			return 0
 		else
 			git reset --hard
 			log_warn "Branches have diverged. Resetting to remote '${upstream}'..."
-			git pull
+			git pull || return 2
 			log_info "New changes:"
 			git log --pretty=format:'%h - %s (%cr)' "${old_head}..HEAD"
+			return 1
 		fi
+	fi
+}
+
+# --- High Level Lifecycle Helpers ---
+
+function kosaio_standard_update_flow() {
+	local id="$1"
+	local name="$2"
+	local repo_dir="$3"
+	local build_cmd="${4:-}"
+	local apply_cmd="${5:-}"
+	# Note: any additional parameters via "$@" are passed to the build/apply commands
+	shift 5 || shift 3 # Handle 3 or 5 positional args
+	local status=0
+
+	kosaio_git_common_update "${repo_dir}" || status=$?
+
+	if [ $status -eq 1 ]; then
+		# Try to update submodules if any
+		if [ -f "${repo_dir}/.gitmodules" ]; then
+			log_info "Updating submodules..."
+			(cd "${repo_dir}" && git submodule update --init --recursive 2>/dev/null || true)
+		fi
+
+		if confirm "New changes detected in ${name}. Do you want to rebuild and apply?" "Y"; then
+			# Case A: Custom commands provided
+			if [ -n "$build_cmd" ]; then
+				$build_cmd "$@"
+				[ -n "$apply_cmd" ] && $apply_cmd "$@"
+			# Case B: Standard Registry functions
+			else
+				if [ "$(type -t reg_build)" == "function" ]; then
+					reg_build "$@"
+				fi
+				if [ "$(type -t reg_apply)" == "function" ]; then
+					reg_apply "$@"
+				fi
+			fi
+		else
+			log_info "Skipping build for ${name}."
+		fi
+	elif [ $status -eq 0 ]; then
+		log_info "${name} is already up-to-date."
 	fi
 }
 

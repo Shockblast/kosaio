@@ -97,10 +97,20 @@ function ports_update() {
 	_ports_check_requirements
 
 	log_info --draw-line "Updating kos-ports repository..."
-	kosaio_git_common_update "${KOS_PORTS_DIR}"
-	(cd "${KOS_PORTS_DIR}" && git submodule update --init --recursive)
-
-	ports_install "$@"
+	
+	# If there are arguments, we want to run ports_install specifically for them
+	# If no arguments, we just update the repo.
+	if [ "$#" -gt 0 ]; then
+		kosaio_standard_update_flow "kos-ports" "kos-ports" "${KOS_PORTS_DIR}" "ports_install" "" "$@"
+	else
+		# Just pull changes
+		local status=0
+		kosaio_git_common_update "${KOS_PORTS_DIR}" || status=$?
+		if [ $status -eq 1 ]; then
+			(cd "${KOS_PORTS_DIR}" && git submodule update --init --recursive)
+			log_success "kos-ports updated successfully."
+		fi
+	fi
 }
 
 function ports_build() {

@@ -52,6 +52,5 @@ function reg_uninstall() {
 
 function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "dcaconv")
-	kosaio_git_common_update "$tool_dir"
-	log_info "Building dcaconv..."
+	kosaio_standard_update_flow "dcaconv" "dcaconv" "$tool_dir" "$@"
 }

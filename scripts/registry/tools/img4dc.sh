@@ -68,8 +68,7 @@ function reg_uninstall() {
 
 function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "img4dc")
-	kosaio_git_common_update "$tool_dir"
-	log_info "Building img4dc..."
+	kosaio_standard_update_flow "img4dc" "img4dc" "$tool_dir" "$@"
 }
 function reg_clean() {
 	local tool_dir=$(kosaio_get_tool_dir "img4dc")

@@ -130,9 +130,7 @@ function reg_uninstall() {
 }
 
 function reg_update() {
-	kosaio_git_common_update "${KOS_DIR}"
-	(cd "${KOS_DIR}" && git submodule update --init --recursive)
-	reg_build
+	kosaio_standard_update_flow "kos" "KOS core" "${KOS_DIR}" "$@"
 }
 
 function reg_clean() {

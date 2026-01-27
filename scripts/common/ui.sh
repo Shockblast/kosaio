@@ -65,3 +65,35 @@ function log_debug() {
 		_log_msg "DEBUG" "${C_GRAY}" "$*"
 	fi
 }
+
+# --- Interactive Functions ---
+
+function confirm() {
+	local msg="$1"
+	local default="${2:-N}" # Default to No
+	local prompt
+
+	if [[ "${KOSAIO_NON_INTERACTIVE:-0}" == "1" ]]; then
+		return 0
+	fi
+
+	if [[ "$default" == "Y" ]]; then
+		prompt="[Y/n]"
+	else
+		prompt="[y/N]"
+	fi
+
+	printf "${C_B_MAGENTA}?? ${C_RESET}${msg} ${C_GRAY}${prompt}${C_RESET} " >&2
+	read -r response
+	response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+
+	if [[ -z "$response" ]]; then
+		response=$(echo "$default" | tr '[:upper:]' '[:lower:]')
+	fi
+
+	if [[ "$response" == "y" || "$response" == "yes" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}

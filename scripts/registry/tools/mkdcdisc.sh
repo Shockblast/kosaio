@@ -52,6 +52,5 @@ function reg_uninstall() {
 
 function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "mkdcdisc")
-	kosaio_git_common_update "$tool_dir"
-	log_info "Building mkdcdisc..."
+	kosaio_standard_update_flow "mkdcdisc" "mkdcdisc" "$tool_dir" "$@"
 }

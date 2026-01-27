@@ -50,6 +50,5 @@ function reg_uninstall() {
 
 function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "makeip")
-	kosaio_git_common_update "$tool_dir"
-	log_info "Building makeip..."
+	kosaio_standard_update_flow "makeip" "makeip" "$tool_dir" "$@"
 }
