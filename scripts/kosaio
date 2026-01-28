@@ -69,6 +69,7 @@ function show_usage() {
 	printf "  ${lrow_life} %s\n" "clone" "<id>" "[args...]" "Download source code only"
 	printf "  ${lrow_life} %s\n" "build" "<id>" "[args...]" "Run compilation on local source"
 	printf "  ${lrow_life} %s\n" "apply" "<id>" "" "Register local build binaries"
+	printf "  ${lrow_life} %s\n" "export" "<id>" "" "Eject artifacts to host out/ folder"
 	printf "  ${lrow_life} %s\n" "checkout" "<id>" "<ref>" "Switch to git branch/tag/commit"
 	printf "  ${lrow_life} %s\n" "clean" "<id>" "" "Clean build artifacts"
 	echo ""

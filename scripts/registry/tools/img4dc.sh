@@ -57,6 +57,37 @@ function reg_install() {
 	log_success "img4dc installation complete."
 }
 
+function reg_export() {
+	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	local host_out="${KOSAIO_DIR}/out/${ID}"
+	local build_dir="${tool_dir}/build"
+	
+	log_info "Exporting ${NAME} artifacts to host..."
+	
+	mkdir -p "${host_out}"
+	local count=0
+	
+	for bin in "cdi4dc/cdi4dc" "gdi4dc/gdi4dc" "mds4dc/mds4dc"; do
+		if [ -f "${build_dir}/${bin}" ]; then
+			cp -v "${build_dir}/${bin}" "${host_out}/"
+			((count++))
+		fi
+	done
+	
+	# Fallback for unified builds
+	if [ $count -eq 0 ] && [ -f "${build_dir}/cdi4dc" ]; then
+		cp -v "${build_dir}/cdi4dc" "${host_out}/"
+		((count++))
+	fi
+
+	if [ $count -eq 0 ]; then
+		log_error "No binaries found to export. Run 'kosaio build ${ID}' first."
+		return 1
+	fi
+	
+	log_success "Export complete. ${count} binaries exported to ${host_out}/"
+}
+
 function reg_uninstall() {
 	local tool_dir=$(kosaio_get_tool_dir "img4dc")
 	rm -rf "$tool_dir"

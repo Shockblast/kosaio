@@ -28,7 +28,7 @@ function kosaio_router_dispatch() {
 			esac
 			;;
 
-		"install"|"uninstall"|"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"info") 
+		"install"|"uninstall"|"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"info"|"export") 
 			_router_handle_lifecycle "$ACTION" "$TARGET" "${ARGS[@]}"
 			;;
 

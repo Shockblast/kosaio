@@ -47,6 +47,23 @@ function reg_apply() {
 	log_success "lxdream-nitro deployed to ${PROJECTS_DIR}/"
 }
 
+function reg_export() {
+	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	local host_out="${KOSAIO_DIR}/out/${ID}"
+	local bin_sh="${tool_dir}/build/lxdream-nitro"
+
+	log_info "Exporting ${NAME} to host..."
+
+	if [ ! -f "$bin_sh" ]; then
+		log_error "lxdream-nitro build not found. Run 'kosaio build ${ID}' first."
+		return 1
+	fi
+
+	mkdir -p "${host_out}"
+	cp -v "$bin_sh" "${host_out}/"
+	log_success "Export complete: ${host_out}/lxdream-nitro"
+}
+
 function reg_install() {
 	reg_clone
 	reg_build

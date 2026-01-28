@@ -5,3 +5,4 @@ kosaio-shell
 kosaio-setup.sh
 __init__.py
 __pycache__/
+out/

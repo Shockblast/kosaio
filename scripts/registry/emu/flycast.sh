@@ -47,6 +47,22 @@ function reg_apply() {
 	log_success "Flycast binary available at ${output_dir}/flycast"
 }
 
+function reg_export() {
+	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	local host_out="${KOSAIO_DIR}/out/${ID}"
+
+	log_info "Exporting ${NAME} to host..."
+
+	if [ ! -f "${tool_dir}/build/flycast" ]; then
+		log_error "Flycast binary not found. Run 'kosaio build ${ID}' first."
+		return 1
+	fi
+
+	mkdir -p "${host_out}"
+	cp -v "${tool_dir}/build/flycast" "${host_out}/"
+	log_success "Export complete: ${host_out}/flycast"
+}
+
 function reg_install() {
 	reg_clone
 	reg_build

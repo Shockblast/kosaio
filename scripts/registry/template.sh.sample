@@ -30,6 +30,11 @@ function reg_check_health() {
 
 # --- Actions ---
 
+function reg_export() {
+	# Logic to export the tool
+	return 0
+}
+
 function reg_install() {
 	# Logic to clone, build and apply
 	# Use helpers from common/git-utils.sh, etc.

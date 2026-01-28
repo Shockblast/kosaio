@@ -99,6 +99,30 @@ function reg_apply() {
 	reg_info
 }
 
+function reg_export() {
+	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	local host_out="${KOSAIO_DIR}/out/aicaos"
+	
+	log_info "Exporting AICAOS artifacts to host..."
+	
+	if [ ! -f "${tool_dir}/arm/aicaos.drv" ] || [ ! -f "${tool_dir}/libaicaos.a" ]; then
+		log_error "Compiled artifacts missing. Run 'kosaio build aicaos' first."
+		return 1
+	fi
+	
+	mkdir -p "${host_out}/include"
+	
+	# 1. Driver and Library
+	cp -v "${tool_dir}/arm/aicaos.drv" "${host_out}/"
+	cp -v "${tool_dir}/libaicaos.a" "${host_out}/"
+	
+	# 2. Headers
+	cp -v "${tool_dir}/"*.h "${host_out}/include/"
+	cp -v "${tool_dir}/sh4/aica_sh4.h" "${host_out}/include/"
+	
+	log_success "Export complete: ${host_out}/"
+}
+
 function reg_install() {
 	reg_clone
 	reg_build

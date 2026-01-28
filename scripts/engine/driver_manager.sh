@@ -62,7 +62,7 @@ function manager_execute() {
 				reg_info "$@"
 			fi
 			;;
-		"build"|"apply"|"reset"|"checkout"|"clone"|"clean")
+		"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"export")
 			FUNC_NAME="reg_${COMMAND}"
 			if [ "$(type -t ${FUNC_NAME})" == "function" ]; then
 				${FUNC_NAME} "$@"

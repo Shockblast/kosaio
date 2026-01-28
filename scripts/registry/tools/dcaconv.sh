@@ -43,6 +43,23 @@ function reg_apply() {
 	log_success "dcaconv installed to bin."
 }
 
+function reg_export() {
+	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	local host_out="${KOSAIO_DIR}/out/${ID}"
+	
+	log_info "Exporting ${NAME} artifacts to host..."
+	
+	if [ ! -f "${tool_dir}/dcaconv" ]; then
+		log_error "Binary not found. Run 'kosaio build ${ID}' first."
+		return 1
+	fi
+	
+	mkdir -p "${host_out}"
+	cp -v "${tool_dir}/dcaconv" "${host_out}/"
+	
+	log_success "Export complete: ${host_out}/dcaconv"
+}
+
 function reg_uninstall() {
 	local tool_dir=$(kosaio_get_tool_dir "dcaconv")
 	rm -rf "$tool_dir"

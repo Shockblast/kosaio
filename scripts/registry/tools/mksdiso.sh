@@ -40,6 +40,24 @@ function reg_apply() {
 	log_success "mksdiso applied successfully."
 }
 
+function reg_export() {
+	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	local host_out="${KOSAIO_DIR}/out/${ID}"
+	
+	log_info "Exporting ${NAME} artifacts to host..."
+	
+	if [ ! -f "${tool_dir}/mksdiso" ]; then
+		log_error "Source script not found. Run 'kosaio clone ${ID}' first."
+		return 1
+	fi
+	
+	mkdir -p "${host_out}"
+	cp -v "${tool_dir}/mksdiso" "${host_out}/"
+	chmod +x "${host_out}/mksdiso"
+	
+	log_success "Export complete: ${host_out}/mksdiso"
+}
+
 function reg_install() {
 	reg_clone
 	reg_build

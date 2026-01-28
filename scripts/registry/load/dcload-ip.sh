@@ -45,6 +45,23 @@ function reg_apply() {
 	log_success "dc-tool-ip installed."
 }
 
+function reg_export() {
+	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	local host_out="${KOSAIO_DIR}/out/${ID}"
+	
+	log_info "Exporting ${NAME} to host..."
+	
+	if [ ! -f "${tool_dir}/host-src/tool/dc-tool-ip" ]; then
+		log_error "dc-tool-ip not found. Run 'kosaio build ${ID}' first."
+		return 1
+	fi
+	
+	mkdir -p "${host_out}"
+	cp -v "${tool_dir}/host-src/tool/dc-tool-ip" "${host_out}/"
+	
+	log_success "Export complete: ${host_out}/dc-tool-ip"
+}
+
 function reg_uninstall() {
 	local tool_dir=$(kosaio_get_tool_dir "dcload-ip")
 	rm -rf "$tool_dir"
