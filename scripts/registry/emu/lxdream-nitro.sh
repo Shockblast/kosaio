@@ -41,10 +41,10 @@ function reg_apply() {
 	if [ ! -f "$bin_sh" ]; then
 		log_error "lxdream-nitro build not found."
 		return 1
+	else
+		log_info "lxdream-nitro build found. execute export function!"
+		reg_export
 	fi
-
-	cp "$bin_sh" "${PROJECTS_DIR}/"
-	log_success "lxdream-nitro deployed to ${PROJECTS_DIR}/"
 }
 
 function reg_export() {

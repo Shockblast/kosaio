@@ -26,11 +26,11 @@ function controller_dev_handle() {
 	mkdir -p "$(dirname "$state_file")"
 
 	case "${mode,,}" in
-		"host"|"h"|"workspace"|"enable")
+		"host"|"h"|"workspace"|"enable"|"dev")
 			touch "$state_file"
 			log_success "${C_BLUE}${target}${C_RESET} switched to ${C_YELLOW}HOST${C_RESET} mode."
 			;;
-		"container"|"c"|"system"|"disable")
+		"container"|"c"|"system"|"disable"|"cont"|"sys")
 			rm -f "$state_file"
 			log_success "${C_BLUE}${target}${C_RESET} switched to ${C_CYAN}CONTAINER${C_RESET} mode."
 			;;

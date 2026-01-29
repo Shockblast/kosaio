@@ -11,18 +11,21 @@ DEPS="build-essential git"
 
 function reg_check_health() {
 	local tool_dir=$(kosaio_get_tool_dir "$ID")
+	
+	# Check source existence
 	[ -d "$tool_dir" ] || return 1
 	
-	# libfastmem Makefile (via Makefile.prefab) installs to addons/
+	# Check installation (KOS Addons Standard)
 	[ -f "${KOS_BASE}/addons/lib/dreamcast/libfastmem.a" ] || return 2
 	[ -d "${KOS_BASE}/addons/include/fastmem" ] || return 2
+	
 	return 0
 }
 
 function reg_clone() {
 	local tool_dir=$(kosaio_get_tool_dir "$ID")
-	log_info --draw-line "Cloning libfastmem..."
-	kosaio_git_clone "https://github.com/sega-dreamcast/libfastmem.git" "${tool_dir}"
+	log_info --draw-line "Cloning libfastmem (Shockblast Fork)..."
+	kosaio_git_clone "https://github.com/Shockblast/libfastmem.git" "${tool_dir}"
 }
 
 function reg_build() {
@@ -31,25 +34,26 @@ function reg_build() {
 
 	log_info --draw-line "Building libfastmem..."
 	
-	# We need KOS environment to build
+	# Build with standard Makefile
 	(cd "${tool_dir}" && source "${KOS_BASE}/environ.sh" && make clean && make)
 }
 
 function reg_apply() {
 	local tool_dir=$(kosaio_get_tool_dir "$ID")
-	log_info "Installing libfastmem headers and library to KOS addons..."
+	log_info "Installing libfastmem to KOS addons..."
 	
-	# Ensure directory exists
-	mkdir -p "${KOS_BASE}/addons/include/fastmem"
+	# 1. Install Library
 	mkdir -p "${KOS_BASE}/addons/lib/dreamcast"
-
-	# Install Headers
-	cp -v "${tool_dir}/include/"*.h "${KOS_BASE}/addons/include/fastmem/"
-	
-	# Install Library (if not already there by Makefile)
 	if [ -f "${tool_dir}/libfastmem.a" ]; then
 		cp -v "${tool_dir}/libfastmem.a" "${KOS_BASE}/addons/lib/dreamcast/"
+	else
+		log_error "Build failed: libfastmem.a not found."
+		return 1
 	fi
+
+	# 2. Install Headers
+	mkdir -p "${KOS_BASE}/addons/include/fastmem"
+	cp -v "${tool_dir}/include/"*.h "${KOS_BASE}/addons/include/fastmem/"
 	
 	log_success "libfastmem integrated complete (KOS addons)."
 }
@@ -82,8 +86,11 @@ function reg_uninstall() {
 	local tool_dir=$(kosaio_get_tool_dir "$ID")
 	log_info "Uninstalling libfastmem..."
 	
+	# Remove installed files
 	rm -rf "${KOS_BASE}/addons/include/fastmem"
 	rm -f "${KOS_BASE}/addons/lib/dreamcast/libfastmem.a"
+	
+	# Remove source
 	rm -rf "$tool_dir"
 	
 	log_success "libfastmem removed."

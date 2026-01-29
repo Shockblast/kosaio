@@ -16,8 +16,15 @@ class StatusService:
 
         if item_type != "port":
             # For tools, check directories
-            c_base = Path(cfg.sdk_root) / item_id
+            holy_list = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "extras", "bin"}
+            
+            if item_id in holy_list:
+                c_base = Path(cfg.sdk_root) / item_id
+            else:
+                c_base = Path(cfg.sdk_root) / "extras" / item_id
+                
             h_base = Path(cfg.dev_root) / item_id
+            
             c_inst = c_base.exists()
             h_inst = h_base.exists()
             if item_id == "kos":

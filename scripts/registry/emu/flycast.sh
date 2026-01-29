@@ -28,23 +28,22 @@ function reg_build() {
 	local tool_dir=$(kosaio_get_tool_dir "flycast")
 	[ -d "$tool_dir" ] || { log_error "Flycast source missing. Run 'kosaio clone flycast' first."; return 1; }
 
-	log_info --draw-line "Compiling Flycast (Native build)..."
+	log_info --draw-line "Compiling Flycast (GDB Server build)..."
+	rm -rf "${tool_dir}/build"
 	mkdir -p "${tool_dir}/build"
-	(cd "${tool_dir}/build" && cmake .. && make -j$(nproc))
+	(cd "${tool_dir}/build" && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_GDB_SERVER=ON .. && make -j$(nproc))
 }
 
 function reg_apply() {
 	local tool_dir=$(kosaio_get_tool_dir "flycast")
-	local output_dir="${PROJECTS_DIR}/flycast"
 
 	if [ ! -f "${tool_dir}/build/flycast" ]; then
 		log_error "Flycast binary not found. Build it first."
 		return 1
+	else
+		log_info "Flycast binary found. execute export function!."
+		reg_export
 	fi
-
-	mkdir -p "$output_dir"
-	cp "${tool_dir}/build/flycast" "$output_dir/"
-	log_success "Flycast binary available at ${output_dir}/flycast"
 }
 
 function reg_export() {
