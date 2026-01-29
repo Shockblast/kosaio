@@ -44,7 +44,6 @@ You can install these tools with kosaio:
 | **mkdcdisc**      | Allows creating disc images in CDI format, compatible with emulators and for burning to CD-R.       |
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
 | **img4dc**        | Tools for working with Dreamcast disc images (CDI/MDS).                                             |
-| **libfastmem**    | Optimized memory routines (memcpy/memset) for Dreamcast.                                            |
 | **AICAOS**        | **[NEW]** Advanced sound driver for Dreamcast (ARM side).                                           |
 
 * **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.

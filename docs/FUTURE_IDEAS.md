@@ -4,9 +4,9 @@ This document contains a list of tools and libraries that were previously in the
 
 ## Libraries
 
-- **AICAOS**
-  * Description: A small library for the Dreamcast AICA sound subsystem.
-  * URL: [https://github.com/pcercuei/AICAOS.git](https://github.com/pcercuei/AICAOS.git)
+- ~~**AICAOS**~~ (DONE)
+  * ~~Description: A small library for the Dreamcast AICA sound subsystem.~~
+  * ~~URL: [https://github.com/pcercuei/AICAOS.git](https://github.com/pcercuei/AICAOS.git)~~
 
 - **libdreamroq**
   * Description: Library for playing RoQ videos.
@@ -28,7 +28,7 @@ This document contains a list of tools and libraries that were previously in the
   * Description: raylib port for Dreamcast.
   * URL: [https://github.com/raylib4Consoles/raylib4Dreamcast.git](https://github.com/raylib4Consoles/raylib4Dreamcast.git)
 
-- ~~**libfastmem**~~ (DONE)
+- ~~**libfastmem**~~ (Already in kos-ports)
   * ~~Description: Memory management and performance optimization library for Sega Dreamcast.~~
   * ~~URL: [https://github.com/sega-dreamcast/libfastmem](https://github.com/sega-dreamcast/libfastmem)~~
 
