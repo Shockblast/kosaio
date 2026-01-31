@@ -46,10 +46,11 @@ You can install these tools with kosaio:
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
 | **img4dc**        | Tools for working with Dreamcast disc images (CDI/MDS).                                             |
 | **AICAOS**        | **[NEW]** Advanced sound driver for Dreamcast (ARM side).                                           |
+| **mame**          | Multiple Arcade Machine Emulator (Optimized for Dreamcast). Requires 'dc.zip'.                      |
 
 * **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.
 * **makeip** is already included in KOS, but this version is more updated.
-* **flycast** and **lxdream-nitro** emulators compile in the container but run on the host. Both require BIOS files installed on the host.
+* **flycast**, **lxdream-nitro** and **mame** emulators compile in the container but run on the host. They require BIOS files installed on the host.
 * Dependencies are installed automatically when a tool is requested. If you need to manually refresh them, use `kosaio install-deps system`.
 * More tools will be implemented. If you want to contribute, check the `scripts/registry` structure. If you have a tool suggestion, please open an issue!
 
@@ -186,6 +187,21 @@ kosaio update libgl
 # Uninstall a library
 kosaio uninstall sh4zam
 ```
+
+#### Direct Access to KOS Utilities
+You can execute internal KOS tools directly without adding them to your PATH:
+
+```bash
+# Convert textures
+kosaio tool pvrtex assets/image.png assets/image.pvr
+
+# Create boot sector
+kosaio tool makeip IP.TXT IP.BIN
+
+# Scramble binary
+kosaio tool scramble main.bin 1st_read.bin
+```
+Available tools: `pvrtex`, `vqenc`, `makeip`, `scramble`, `bin2o`, `wav2adpcm`, `kmgenc`, `dcbumpgen`.
 
 
 ### Advanced Documentation
