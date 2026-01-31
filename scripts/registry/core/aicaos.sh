@@ -4,7 +4,7 @@
 
 ID="aicaos"
 NAME="AICAOS"
-DESC="Low-level library and driver for the Dreamcast AICA (ARM7) sound subsystem."
+DESC="Dedicated Operating System for the AICA (ARM7) Sound Chip"
 TAGS="core,sound,aica,arm,audio,driver,os"
 TYPE="core"
 DEPS="build-essential git"
@@ -20,13 +20,10 @@ function reg_check_health() {
 }
 
 function reg_info() {
-	log_alert_box "AICAOS: SPU MULTITASKING SYSTEM" \
-		"AICAOS has been successfully integrated into your environment." \
-		"1. CORE API: Library libaicaos.a installed in KOS addons." \
-		"2. SPU DRIVER: Compiled aicaos.drv ready for loading." \
-		"" \
-		"⚠️ IMPORTANT: You MUST load 'aicaos.drv' into the SPU" \
-		"at the beginning of your SH4 program to use this OS."
+	log_box --info "AICAOS: SOUND COPROCESSOR OS" \
+		"${C_YELLOW}Context:${C_RESET} Runs autonomously on the ${C_MAGENTA}ARM7 Sound Chip${C_RESET} (SPU)." \
+		"${C_YELLOW}Benefit:${C_RESET} Offloads audio processing, saving ${C_GREEN}main CPU power${C_RESET}." \
+		"${C_YELLOW}Components:${C_RESET} ${C_CYAN}libaicaos.a${C_RESET} (SH4 Control) + ${C_CYAN}aicaos.drv${C_RESET} (ARM Firmware)"
 }
 
 function reg_clone() {
@@ -95,8 +92,13 @@ function reg_apply() {
 	log_success "AICAOS integration complete."
 	log_info "Driver available at: /rd/aicaos.drv (if using romdisk)"
 	
-	# Show the aggressive changes warning again after install
-	reg_info
+	# Show post-install success/warning explicitly
+	log_box --success "AICAOS: INSTALLATION SUCCESSFUL" \
+		"1. CORE API: Library libaicaos.a installed in KOS addons." \
+		"2. SPU DRIVER: Compiled aicaos.drv ready for loading." \
+		"" \
+		"IMPORTANT: You MUST load 'aicaos.drv' into the SPU" \
+		"at the beginning of your SH4 program to use this OS."
 }
 
 function reg_export() {

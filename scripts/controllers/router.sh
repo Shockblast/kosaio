@@ -48,6 +48,11 @@ function kosaio_router_dispatch() {
 			_router_handle_self_update
 			;;
 
+		"tool")
+			source "${KOSAIO_DIR}/scripts/controllers/tool.sh"
+			kosaio_cmd_tool "$TARGET" "${ARGS[@]}"
+			;;
+
 		*)
 			show_usage 
 			;;

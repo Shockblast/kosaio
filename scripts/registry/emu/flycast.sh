@@ -28,10 +28,24 @@ function reg_build() {
 	local tool_dir=$(kosaio_get_tool_dir "flycast")
 	[ -d "$tool_dir" ] || { log_error "Flycast source missing. Run 'kosaio clone flycast' first."; return 1; }
 
-	log_info --draw-line "Compiling Flycast (GDB Server build)..."
+	local gdb_state="OFF"
+	for arg in "$@"; do
+		if [[ "$arg" == "--with-gdb" ]]; then
+			gdb_state="ON"
+		fi
+	done
+
+	log_info --draw-line "Compiling Flycast (GDB Server: ${gdb_state})..."
+	
 	rm -rf "${tool_dir}/build"
 	mkdir -p "${tool_dir}/build"
-	(cd "${tool_dir}/build" && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_GDB_SERVER=ON .. && make -j$(nproc))
+	# Configure CMake with GDB state
+	(cd "${tool_dir}/build" && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_GDB_SERVER=${gdb_state} .. && make -j$(nproc))
+}
+
+function reg_info() {
+	log_box --info "FLYCAST: EXTRA INFORMATION" \
+		"${C_CYAN}--with-gdb${C_RESET}     : Enable built-in GDB Server (Required for debugging)"
 }
 
 function reg_apply() {
@@ -80,6 +94,7 @@ function reg_update() {
 	local tool_dir=$(kosaio_get_tool_dir "flycast")
 	kosaio_standard_update_flow "flycast" "Flycast" "$tool_dir" "$@"
 }
+
 function reg_clean() {
 	local tool_dir=$(kosaio_get_tool_dir "flycast")
 	[ -d "${tool_dir}/build" ] || return 0

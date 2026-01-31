@@ -18,6 +18,13 @@ function reg_check_health() {
 	return 0
 }
 
+function reg_info() {
+	log_box --info "DCLOAD-SERIAL: CABLE LOADER" \
+		"${C_YELLOW}Context:${C_RESET} Code upload via Serial Cable (Coder's Cable/USB)." \
+		"${C_YELLOW}Tool:${C_RESET}    dc-tool-ser (Host Utility)" \
+		"${C_YELLOW}Usage:${C_RESET}   dc-tool-ser -t <device> -x <binary.elf>"
+}
+
 function reg_clone() {
 	local tool_dir=$(kosaio_get_tool_dir "dcload-serial")
 	log_info --draw-line "Cloning dcload-serial..."

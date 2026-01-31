@@ -1,8 +1,24 @@
-imgname
-.vscode
+### System ###
+.DS_Store
+Thumbs.db
+*.log
+
+### Editors ###
+.vscode/
+.idea/
+*.swp
+
+### KOSAIO Config & Scripts ###
 kosaio.cfg
 kosaio-shell
-kosaio-setup.sh
-__init__.py
-__pycache__/
 out/
+
+### Python Engine ###
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# projects/ is managed by user, usually ignored or managed separately

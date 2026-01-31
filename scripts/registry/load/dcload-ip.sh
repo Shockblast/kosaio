@@ -18,6 +18,13 @@ function reg_check_health() {
 	return 0
 }
 
+function reg_info() {
+	log_box --info "DCLOAD-IP: ETHERNET LOADER" \
+		"${C_YELLOW}Context:${C_RESET} High-speed code upload via Broadband Adapter (BBA)." \
+		"${C_YELLOW}Tool:${C_RESET}    dc-tool-ip (Host Utility)" \
+		"${C_YELLOW}Usage:${C_RESET}   dc-tool-ip -t <ip_address> -x <binary.elf>"
+}
+
 function reg_clone() {
 	local tool_dir=$(kosaio_get_tool_dir "dcload-ip")
 	log_info --draw-line "Cloning dcload-ip..."

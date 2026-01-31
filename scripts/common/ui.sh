@@ -100,19 +100,35 @@ function confirm() {
 
 # --- Visual Components ---
 
-# Draw a warning/alert box
-# Usage: log_alert_box "TITLE" "Line 1" "Line 2" ...
-function log_alert_box() {
+# Draw a styled box (Alert, Info, Success)
+# Usage: log_box [--type=alert|info|success] "TITLE" "Line 1" "Line 2" ...
+function log_box() {
+	local type="alert" # Default legacy behavior
+
+	# Parse optional first arg as type
+	if [[ "$1" == --type=* ]]; then
+		type="${1#*=}"
+		shift
+	elif [[ "$1" == "--info" ]]; then type="info"; shift;
+	elif [[ "$1" == "--success" ]]; then type="success"; shift;
+	elif [[ "$1" == "--alert" ]]; then type="alert"; shift;
+	fi
+
 	local title="$1"
 	shift
 	
 	if [[ -f "${KOSAIO_DIR}/scripts/engine/py/main.py" ]]; then
-		python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" render_alert "$title" "$@" >&2
+		python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" render_alert --type "$type" "$title" "$@" >&2
 	else
 		# Fallback if engine is missing
-		log_warn "[$title]"
+		log_warn "[$type: $title]"
 		for line in "$@"; do
 			echo "  - $line" >&2
 		done
 	fi
+}
+
+# Legacy Alias
+function log_alert_box() {
+	log_box --type=alert "$@"
 }

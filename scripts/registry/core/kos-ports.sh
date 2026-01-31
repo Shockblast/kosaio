@@ -16,6 +16,15 @@ function reg_check_health() {
 	return 0
 }
 
+function reg_info() {
+	log_box --info "KOS-PORTS: LIBRARY COLLECTION" \
+		"${C_YELLOW}Context:${C_RESET} Collection of 3rd party libraries (SDL, zlib, GLdc, etc.)" \
+		"${C_YELLOW}Usage:${C_RESET}   Install specific ports: ${C_CYAN}kosaio install <port_name>${C_RESET}" \
+		"${C_YELLOW}List:${C_RESET}    Run ${C_CYAN}kosaio list${C_RESET} to see available ports." \
+		"${C_YELLOW}Path:${C_RESET}    ${KOS_PORTS_DIR}" \
+		"${C_YELLOW}Note:${C_RESET}    You need to clone first ${C_CYAN}kosaio clone kos-ports${C_RESET} to see available ports."
+}
+
 function reg_clone() {
 	log_info --draw-line "Cloning KOS-PORTS repository..."
 	kosaio_git_clone https://github.com/KallistiOS/kos-ports.git "${KOS_PORTS_DIR}"
@@ -37,12 +46,11 @@ function reg_install() {
 	done
 
 	if [ "$force_build" = false ]; then
-		log_warn "You are about to download and compile ALL kos-ports libraries."
-		log_warn "This generates a lot of data and takes a long time."
-		log_info "Tip: Use 'kosaio clone kos-ports' to download sources,"
-		log_info "     then install specific ports as needed (e.g., 'kosaio install libpng')."
-		log_warn "Tip: After cloning, you can also use 'kosaio list' to see all available ports."
-		log_info "To force build everything, use: '${C_YELLOW}kosaio install kos-ports --force-build${C_RESET}'"
+		log_box --type=warn "MASSIVE BUILD DETECTED" \
+			"Target: ALL kos-ports libraries (Huge compiling time!)" \
+			"${C_YELLOW}Tip:${C_RESET} Use ${C_CYAN}kosaio clone kos-ports${C_RESET} to explore first." \
+			"${C_YELLOW}Tip:${C_RESET} Then install specific ports: ${C_CYAN}kosaio install libpng${C_RESET}" \
+			"To force install EVERYTHING, use: ${C_YELLOW}--force-build${C_RESET}"
 		return 0
 	fi
 

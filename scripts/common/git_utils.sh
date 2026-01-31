@@ -118,16 +118,16 @@ function kosaio_standard_update_flow() {
 	fi
 
 	if [ $status -eq 1 ]; then
+		echo ""
 		# Try to update submodules if any
 		if [ -f "${repo_dir}/.gitmodules" ]; then
 			log_info "Updating submodules..."
 			(cd "${repo_dir}" && git submodule update --init --recursive 2>/dev/null || true)
 		fi
 
-		local prompt_msg="Changes/Update detected for ${name}. Do you want to rebuild and apply?"
-		[ $force_build -eq 1 ] && prompt_msg="Forcing rebuild for ${name}. Proceed?"
-
-		if confirm "$prompt_msg" "$default_confirm"; then
+		if [ $force_build -eq 1 ]; then
+			log_info "Forcing rebuild for ${name}..."
+			
 			# Case A: Custom commands provided
 			if [ -n "$build_cmd" ]; then
 				$build_cmd "$@"
@@ -141,10 +141,11 @@ function kosaio_standard_update_flow() {
 					reg_apply "$@"
 				fi
 			fi
-			return 11 # SUCCESS - UPDATED
+			return 11 # SUCCESS - UPDATED & BUILT
 		else
-			log_info "Skipping build for ${name}."
-			return 12 # SUCCESS - CODE UPDATED BUT NOT BUILT
+			log_success "Source code updated for ${name}."
+			log_info "To recompile, run: ${C_CYAN}kosaio build ${id}${C_RESET} (or run update with --build)"
+			return 12 # SUCCESS - CODE UPDATED (NO BUILD)
 		fi
 	elif [ $status -eq 0 ]; then
 		log_info "${name} is already up-to-date."
@@ -169,6 +170,7 @@ function kosaio_git_clone() {
 	done
 
 	local full_clone=0
+
 	if [ "${KOSAIO_DEV_MODE:-}" == "1" ]; then
 		full_clone=1
 	elif [[ -n "$target" ]] && [[ "$target" == "${KOSAIO_DEV_ROOT:-}"* ]]; then

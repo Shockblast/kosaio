@@ -29,13 +29,14 @@ function reg_check_health() {
 # --- Metadata Extension (Used by kosaio info) ---
 function reg_info() {
 	local kos_dir=$(kosaio_get_tool_dir "kos")
-	echo "KOS SDK STATUS:"
-	echo "  Source Dir:    $kos_dir"
-	echo "  Libraries:     $( [ -f "$kos_dir/lib/dreamcast/libkallisti.a" ] && echo "Compiled" || echo "Missing" )"
-	echo ""
-	echo "MANAGEMENT:"
-	echo "  Use 'kosaio build toolchain' to manage compilers."
-	echo "  Use 'kosaio build kos' to rebuild KOS libraries."
+	local lib_status="Missing"
+	[ -f "$kos_dir/lib/dreamcast/libkallisti.a" ] && lib_status="${C_GREEN}Compiled${C_RESET}"
+
+	log_box --info "KALLISTIOS: SDK CORE" \
+		"${C_YELLOW}Source:${C_RESET}  ${kos_dir}" \
+		"${C_YELLOW}Status:${C_RESET}  ${lib_status}" \
+		"${C_YELLOW}Build:${C_RESET}   Run ${C_CYAN}kosaio build kos${C_RESET} to compile libraries." \
+		"${C_YELLOW}Note:${C_RESET}    Core SDK required for all Dreamcast development."
 }
 
 # --- External Helpers ---

@@ -18,6 +18,15 @@ function reg_check_health() {
 	return 0
 }
 
+function reg_info() {
+	log_box --info "LXDREAM-NITRO: HIGH PRECISION" \
+		"${C_YELLOW}Context:${C_RESET} Specialized Dreamcast emulator for debugging & testing." \
+		"${C_YELLOW}Build System:${C_RESET} Uses ${C_CYAN}Meson + Ninja${C_RESET} (Modern/Fast)." \
+		"${C_YELLOW}Reqs:${C_RESET} Requires ${C_MAGENTA}GTK3${C_RESET} for the user interface." \
+		"${C_YELLOW}Note:${C_RESET} Excellent for homebrew development due to accuracy." \
+		"${C_RED}Warning:${C_RESET} GUI glitches possible if launched from terminal."
+}
+
 function reg_clone() {
 	local tool_dir=$(kosaio_get_tool_dir "lxdream-nitro")
 	log_info --draw-line "Cloning lxdream-nitro repository..."
