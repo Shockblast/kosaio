@@ -5,6 +5,7 @@
 KOSAIO bridges the gap between your Host OS and the SDK through a surgical hybrid architecture, creating a unified workspace for modern homebrew development.
 
 ![KOSAIO Unified HUD](img.png)
+
 *The KOSAIO Master HUD showing a healthy, ready-to-use cross-compiler environment.*
 
 > [!WARNING]  

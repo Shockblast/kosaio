@@ -55,16 +55,46 @@ class UI:
         return s
 
     @staticmethod
-    def render_alert_box(title: str, lines: List[str], width: int = 66) -> str:
-        """Draws a visually striking alert box with centered icons."""
-        is_urgent = any(word in title.upper() for word in ["AGRESSIVE", "WARNING", "URGENT", "ERROR", "CRITICAL"])
-        color = UI.RED if is_urgent else UI.YELLOW
+    def render_box(title: str, lines: List[str], type: str = "default", width: int = 66) -> str:
+        """
+        Draws a visually striking box with centered header and proper borders.
+        Type can be: 'alert' (red/yellow), 'success' (green), 'info' (cyan), 'default' (blue/gray)
+        """
+        type = type.lower()
         
-        # Premium emoji pair: Warning + Lightning
-        icon_l = "⚠️  ⚡ " # for some reason, looks good this way (maybe my fonts?)
-        icon_r = " ⚡⚠️" # for some reason, looks good this way (maybe my fonts?)
+        # Color & Icon Mapping
+        if type == "alert" or type == "warn":
+            color = UI.YELLOW
+            # Urgent Logic override
+            is_urgent = any(word in title.upper() for word in ["AGRESSIVE", "URGENT", "ERROR", "CRITICAL"])
+            if is_urgent: color = UI.RED
+            icon_l, icon_r = "⚠️  ⚡ ", " ⚡⚠️"
+            
+        elif type == "success":
+            color = UI.GREEN
+            icon_l, icon_r = "✅  ", "  ✅"
+            
+        elif type == "info":
+            color = UI.CYAN
+            icon_l, icon_r = "ℹ️   ", "   ℹ️"
+            
+        else: # default
+            color = UI.BLUE
+            icon_l, icon_r = "  ", "  " # minimalistic
+
         full_title = f"{icon_l}{title}{icon_r}"
         
+        # Calculate dynamic width
+        max_content_len = UI.visual_len(full_title)
+        for line in lines:
+             max_content_len = max(max_content_len, UI.visual_len(line))
+        
+        # Add padding (2 chars for borders + 2 chars for inner padding)
+        dynamic_width = max_content_len + 4
+        
+        # Ensure we meet minimum width but also accommodate content
+        width = max(width, dynamic_width)
+
         output = []
         # Upper Border: ┌─────┐
         output.append(f"\n{color}\u250c" + "\u2500" * (width) + f"\u2510{UI.RESET}")
@@ -72,6 +102,10 @@ class UI:
         # Header (Centered)
         vlen_title = UI.visual_len(full_title)
         padding_total = width - vlen_title - 2
+        # Ensure non-negative padding
+        if padding_total < 0: 
+            padding_total = 0
+            
         padding_l = padding_total // 2
         padding_r = padding_total - padding_l
         

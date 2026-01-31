@@ -161,9 +161,11 @@ def cmd_render_banner(args):
 
 def cmd_render_alert(args):
     """
-    Renders a visually striking alert box.
+    Renders a visually striking box (Alert/Info/Success).
     """
-    print(UI.render_alert_box(args.title, args.lines))
+    # Fallback to 'alert' if no type provided (legacy compat)
+    box_type = getattr(args, "type", "alert") 
+    print(UI.render_box(args.title, args.lines, type=box_type))
     sys.exit(0)
 
 # --- Main Dispatch ---
@@ -240,10 +242,11 @@ def main():
     p_banner.add_argument("date")
     p_banner.set_defaults(func=cmd_render_banner)
 
-    # Render Alert Command
+    # Render Alert/Box Command
     p_alert = subparsers.add_parser("render_alert")
     p_alert.add_argument("title")
     p_alert.add_argument("lines", nargs="+")
+    p_alert.add_argument("--type", "-t", default="alert", help="Box type: alert, info, success, default")
     p_alert.set_defaults(func=cmd_render_alert)
 
     # Parse args
