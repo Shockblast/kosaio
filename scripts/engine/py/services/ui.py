@@ -22,10 +22,18 @@ class UI:
         # Remove ANSI escape sequences
         clean = re.sub(r'\033\[[0-9;]*[a-zA-Z]', '', s)
         vlen = 0
+        last_char = None
         for char in clean:
             # Skip non-spacing marks (like variation selectors \ufe0f)
             if unicodedata.category(char) == 'Mn':
+                # Fix: VS16 (\ufe0f) usually forces Emoji style (Width 2). 
+                # If the base char was 'N' (Width 1), we need to add 1.
+                # EXCEPTION: Info (U+2139) often stays narrow even with VS16.
+                if char == '\ufe0f' and last_char != '\u2139':
+                    vlen += 1
                 continue
+            
+            last_char = char
             # Most emojis and CJK characters have east_asian_width 'W', 'F' or 'A'
             # In modern terminals, Ambiguous ('A') is usually 2 columns.
             if unicodedata.east_asian_width(char) in ('W', 'F', 'A'):
@@ -68,15 +76,15 @@ class UI:
             # Urgent Logic override
             is_urgent = any(word in title.upper() for word in ["AGRESSIVE", "URGENT", "ERROR", "CRITICAL"])
             if is_urgent: color = UI.RED
-            icon_l, icon_r = "⚠️  ⚡ ", " ⚡⚠️"
+            icon_l, icon_r = "⚠️ ", " ⚠️"
             
         elif type == "success":
             color = UI.GREEN
-            icon_l, icon_r = "✅  ", "  ✅"
+            icon_l, icon_r = "✅ ", " ✅"
             
         elif type == "info":
             color = UI.CYAN
-            icon_l, icon_r = "ℹ️   ", "   ℹ️"
+            icon_l, icon_r = "ℹ️ ", " ℹ️"
             
         else: # default
             color = UI.BLUE

@@ -63,8 +63,15 @@ function reg_build() {
 	if [ -f "${kos_dir}/environ.sh" ]; then
 		source "${kos_dir}/environ.sh"
 	else
-		log_error "environ.sh not found. Have you initialized KOS?"
-		return 1
+		log_warn "environ.sh not found. Auto-initializing KOS environment..."
+		reg_apply || return 1
+		# Now that we've applied, try sourcing again
+		if [ -f "${kos_dir}/environ.sh" ]; then
+			source "${kos_dir}/environ.sh"
+		else
+			log_error "Failed to initialize environment. Please run 'kossaio apply kos' manually."
+			return 1
+		fi
 	fi
 
 	(cd "${kos_dir}" && make -j$(nproc))
