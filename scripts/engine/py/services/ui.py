@@ -148,6 +148,8 @@ class UI:
         elif installed == "!":
             char = "!"
             color = UI.RED
+            # If it's a broken active state, force RED on the active marker too
+            if is_active: active_color = UI.RED
 
         m_char = "*" if is_active else " "
         return f"{color}[{char}{m_char}]{UI.RESET}"

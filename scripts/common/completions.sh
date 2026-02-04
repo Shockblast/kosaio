@@ -27,6 +27,14 @@ function _kosaio_completions() {
 			COMPREPLY=( $(compgen -W "${targets}" -- ${cur}) )
 			return 0
 			;;
+		list|search)
+			if [[ "${cur}" == -* ]]; then
+				COMPREPLY=( $(compgen -W "--installed -i" -- ${cur}) )
+			else
+				COMPREPLY=( $(compgen -W "${targets}" -- ${cur}) )
+			fi
+			return 0
+			;;
 	esac
 
 	# Sub-options for dev-switch

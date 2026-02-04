@@ -42,7 +42,8 @@ function kosaio_apply_patches() {
 				return 1
 			fi
 		else
-			log_warn "  Warning: ${patch_name} cannot be applied (Conflict or already modified)."
+			log_error "Error: ${patch_name} cannot be applied (Conflict or already modified)."
+			return 1
 		fi
 	done
 

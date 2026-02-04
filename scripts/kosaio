@@ -55,8 +55,8 @@ function show_usage() {
 	
 	echo -e "${C_BOLD}DISCOVERY:${C_RESET}"
 	local lrow="${C_CYAN}%-12s${C_RESET} ${C_YELLOW}%-15s${C_RESET}"
-	printf "  ${lrow} %s\n" "list" "[query]" "Search tools/ports and see their status"
-	printf "  ${lrow} %s\n" "search" "<query>" "Quick alias for 'list' discovery"
+	printf "  ${lrow} %s\n" "list" "[query] [-i]" "Search tools (use -i for installed only)"
+	printf "  ${lrow} %s\n" "search" "<query> [-i]" "Quick alias for 'list' discovery"
 	printf "  ${lrow} %s\n" "info" "<id>" "Show detailed metadata about a tool/port"
 	printf "  ${lrow} %s\n" "diagnose" "<id|self|sys>" "Health check (Tool, KOSAIO itself, or System)"
 	echo ""

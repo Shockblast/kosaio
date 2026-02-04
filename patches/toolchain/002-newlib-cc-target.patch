@@ -1,11 +1,11 @@
---- scripts/newlib.mk
-+++ scripts/newlib.mk
-@@ -16,7 +16,7 @@
-             --prefix=$(prefix) \
-             $(cpu_configure_args) \
-             $(newlib_extra_configure_args) \
--            CC_FOR_TARGET="$(SH_CC_FOR_TARGET)" \
-+            CC_FOR_TARGET="$(TARGET_CC)" \
-             $(to_log)
-         $(MAKE) $(jobs_arg) -C $(build) DESTDIR=$(DESTDIR) $(to_log)
-         $(MAKE) -C $(build) install DESTDIR=$(DESTDIR) $(to_log)
+--- a/scripts/newlib.mk
++++ b/scripts/newlib.mk
+@@ -15,7 +15,7 @@
+ 	    --prefix=$(prefix) \
+ 	    $(cpu_configure_args) \
+ 	    $(newlib_extra_configure_args) \
+-	    CC_FOR_TARGET="$(SH_CC_FOR_TARGET)" \
++	    CC_FOR_TARGET="$(TARGET_CC)" \
+ 	    $(to_log)
+ 	$(MAKE) $(jobs_arg) -C $(build) DESTDIR=$(DESTDIR) $(to_log)
+ 	$(MAKE) -C $(build) install DESTDIR=$(DESTDIR) $(to_log)

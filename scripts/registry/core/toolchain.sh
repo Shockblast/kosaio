@@ -129,3 +129,23 @@ function reg_install() {
 	# Toolchain installation is just building it
 	reg_build "$@"
 }
+
+function reg_uninstall() {
+	log_warn "This will remove the entire Dreamcast Toolchain."
+	log_warn "paths: /opt/toolchains/dc/sh-elf, /opt/toolchains/dc/arm-eabi"
+	log_warn "Are you sure? (y/n)"
+	read -r CONFIRM
+	if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+		log_info "Removing Toolchain..."
+		rm -rf "/opt/toolchains/dc/sh-elf"
+		rm -rf "/opt/toolchains/dc/arm-eabi"
+		
+		# Optional: cleanup dc-chain build dirs?
+		# local kos_dir=$(kosaio_get_tool_dir "kos")
+		# rm -rf "${kos_dir}/utils/dc-chain/build-*"
+		
+		log_success "Toolchain uninstalled."
+	else
+		log_info "Uninstallation cancelled."
+	fi
+}

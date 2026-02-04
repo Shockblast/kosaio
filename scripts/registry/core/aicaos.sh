@@ -86,11 +86,10 @@ function reg_apply() {
 	cp -v "${tool_dir}/libaicaos.a" "${KOS_BASE}/addons/lib/dreamcast/"
 	
 	# 3. Driver (Place it in a common drivers folder)
-	mkdir -p "${KOS_BASE}/addons/drivers"
-	cp -v "${tool_dir}/arm/aicaos.drv" "${KOS_BASE}/addons/drivers/"
+	#mkdir -p "${KOS_BASE}/addons/drivers"
+	#cp -v "${tool_dir}/arm/aicaos.drv" "${KOS_BASE}/addons/drivers/"
 	
 	log_success "AICAOS integration complete."
-	log_info "Driver available at: /rd/aicaos.drv (if using romdisk)"
 	
 	# Show post-install success/warning explicitly
 	log_box --success "AICAOS: INSTALLATION SUCCESSFUL" \
@@ -98,7 +97,11 @@ function reg_apply() {
 		"2. SPU DRIVER: Compiled aicaos.drv ready for loading." \
 		"" \
 		"IMPORTANT: You MUST load 'aicaos.drv' into the SPU" \
-		"at the beginning of your SH4 program to use this OS."
+		"at the beginning of your SH4 program to use this OS." \
+		"" \
+		"STEPS TO DEPLOY:" \
+		" - Run: ${C_CYAN}kosaio export aicaos${C_RESET}" \
+		" - Place 'aicaos.drv' in a reachable DC path (e.g. /rd/)."
 }
 
 function reg_export() {
