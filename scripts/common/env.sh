@@ -72,7 +72,21 @@ function kosaio_get_tool_dir() {
 	local base_dir
 
 	# 1. Determine base path based on mode and tool criticality
-	if [ "${KOSAIO_DEV_MODE:-0}" = "1" ] || [ -f "${state_file}" ]; then
+	# PRIORITY: 
+	#   1. KOSAIO_DEV_MODE=1 (Forced Host/Dev)
+	#   2. KOSAIO_DEV_MODE=0 (Forced Container/Sys)
+	#   3. Persistent state file (dev-switch)
+	
+	local use_dev=0
+	if [ "${KOSAIO_DEV_MODE:-}" = "1" ]; then
+		use_dev=1
+	elif [ "${KOSAIO_DEV_MODE:-}" = "0" ]; then
+		use_dev=0
+	elif [ -f "${state_file}" ]; then
+		use_dev=1
+	fi
+
+	if [ "$use_dev" = "1" ]; then
 		# Host / Dev Mode always uses kosaio-dev root
 		base_dir="${KOSAIO_DEV_ROOT}"
 	else

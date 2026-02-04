@@ -163,6 +163,7 @@ Enabling the KOSAIO shell provides a series of productivity helpers:
 - **`kosaio list`**: Find libraries by name or description.
 - **`kcd <project>`**: Fast jump to any project in your workspace.
 - **`kreload`**: Hot-swap environment variables & prompt after a `dev-switch`.
+- **Hot Actions**: Use `--dev-host` or `--dev-cont` to override mode for a single command.
 - **Tab-Completions**: Full support for all `kosaio` commands.
 
 #### Managing KOS-PORTS Libraries

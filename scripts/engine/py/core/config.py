@@ -21,8 +21,21 @@ class Config:
 
         state_file = self.state_dir / f"{tool}_dev"
 
+        # PRIORITY:
+        # 1. mode == "1" (Forced Host)
+        # 2. mode == "0" (Forced Container)
+        # 3. Persistent state file
+        
+        is_dev = False
+        if mode == "1":
+            is_dev = True
+        elif mode == "0":
+            is_dev = False
+        elif state_file.exists():
+            is_dev = True
+
         # 1. Host / Dev Mode (Always in kosaio-dev root)
-        if mode == "1" or state_file.exists():
+        if is_dev:
             return Path(self.dev_root) / tool
 
         # 2. System / Container Mode (Shared SDK)

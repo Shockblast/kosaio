@@ -51,8 +51,13 @@ function show_usage() {
 	echo ""
 	
 	echo -e "${C_BOLD}USAGE:${C_RESET}"
-	echo -e "  ${C_BLUE}kosaio${C_RESET} ${C_CYAN}<action>${C_RESET} ${C_YELLOW}[target/query]${C_RESET} ${C_GRAY}[arguments]${C_RESET}\n"
+	echo -e "  ${C_BLUE}kosaio${C_RESET} ${C_CYAN}<action>${C_RESET} ${C_YELLOW}[target/query]${C_RESET} ${C_GRAY}[flags]${C_RESET}\n"
 	
+	echo -e "${C_BOLD}HOT ACTIONS (Transient Overrides):${C_RESET}"
+	printf "  ${C_CYAN}%-12s${C_RESET} %s\n" "--dev-host" "Force 'Host' mode for this command only (-H)"
+	printf "  ${C_CYAN}%-12s${C_RESET} %s\n" "--dev-cont" "Force 'Container' mode for this command only (-C)"
+	echo ""
+
 	echo -e "${C_BOLD}DISCOVERY:${C_RESET}"
 	local lrow="${C_CYAN}%-12s${C_RESET} ${C_YELLOW}%-15s${C_RESET}"
 	printf "  ${lrow} %s\n" "list" "[query] [-i]" "Search tools (use -i for installed only)"
