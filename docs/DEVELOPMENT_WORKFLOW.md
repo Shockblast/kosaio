@@ -25,9 +25,9 @@ kosaio clone kos
 The source will appear in `/opt/projects/kosaio-dev/kos` on your host.
 
 ### 4. Activate the Environment (The Hot-Swap)
-This is a critical step. To tell your current terminal to use the new paths, run:
+This is a critical step. To tell your current terminal to use the new paths and refresh the HUD, run:
 ```bash
-kenv
+kreload
 ```
 Your prompt will change to **[KOS:HOST]** with a **Blue ◎**.
 
@@ -48,6 +48,6 @@ kosaio apply kos
 ## Returning to Stability
 If you want to go back to the official stable version:
 1. `kosaio dev-switch kos container`
-2. `kenv` (Your prompt returns to **Orange ◎**)
+2. `kreload` (Your prompt returns to **Orange ◎**)
 
 Now you are back to the "factory settings" of the Docker image.

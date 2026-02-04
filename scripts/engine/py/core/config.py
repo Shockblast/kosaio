@@ -38,6 +38,15 @@ class Config:
         return self.get_tool_dir("kos-ports")
 
     @property
+    def system_kos_ports_dir(self) -> Path:
+        """Returns the discovery path for kos-ports. Prefers system (container), fallbacks to host."""
+        sys_path = Path(self.sdk_root) / "kos-ports"
+        if sys_path.exists():
+            return sys_path
+        # Fallback to Host workspace version if system one is missing (e.g. running on host)
+        return self.get_tool_dir("kos-ports", force_mode="1")
+
+    @property
     def registry_dir(self) -> Path:
         return Path(self.kosaio_dir) / "scripts" / "registry"
 

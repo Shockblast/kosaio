@@ -10,6 +10,9 @@ class StatusService:
         Calculates the installation and active status of a tool or port
         for both Container (c) and Host (h) environments.
         """
+        c_source = False
+        h_source = False
+        
         # Detections
         c_inst = cfg.get_installed_version(item_id, mode="0") is not None
         h_inst = cfg.get_installed_version(item_id, mode="1") is not None
@@ -96,24 +99,45 @@ class StatusService:
 
         # Active detection
         state_file = cfg.state_dir / f"{item_id}_dev"
-        is_host_active = state_file.exists()
+        # If specific state file exists, it rules. Otherwise, follow global dev_mode.
+        if state_file.exists():
+            is_host_active = True
+        else:
+            is_host_active = cfg.dev_mode == "1"
+
+        # Ports special case: Active marker follows kos-ports state
+        if item_type == "port":
+            p_state = cfg.state_dir / "kos-ports_dev"
+            is_host_active = p_state.exists() or cfg.dev_mode == "1"
         
-        # BROKEN State Detection
-        # If active in Host mode, but folder missing -> BROKEN
-        if is_host_active and h_inst == False:
+        # BROKEN State Detection (Based on persistent health markers)
+        broken_marker = cfg.state_dir / f"{item_id}_broken"
+        if broken_marker.exists():
+            # If marker exists, it's definitely broken
+            if is_host_active:
+                h_inst = "!"
+            else:
+                c_inst = "!"
+        elif is_host_active and item_id in {"kos", "kos-ports", "aicaos"} and h_inst == False:
+            # Core components missing in host -> also broken
             h_inst = "!" 
 
         # Source Detection (for Ports)
         if item_type == "port":
-            c_ports_dir = cfg.get_tool_dir("kos-ports", force_mode="0")
+            # Detection is performed relative to the ACTIVE ports directory
+            active_ports_dir = cfg.get_tool_dir("kos-ports")
             h_ports_dir = cfg.get_tool_dir("kos-ports", force_mode="1")
+            c_ports_dir = cfg.get_tool_dir("kos-ports", force_mode="0")
 
-            # Check for 'dist' folder which indicates 'make fetch' was run
-            c_source = (c_ports_dir / item_id / "dist").exists()
+            # Check for 'dist' folder (Source) and 'inst' folder (Installed)
             h_source = (h_ports_dir / item_id / "dist").exists()
-        else:
-            c_source = False
-            h_source = False
+            h_inst_dir = (h_ports_dir / item_id / "inst").exists()
+            
+            c_source = (c_ports_dir / item_id / "dist").exists()
+            c_inst_dir = (c_ports_dir / item_id / "inst").exists()
+
+            if h_inst_dir: h_inst = True
+            if c_inst_dir: c_inst = True
 
         return {
             "c_inst": "o" if c_inst is True else ("c" if c_inst == "c" or (c_source and item_type == "port") else "x"),

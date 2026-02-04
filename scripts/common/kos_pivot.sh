@@ -35,6 +35,11 @@ function kosaio_kos_pivot() {
 	# Standard KOS environ.sh will populate PATH and variables
 	source "${target_environ}" > /dev/null 2>&1
 
+	# 4b. PATH PROTECTION: Re-enforce KOSAIO's choice for Ports
+	# This prevents environ.sh from hijacking the path back to container defaults.
+	export KOS_PORTS="${KOS_PORTS_DIR}"
+	export KOS_PORTS_BASE="${KOS_PORTS_DIR}"
+
 	# 5. Re-inject KOSAIO Extras Bin (it might have been wiped by cleanup)
 	if [ -d "${DREAMCAST_BIN_PATH:-}" ]; then
 		export PATH="${PATH}:${DREAMCAST_BIN_PATH}"
@@ -50,6 +55,4 @@ function kosaio_kos_pivot() {
 	fi
 }
 
-# Alias for easy access
-alias kos-env='kosaio_kos_pivot'
-alias kenv='kosaio_kos_pivot'
+# Note: kreload handles the UI-friendly pivoting

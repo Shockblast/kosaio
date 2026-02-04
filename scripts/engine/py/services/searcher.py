@@ -36,7 +36,8 @@ class SearchService:
                  return "core"
 
         # 2. Check Ports
-        ports_path = cfg.kos_ports_dir
+        # Use SYSTEM path for identification (Authoritative registry)
+        ports_path = cfg.system_kos_ports_dir
         if ports_path.exists():
             # Exact match
             if (ports_path / target_id / "Makefile").exists():
@@ -129,7 +130,8 @@ class SearchService:
 
     @staticmethod
     def search_ports(query: str = "") -> List[Manifest]:
-        ports_path = cfg.kos_ports_dir
+        # Always use SYSTEM path for search (Discovery should show all available)
+        ports_path = cfg.system_kos_ports_dir
         if not ports_path or not ports_path.exists():
             return []
 

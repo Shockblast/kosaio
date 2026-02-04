@@ -41,12 +41,22 @@ export PATH="${KOSAIO_DIR}/scripts:$PATH"
 shopt -s expand_aliases
 kosaio_kos_pivot >/dev/null 2>&1
 
-# --- Navigation Aliases ---
+# --- Environment Management ---
+function kreload() {
+	# 1. Pivot KOS (updates KOS_BASE, PATH, etc.)
+	if [ "$(type -t kosaio_kos_pivot)" == "function" ]; then
+		kosaio_kos_pivot >/dev/null 2>&1
+	fi
+	# 2. Reload shell-init (refreshes prompt, aliases, etc.)
+	unset KOSAIO_BANNER_SHOWN
+	source "${KOSAIO_DIR}/scripts/shell-init.sh"
+}
+
 alias ksdk='cd /opt/toolchains/dc'
 alias kkos='cd ${KOS_BASE}'
 alias kports='cd ${KOS_PORTS_DIR}'
 alias kproj='cd /opt/projects'
-alias reload='unset KOSAIO_BANNER_SHOWN; source ${KOSAIO_DIR}/scripts/shell-init.sh'
+alias kreload='kreload'
 
 # --- Dynamic Prompt (PS1) ---
 # Contextual prompt: [CONTEXT(:BRANCH) : MODE] /path/to/dir #

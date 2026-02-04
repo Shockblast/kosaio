@@ -5,7 +5,7 @@
 **KOSAIO** (KallistiOS All-In-One) is an orchestration layer for the Sega Dreamcast development ecosystem. It serves as a unified interface to manage toolchains (KOS), libraries (Ports), and project environments.
 
 It utilizes a **Hybrid Architecture**:
-*   **Bash (The Shell Layer)**: Handles user interaction, environment pivoting (`source`), and process execution.
+*   **Bash (The Shell Layer)**: Handles user interaction, unified environment pivoting via `kreload`, and process execution.
 *   **Python (The Engine Layer)**: Handles complex logic, dependency resolution, text parsing, and state management.
 
 ## 2. Core Design Principles

@@ -157,8 +157,10 @@ function _ports_execute_install() {
 	log_info --draw-line "Installing ${lib_name}..."
 	
 	export KOS_BASE="${KOS_DIR}"
-	export KOS_PORTS="${KOS_PORTS_DIR}"
 	[ -f "${KOS_BASE}/environ.sh" ] && source "${KOS_BASE}/environ.sh"
+	
+	# PATH PROTECTION: Re-enforce KOSAIO's Choice
+	export KOS_PORTS="${KOS_PORTS_DIR}"
 	export KOS_PORTS_BASE="${KOS_PORTS_DIR}"
 
 	local make_targets="install"

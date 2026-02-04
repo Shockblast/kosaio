@@ -35,7 +35,7 @@ function kosaio_install_apt_deps() {
 
 # Installs the Core SDK dependencies (GCC, Make, etc.)
 function kosaio_install_core_sdk_deps() {
-	local deps_file="${KOSAIO_DIR}/config/apt-packages.txt"
+	local deps_file="${KOSAIO_DIR}/configs/apt-packages.txt"
 
 	if [ ! -f "$deps_file" ]; then
 		log_error "Core dependencies file not found: $deps_file"

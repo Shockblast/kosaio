@@ -12,9 +12,28 @@ function controller_dev_handle() {
 	fi
 
 	# Strict Validation: Ensure target is a known tool/port
-	if ! python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" validate_target "$target" >/dev/null 2>&1; then
+	local target_type
+	target_type=$(python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" get_type "$target")
+	
+	if [ -z "$target_type" ] || [ "$target_type" == "unknown" ]; then
 		log_error "Target '${target}' is not a valid KOSAIO tool or port."
 		return 1
+	fi
+
+	# ARCHITECTURE DECISION: Ports are a collection.
+	# We only allow dev-switch for 'kos-ports' as a whole, not individual ports.
+	if [ "$target_type" == "port" ] && [ "$target" != "kos-ports" ]; then
+		log_warn "Individual port '${target}' cannot be switched independently."
+		log_info "To use host ports, run: ${C_CYAN}kosaio dev-switch kos-ports host${C_RESET}"
+		return 1
+	fi
+
+	# Resolve canonical name (for case-insensitive support in ports)
+	# ports_resolve_name is available if ports driver is loaded
+	if [ "$(type -t ports_resolve_name)" == "function" ]; then
+		if resolved=$(ports_resolve_name "$target"); then
+			target="$resolved"
+		fi
 	fi
 
 	local state_file="${HOME}/.kosaio/states/${target}_dev"
@@ -34,7 +53,10 @@ function controller_dev_handle() {
 	case "${mode,,}" in
 		"host"|"h"|"workspace"|"enable"|"dev")
 			# Validation: Check if the target exists in the workspace
-			local workspace_path="${KOSAIO_DEV_ROOT}/${target}"
+			# Use the engine to get the authoritative path for host mode
+			local workspace_path
+			workspace_path=$(python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" get_tool_path "$target" --mode dev)
+			
 			if [ ! -d "${workspace_path}" ]; then
 				log_error "Target '${target}' not found in workspace: ${workspace_path}"
 				log_info "Tip: Run 'kosaio clone ${target}' or 'kosaio install ${target}' first."

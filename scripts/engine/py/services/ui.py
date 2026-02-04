@@ -134,25 +134,27 @@ class UI:
         return "\n".join(output)
 
     @staticmethod
-    def status_pill(installed: Union[str, bool], is_active: bool, active_color: str = YELLOW) -> str:
+    def status_pill(installed: Union[str, bool], is_active: bool) -> str:
         char = "x"
         color = UI.GRAY
 
         if installed == "o" or installed is True:
             char = "✓"
             color = UI.GREEN
-            if is_active: color = active_color
         elif installed == "c":
             char = "S" # Source available
             color = UI.BLUE
         elif installed == "!":
             char = "!"
             color = UI.RED
-            # If it's a broken active state, force RED on the active marker too
-            if is_active: active_color = UI.RED
 
         m_char = "*" if is_active else " "
-        return f"{color}[{char}{m_char}]{UI.RESET}"
+        pill = f"[{char}{m_char}]"
+
+        if is_active:
+            return f"{color}{UI.BOLD}{pill}{UI.RESET}"
+        else:
+            return f"{color}{pill}{UI.RESET}"
 
     @staticmethod
     def render_table(headers: List[Tuple[str, int, str]], rows: List[List[Tuple[Any, str]]]) -> str:

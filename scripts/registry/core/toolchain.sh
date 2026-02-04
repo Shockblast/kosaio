@@ -120,7 +120,7 @@ function reg_build() {
 	
 	# Sync settings
 	mkdir -p "${dc_chain}"
-	cp "${KOSAIO_DIR}/dc-chain-settings/Makefile.cfg" "${dc_chain}/"
+	cp "${KOSAIO_DIR}/configs/dc-chain-settings.cfg" "${dc_chain}/Makefile.cfg"
 
 	(cd "${dc_chain}" && make -j$(nproc) ${target})
 }

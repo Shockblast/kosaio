@@ -22,7 +22,10 @@ function ports_clone() {
 	fi
 
 	for lib_name in "${targets[@]}"; do
-		if ! _ports_validate_library "${lib_name}"; then
+		local resolved_name
+		if resolved_name=$(ports_resolve_name "${lib_name}"); then
+			lib_name="${resolved_name}"
+		else
 			log_error "Library '${lib_name}' not found. Skipping."
 			continue
 		fi
@@ -142,10 +145,13 @@ function ports_build() {
 		local make_targets="build-stamp"
 		[ "${KOSAIO_CLEAN_AFTER:-false}" = true ] && make_targets="build-stamp clean"
 
+		local broken_marker="${HOME}/.kosaio/states/${lib_name}_broken"
 		if (cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} ${make_targets}); then
+			rm -f "${broken_marker}"
 			log_success "${lib_name} built."
 			success_libs+=("${lib_name}")
 		else
+			touch "${broken_marker}"
 			log_error "${lib_name} build failed."
 			break
 		fi
@@ -169,10 +175,13 @@ function ports_apply() {
 
 		check_dir_soft "${KOS_PORTS_DIR}/${lib_name}" "Port source not found" || continue
 		log_info --draw-line "Applying ${lib_name}..."
+		local broken_marker="${HOME}/.kosaio/states/${lib_name}_broken"
 		if (cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} install); then
+			rm -f "${broken_marker}"
 			log_success "${lib_name} applied."
 			success_libs+=("${lib_name}")
 		else
+			touch "${broken_marker}"
 			log_error "${lib_name} application failed."
 			break
 		fi

@@ -106,4 +106,12 @@ class ValidatorService:
         elif mode == "sys":
             force_mode = "0"
 
+        # Check if it's a port. Ports live INSIDE kos-ports.
+        # We use a temporary config override if mode is provided to ensure identifying correctly
+        target_type = SearchService.identify_target(tool)
+        
+        if target_type == "port":
+            ports_dir = cfg.get_tool_dir("kos-ports", force_mode=force_mode)
+            return ports_dir / tool
+
         return cfg.get_tool_dir(tool, force_mode=force_mode)

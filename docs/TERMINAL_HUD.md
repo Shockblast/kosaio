@@ -12,9 +12,9 @@ The swirl symbol remains constant, but the **MODE** indicator next to it reflect
 - **Blue [DEV]**: **HOST** mode (JP/EU Style). You are using your local workspace/developer SDK.
 
 ### 🔻 Power LED (The Status)
-The triangle indicates system health based on the last command's exit code:
+The triangle indicates system health based on the last command's exit code **and** the specific health markers of your tools:
 - **Orange LED 🔻**: **HEALTHY**. Your environment is ready and the last command succeeded.
-- **Red LED 🛑**: **ERROR/PANIC**. The last command execution failed.
+- **Red LED 🛑**: **ERROR/PANIC**. The last command execution failed, or a tool state is marked as **BROKEN** (`!`).
 
 ## Shell Helpers
 
@@ -23,8 +23,8 @@ Stop typing long paths to your projects.
 - `kcd`: Jumps directly to the project root (`/opt/projects`).
 - `kcd <name>`: Jumps to a specific project folder with tab-completion.
 
-### Quick Environment Swapping (`kenv`)
-Manual shortcut to trigger the pivot logic. Use this after changing modes with `kosaio dev-switch` to update your current terminal's variables instantly.
+### Quick Environment Swapping (`kreload`)
+Unified shortcut to trigger the pivot logic and UI refresh. Use this after changing modes with `kosaio dev-switch` to update your current terminal's variables and prompt instantly.
 
 ### Automated Completions
 The shell includes smart tab-completions for:

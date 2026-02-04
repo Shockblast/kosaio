@@ -73,14 +73,14 @@ class PortService:
         from core.config import cfg
 
         # 1. Exact match check
-        exact_path = cfg.kos_ports_dir / input_name / "Makefile"
+        exact_path = cfg.system_kos_ports_dir / input_name / "Makefile"
         if exact_path.exists():
             return input_name
 
         # 2. Case-insensitive search
         input_lower = input_name.lower()
-        if cfg.kos_ports_dir.exists():
-            for path in cfg.kos_ports_dir.iterdir():
+        if cfg.system_kos_ports_dir.exists():
+            for path in cfg.system_kos_ports_dir.iterdir():
                 if path.is_dir() and path.name.lower() == input_lower:
                     if (path / "Makefile").exists():
                         return path.name

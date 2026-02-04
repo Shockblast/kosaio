@@ -4,7 +4,7 @@
 
 KOSAIO bridges the gap between your Host OS and the SDK through a surgical hybrid architecture, creating a unified workspace for modern homebrew development.
 
-![KOSAIO Unified HUD](img.png)
+![KOSAIO Unified HUD](assets/banner.png)
 
 *The KOSAIO Master HUD showing a healthy, ready-to-use cross-compiler environment.*
 
@@ -22,7 +22,7 @@ KOSAIO bridges the gap between your Host OS and the SDK through a surgical hybri
 ## Core Features
 
 *   **⚡ Integrated Environment**: Comes with KOS and essential tools pre-configured and ready for action.
-*   **🔄🔥 HOT SWAP Mode**: Switch any tool between **Container** (system) and **Host** (workspace) individually with `dev-switch`.
+*   **🔄🔥 HOT SWAP Mode**: Switch any tool between **Container** (system) and **Host** (workspace) individually with `dev-switch`. Libraries follow a **Collection-First** model via `kos-ports`.
 *   **🛠️ ARM & AICAOS Ready**: Full support for building custom sound drivers with automated ARM toolchain patching.
 *   **📊 Smart Dashboard**: Use `kosaio list` to see instantly which tools are installed and which mode is active.
 *   **🏠 Unified Workspace**: Develop on your Host OS (Antigravity/VSCode/NeoVim) while compiling inside the container effortlessly.
@@ -86,14 +86,13 @@ The easiest way to set up your environment is using the assistant script. It wil
 The first SDK you need to install is KallistiOS (KOS). It is a long process, so be prepared for a break!
 
 > [!TIP]
-> Before installing KOS, you can look at the `Makefile.cfg` file inside the `dc-chain-settings` folder and make adjustments if required (like changing GCC version).
+> Before installing KOS, you can look at the `dc-chain-settings.cfg` file inside the `configs` folder and make adjustments if required (like changing GCC version).
 
 ```bash
 kosaio install kos
 ```
 
-> [!IMPORTANT]
-> After installing KOS, you don't need to exit! Just run **`kos-env`** (or the shortcut **`kenv`**) to activate the new environment instantly.
+> After installing KOS, you don't need to exit! Just run **`kreload`** to activate the new environment and refresh your shell instantly.
 
 Now you are ready to develop a Dreamcast application. You can create a new project from a template:
 
@@ -128,8 +127,8 @@ KOSAIO offers a granular **Hybrid Mode** for advanced users who want to modify t
     # Move KOS to your workspace
     kosaio dev-switch kos host
     
-    # Refresh the variables in your current shell
-    kenv
+    # Refresh the variables and shell UI instantly
+    kreload
     ```
 
 3.  **Manage Sources**:
@@ -140,7 +139,7 @@ KOSAIO offers a granular **Hybrid Mode** for advanced users who want to modify t
 4.  **Back to Stable**:
     ```bash
     kosaio dev-switch kos container
-    kenv
+    kreload
     ```
 
 ### Examples
@@ -163,7 +162,7 @@ Some examples of how to use kosaio:
 Enabling the KOSAIO shell provides a series of productivity helpers:
 - **`kosaio list`**: Find libraries by name or description.
 - **`kcd <project>`**: Fast jump to any project in your workspace.
-- **`kenv`**: Hot-swap environment variables after a `dev-switch`.
+- **`kreload`**: Hot-swap environment variables & prompt after a `dev-switch`.
 - **Tab-Completions**: Full support for all `kosaio` commands.
 
 #### Managing KOS-PORTS Libraries

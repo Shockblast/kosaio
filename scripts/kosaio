@@ -76,9 +76,12 @@ function show_usage() {
 
 	echo -e "${C_BOLD}SYSTEM WORKFLOW:${C_RESET}"
 	printf "  ${lrow} %s\n" "dev-switch" "<id> [mode]" "Toggle between CONTAINER and HOST mode"
+	printf "  ${C_GRAY}%-28s %s${C_RESET}\n" "" "(Note: Ports follow 'kos-ports' collection)"
 	printf "  ${lrow} %s\n" "create-proj" "<name>" "Initialize a new project folder"
 	printf "  ${lrow} %s\n" "install-deps" "system" "Install core SDK dependencies (GCC, Make, etc)"
 	printf "  ${lrow} %s\n" "self-update" "" "Update KOSAIO framework and scripts"
+	printf "  ${C_YELLOW}%-12s${C_RESET} %-15s %s\n" "kreload" "" "Unified hot-swap of Environment & Terminal"
+	echo ""
 	echo ""
 	exit 1
 }
