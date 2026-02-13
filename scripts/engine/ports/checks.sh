@@ -23,6 +23,8 @@ function _ports_check_exists() {
 function _ports_check_requirements() {
 	if [ ! -f "${KOS_DIR}/environ.sh" ]; then
 		log_error "KOS environment not found (environ.sh missing)."
+		log_info "Path checked: ${KOS_DIR}"
+		log_info "Tip: Run 'kosaio apply kos' to generate the environment file."
 		return 1
 	fi
 }

@@ -8,28 +8,44 @@ if [[ "$-" != *i* ]]; then
 	set -Eeuo pipefail
 fi
 
-# Detect KOSAIO_DIR if not set
-if [ -z "${KOSAIO_DIR:-}" ]; then
-	# Assume script is located in <KOSAIO_DIR>/scripts/... or <KOSAIO_DIR>/scripts/common
-	# Resolve symlinks to find the real source location
-	SOURCE="${BASH_SOURCE[0]}"
-	while [ -h "$SOURCE" ]; do
-	  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-	  SOURCE="$(readlink "$SOURCE")"
-	  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-	done
-	ENV_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+# Resolve KOSAIO_DIR correctly relative to the script location
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-	# If we are in 'scripts/common', KOSAIO_DIR is two levels up
-	if [[ "$(basename "$ENV_DIR")" == "common" ]]; then
-		export KOSAIO_DIR="$(dirname "$(dirname "$ENV_DIR")")"
-	# If we are in 'scripts', KOSAIO_DIR is one level up
-	elif [[ "$(basename "$ENV_DIR")" == "scripts" ]]; then
-		export KOSAIO_DIR="$(dirname "$ENV_DIR")"
-	else
-		# Fallback default
-		export KOSAIO_DIR="/opt/kosaio" 
-	fi
+# Detect root based on current folder name
+if [[ "$(basename "$DIR")" == "common" ]]; then
+	DETECTED_KOSAIO_DIR="$(dirname "$(dirname "$DIR")")"
+elif [[ "$(basename "$DIR")" == "scripts" ]]; then
+	DETECTED_KOSAIO_DIR="$(dirname "$DIR")"
+else
+	DETECTED_KOSAIO_DIR="$DIR"
+fi
+
+if [ -z "${KOSAIO_DIR:-}" ] || [ ! -d "${KOSAIO_DIR}/scripts" ]; then
+	export KOSAIO_DIR="$DETECTED_KOSAIO_DIR"
+fi
+
+# Load kosaio.cfg if it exists (mostly for PROJECTS_HOST_DIR on host)
+if [ -f "${KOSAIO_DIR}/kosaio.cfg" ]; then
+	# Extract variables safely (allowing comments and ignoring them)
+	while IFS='=' read -r key value; do
+		[[ "$key" =~ ^#.* ]] && continue
+		[[ -z "$key" ]] && continue
+		# Trim whitespace and quotes
+		key=$(echo "$key" | xargs)
+		value=$(echo "$value" | xargs | sed 's/^"//;s/"$//')
+		
+		case "$key" in
+			PROJECTS_HOST_DIR) export PROJECTS_HOST_DIR="${value%/}" ;;
+			TOOL) export KOSAIO_TOOL="$value" ;;
+			CONTAINER_NAME) export KOSAIO_CONTAINER_NAME="$value" ;;
+		esac
+	done < "${KOSAIO_DIR}/kosaio.cfg"
 fi
 
 # Framework Update Branch (Defaults to current branch)
@@ -43,7 +59,17 @@ fi
 
 # SDK Constants & Defaults
 export DREAMCAST_SDK="${DREAMCAST_SDK:-/opt/toolchains/dc}"
-export PROJECTS_DIR="${PROJECTS_DIR:-/opt/projects}"
+
+# On Host, if we have PROJECTS_HOST_DIR, use it for PROJECTS_DIR
+if [ ! -f /.dockerenv ] && [ -n "${PROJECTS_HOST_DIR:-}" ]; then
+	# If PROJECTS_DIR is unset or points to the default container path, override it
+	if [ -z "${PROJECTS_DIR:-}" ] || [ "${PROJECTS_DIR}" == "/opt/projects" ]; then
+		export PROJECTS_DIR="$PROJECTS_HOST_DIR"
+	fi
+else
+	export PROJECTS_DIR="${PROJECTS_DIR:-/opt/projects}"
+fi
+
 export KOSAIO_DEV_ROOT="${PROJECTS_DIR}/kosaio-dev"
 export KOS_MAKE="${KOS_MAKE:-make}"
 
@@ -86,23 +112,34 @@ function kosaio_get_tool_dir() {
 		use_dev=1
 	fi
 
+	local final_path
 	if [ "$use_dev" = "1" ]; then
 		# Host / Dev Mode always uses kosaio-dev root
-		base_dir="${KOSAIO_DEV_ROOT}"
+		final_path="${KOSAIO_DEV_ROOT}/${tool}"
 	else
 		# System / Container Mode
 		case "$tool" in
 			kos|kos-ports|sh-elf|arm-eabi|aicaos|extras|bin)
-				base_dir="${DREAMCAST_SDK}"
+				final_path="${DREAMCAST_SDK}/${tool}"
 				;;
 			*)
 				# Registry tools/libs go to extras/
-				base_dir="${DREAMCAST_SDK}/extras"
+				final_path="${DREAMCAST_SDK}/extras/${tool}"
 				;;
 		esac
+
+		# 2. AUTO-PIVOT (Smart Detection)
+		# If the system path is missing but we are on a HOST, check if the dev path exists.
+		# This prevents "environ.sh missing" errors if the user is running on host 
+		# and has a local workspace ready, but hasn't explicitly switched mode.
+		if [ ! -f /.dockerenv ] && [ ! -d "$final_path" ]; then
+			if [ -d "${KOSAIO_DEV_ROOT}/${tool}" ]; then
+				final_path="${KOSAIO_DEV_ROOT}/${tool}"
+			fi
+		fi
 	fi
 
-	echo "${base_dir}/${tool}"
+	echo "${final_path}"
 }
 
 # --- Legacy and Global Exports ---

@@ -6,15 +6,18 @@
 
 set -Eeuo pipefail
 
-if [ -z "${KOSAIO_DIR}" ]; then
-	SOURCE="${BASH_SOURCE[0]}"
-	while [ -h "$SOURCE" ]; do
-	  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-	  SOURCE="$(readlink "$SOURCE")"
-	  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-	done
-	DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-	export KOSAIO_DIR="$(dirname "$DIR")"
+# Resolve KOSAIO_DIR correctly relative to the script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+DETECTED_KOSAIO_DIR="$(dirname "$DIR")"
+
+if [ -z "${KOSAIO_DIR:-}" ] || [ ! -d "${KOSAIO_DIR}/scripts" ]; then
+	export KOSAIO_DIR="$DETECTED_KOSAIO_DIR"
 fi
 ENGINE_DIR="${KOSAIO_DIR}/scripts/engine"
 
