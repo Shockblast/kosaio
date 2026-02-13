@@ -18,6 +18,18 @@ if [ -z "${KOSAIO_DIR}" ]; then
 fi
 ENGINE_DIR="${KOSAIO_DIR}/scripts/engine"
 
+# --- Hot Action Flag Parsing (Early Detection) ---
+# We parse these before loading env.sh to ensure correct path resolution
+CLEAN_ARGS=()
+for arg in "$@"; do
+	case "$arg" in
+		--dev-host|-H) export KOSAIO_DEV_MODE=1 ;;
+		--dev-cont|--dev-container|-C) export KOSAIO_DEV_MODE=0 ;;
+		*) CLEAN_ARGS+=("$arg") ;;
+	esac
+done
+set -- "${CLEAN_ARGS[@]}"
+
 # Load essential UI and Environment
 source "${KOSAIO_DIR}/scripts/common/env.sh"
 

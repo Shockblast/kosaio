@@ -7,26 +7,6 @@ source "${KOSAIO_DIR}/scripts/controllers/list.sh"
 source "${KOSAIO_DIR}/scripts/controllers/dev.sh"
 
 function kosaio_router_dispatch() {
-	# --- Hot Action Flag Parsing ---
-	local RAW_ARGS=("$@")
-	local CLEAN_ARGS=()
-	for arg in "${RAW_ARGS[@]}"; do
-		case "$arg" in
-			--dev-host|-H)
-				export KOSAIO_DEV_MODE=1
-				;;
-			--dev-cont|--dev-container|-C)
-				export KOSAIO_DEV_MODE=0
-				;;
-			*)
-				CLEAN_ARGS+=("$arg")
-				;;
-		esac
-	done
-
-	# Update positionals from cleaned list
-	set -- "${CLEAN_ARGS[@]}"
-	
 	local ACTION="${1:-}"
 	local TARGET="${2:-}"
 	local ARGS=("${@:3}") # Capture remaining filtered args
