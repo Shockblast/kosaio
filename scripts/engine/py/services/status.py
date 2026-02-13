@@ -19,7 +19,7 @@ class StatusService:
 
         if item_type != "port":
             # For tools, check directories
-            holy_list = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "extras", "bin"}
+            holy_list = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "extras", "bin", "toolchain"}
             
             if item_id in holy_list:
                 c_base = Path(cfg.sdk_root) / item_id
@@ -30,7 +30,35 @@ class StatusService:
             
             c_inst = c_base.exists()
             h_inst = h_base.exists()
-            if item_id == "kos":
+
+            if item_id == "toolchain":
+                # Toolchain Specific: Check for sh-elf and arm-eabi
+                c_sh = Path(cfg.sdk_root) / "sh-elf"
+                c_arm = Path(cfg.sdk_root) / "arm-eabi"
+                h_sh = Path(cfg.dev_root) / "sh-elf"
+                h_arm = Path(cfg.dev_root) / "arm-eabi"
+
+                # Container Status
+                c_has_sh = (c_sh / "bin" / "sh-elf-gcc").exists()
+                c_has_arm = (c_arm / "bin" / "arm-eabi-gcc").exists()
+                if c_has_sh and c_has_arm:
+                    c_inst = True
+                elif c_has_sh:
+                    c_inst = "c" # Partially installed (SH4 only)
+                else:
+                    c_inst = False
+
+                # Host Status
+                h_has_sh = (h_sh / "bin" / "sh-elf-gcc").exists()
+                h_has_arm = (h_arm / "bin" / "arm-eabi-gcc").exists()
+                if h_has_sh and h_has_arm:
+                    h_inst = True
+                elif h_has_sh:
+                    h_inst = "c"
+                else:
+                    h_inst = False
+
+            elif item_id == "kos":
                 # KOS Specific: Check for compiled library for "Installed" status
                 # Container
                 c_env = c_base / "environ.sh"

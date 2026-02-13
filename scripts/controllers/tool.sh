@@ -15,8 +15,8 @@ function kosaio_cmd_tool() {
 	# 1. Check if KOS is installed (Base Requirement)
 	if [ -z "${KOS_BASE:-}" ] || [ ! -d "${KOS_BASE}" ]; then
 		# Try to source environment if not loaded
-		if [ -f "/opt/toolchains/dc/kos/environ.sh" ]; then
-			source "/opt/toolchains/dc/kos/environ.sh"
+		if [ -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+			source "${DREAMCAST_SDK}/kos/environ.sh"
 		else
 			log_box --type=error "SDK MISSING" \
 				"The 'tool' command requires KOS utilities." \

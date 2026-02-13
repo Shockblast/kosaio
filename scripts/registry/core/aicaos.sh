@@ -37,8 +37,8 @@ function reg_build() {
 	[ -d "$tool_dir" ] || { log_error "Source missing."; return 1; }
 
 	# Check for ARM Toolchain (Required for AICAOS)
-	if ! command -v arm-eabi-gcc &> /dev/null && [ ! -d "/opt/toolchains/dc/arm-eabi" ]; then
-		log_error "ARM Toolchain (arm-eabi) not found!"
+	if ! command -v arm-eabi-gcc &> /dev/null && [ ! -d "${DREAMCAST_SDK}/arm-eabi" ]; then
+		log_error "ARM Toolchain missing. Please install toolchain with ARM support."
 		log_info "AICAOS requires the ARM compiler to build the SPU driver."
 		log_info "Tip: You may need to rebuild kos toolchain with ARM support enabled."
 		return 3

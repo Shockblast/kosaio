@@ -23,8 +23,13 @@ function reg_check_health() {
 		fi
 	done
 
+	# Source KOS environ.sh if it exists
+	if [ -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
+		source "${DREAMCAST_SDK}/kos/environ.sh"
+	fi
+
 	log_info "--- SH4 Toolchain (Main CPU) ---"
-	local sh_gcc="/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc"
+	local sh_gcc="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc"
 	if [ -f "$sh_gcc" ]; then
 		local v=$($sh_gcc -dumpversion 2>/dev/null || echo "Unknown")
 		printf "  %-20s: ${C_GREEN}READY${C_RESET} (GCC %s)\n" "SH4 Compiler" "$v"
@@ -34,7 +39,7 @@ function reg_check_health() {
 		((errors++)) || true
 	fi
 
-	local sh_gdb="/opt/toolchains/dc/sh-elf/bin/sh-elf-gdb"
+	local sh_gdb="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gdb"
 	if [ -f "$sh_gdb" ]; then
 		printf "  %-20s: ${C_GREEN}READY${C_RESET}\n" "GDB Debugger"
 	else
@@ -42,7 +47,7 @@ function reg_check_health() {
 	fi
 
 	log_info "--- ARM Toolchain (AICA SPU) ---"
-	local arm_gcc="/opt/toolchains/dc/arm-eabi/bin/arm-eabi-gcc"
+	local arm_gcc="${DREAMCAST_SDK}/arm-eabi/bin/arm-eabi-gcc"
 	if [ -f "$arm_gcc" ]; then
 		local v=$($arm_gcc -dumpversion 2>/dev/null || echo "Unknown")
 		printf "  %-20s: ${C_GREEN}READY${C_RESET} (GCC %s)\n" "ARM Compiler" "$v"

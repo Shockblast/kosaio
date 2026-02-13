@@ -18,7 +18,7 @@ function reg_check_health() {
 	[ -d "$kos_dir" ] || return 1
 	
 	# Check if toolchain exists (minimal check)
-	[ -f "/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc" ] || return 3 # Toolchain missing
+	[ -f "${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc" ] || return 3 # Toolchain missing
 	
 	# Check if KOS libraries are built
 	[ -f "$kos_dir/lib/dreamcast/libkallisti.a" ] || return 2 # Not built
@@ -52,7 +52,7 @@ function reg_build() {
 	[ -d "$kos_dir" ] || { log_error "KOS source missing."; return 1; }
 
 	# Ensure toolchain is at least present
-	if [ ! -f "/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc" ]; then
+	if [ ! -f "${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc" ]; then
 		log_error "SH4 Toolchain not found! Please run: kosaio build toolchain"
 		return 3
 	fi
@@ -93,7 +93,7 @@ function reg_apply() {
 	cp "${sample_env}" "${target_env}"
 
 	sed -i "s|^#\? \?export KOS_BASE=.*|export KOS_BASE=\"${KOS_DIR}\"|g" "${target_env}"
-	local stable_toolchain="/opt/toolchains/dc"
+	local stable_toolchain="${DREAMCAST_SDK}"
 	sed -i "s|^#\? \?export KOS_CC_BASE=.*|export KOS_CC_BASE=\"${stable_toolchain}/sh-elf\"|g" "${target_env}"
 	sed -i "s|^#\? \?export DC_ARM_BASE=.*|export DC_ARM_BASE=\"${stable_toolchain}/arm-eabi\"|g" "${target_env}"
 	sed -i "s|^#\? \?export DC_TOOLS_BASE=.*|export DC_TOOLS_BASE=\"${stable_toolchain}/bin\"|g" "${target_env}"

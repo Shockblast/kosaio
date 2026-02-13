@@ -12,8 +12,8 @@ DEPS="bison build-essential bzip2 cmake curl diffutils flex gawk gettext git lib
 source "${KOSAIO_DIR}/scripts/common/patch_utils.sh"
 
 function reg_check_health() {
-	local sh_gcc="/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc"
-	local arm_gcc="/opt/toolchains/dc/arm-eabi/bin/arm-eabi-gcc"
+	local sh_gcc="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc"
+	local arm_gcc="${DREAMCAST_SDK}/arm-eabi/bin/arm-eabi-gcc"
 	
 	if [ -f "$sh_gcc" ]; then
 		return 0 # At least SH4 is ready, which is minimal requirement
@@ -24,16 +24,16 @@ function reg_check_health() {
 
 function reg_info() {
 	# Gather Status Data
-	local sh_gcc="/opt/toolchains/dc/sh-elf/bin/sh-elf-gcc"
+	local sh_gcc="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc"
 	local sh_ver="MISSING"
 	local sh_status="${C_RED}NOT INSTALLED${C_RESET}"
 	[ -f "$sh_gcc" ] && sh_ver=$($sh_gcc -dumpversion) && sh_status="${C_GREEN}READY (GCC $sh_ver)${C_RESET}"
 
-	local sh_gdb="/opt/toolchains/dc/sh-elf/bin/sh-elf-gdb"
+	local sh_gdb="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gdb"
 	local sh_gdb_status="${C_GRAY}Missing${C_RESET}"
 	[ -f "$sh_gdb" ] && sh_gdb_status="${C_GREEN}INSTALLED${C_RESET}"
 
-	local arm_gcc="/opt/toolchains/dc/arm-eabi/bin/arm-eabi-gcc"
+	local arm_gcc="${DREAMCAST_SDK}/arm-eabi/bin/arm-eabi-gcc"
 	local arm_ver="MISSING"
 	local arm_status="${C_RED}NOT INSTALLED${C_RESET}"
 	[ -f "$arm_gcc" ] && arm_ver=$($arm_gcc -dumpversion) && arm_status="${C_GREEN}READY (GCC $arm_ver)${C_RESET}"
@@ -132,17 +132,13 @@ function reg_install() {
 
 function reg_uninstall() {
 	log_warn "This will remove the entire Dreamcast Toolchain."
-	log_warn "paths: /opt/toolchains/dc/sh-elf, /opt/toolchains/dc/arm-eabi"
+	log_warn "paths: ${DREAMCAST_SDK}/sh-elf, ${DREAMCAST_SDK}/arm-eabi"
 	log_warn "Are you sure? (y/n)"
 	read -r CONFIRM
 	if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
 		log_info "Removing Toolchain..."
-		rm -rf "/opt/toolchains/dc/sh-elf"
-		rm -rf "/opt/toolchains/dc/arm-eabi"
-		
-		# Optional: cleanup dc-chain build dirs?
-		# local kos_dir=$(kosaio_get_tool_dir "kos")
-		# rm -rf "${kos_dir}/utils/dc-chain/build-*"
+		rm -rf "${DREAMCAST_SDK}/sh-elf"
+		rm -rf "${DREAMCAST_SDK}/arm-eabi"
 		
 		log_success "Toolchain uninstalled."
 	else
