@@ -3,7 +3,7 @@
 
 function ports_clone() {
 	_ports_check_exists
-	_ports_check_requirements
+	_ports_check_requirements "true"
 
 	local success_libs=()
 	local targets=()
@@ -97,7 +97,7 @@ function ports_clean() {
 
 function ports_update() {
 	_ports_check_exists
-	_ports_check_requirements
+	_ports_check_requirements "true"
 
 	log_info --draw-line "Updating kos-ports repository..."
 	
