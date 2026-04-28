@@ -47,6 +47,7 @@ source "${KOSAIO_DIR}/scripts/common/errors.sh"
 
 # Load common utilities
 source "${KOSAIO_DIR}/scripts/common/git_utils.sh"
+source "${KOSAIO_DIR}/scripts/common/patch_utils.sh"
 source "${KOSAIO_DIR}/scripts/common/port_utils.sh"
 
 function show_usage() {

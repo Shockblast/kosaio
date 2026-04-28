@@ -32,11 +32,7 @@ function reg_clone() {
 
 function reg_build() {
 	[ -d "${KOS_PORTS_DIR}" ] || { log_error "KOS-PORTS source missing. Run 'kosaio clone kos-ports' first."; return 1; }
-	log_info --draw-line "Building KOS-PORTS (Build system utilities)..."
-	(cd "${KOS_PORTS_DIR}/utils" && ./build-all.sh || true)
-}
 
-function reg_install() {
 	local force_build=false
 	for arg in "$@"; do
 		if [ "$arg" == "--force-build" ]; then
@@ -50,12 +46,33 @@ function reg_install() {
 			"Target: ALL kos-ports libraries (Huge compiling time!)" \
 			"${C_YELLOW}Tip:${C_RESET} Use ${C_CYAN}kosaio clone kos-ports${C_RESET} to explore first." \
 			"${C_YELLOW}Tip:${C_RESET} Then install specific ports: ${C_CYAN}kosaio install libpng${C_RESET}" \
-			"To force install EVERYTHING, use: ${C_YELLOW}--force-build${C_RESET}"
+			"To force compile EVERYTHING, use: ${C_YELLOW}--force-build${C_RESET}"
+		return 0
+	fi
+
+	log_info --draw-line "Building KOS-PORTS (Build system utilities)..."
+	(cd "${KOS_PORTS_DIR}/utils" && ./build-all.sh || true)
+}
+
+function reg_install() {
+	# Protection is now handled dynamically inside reg_build
+	# However, we evaluate force_build here to avoid cloning if they reject it
+	local force_build=false
+	for arg in "$@"; do
+		if [ "$arg" == "--force-build" ]; then
+			force_build=true
+			break
+		fi
+	done
+
+	if [ "$force_build" = false ]; then
+		# Call reg_build anyway to show the warning and halt
+		reg_build "$@"
 		return 0
 	fi
 
 	reg_clone
-	reg_build
+	reg_build "$@"
 	log_success "KOS-PORTS installation complete."
 }
 

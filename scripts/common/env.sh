@@ -60,8 +60,14 @@ fi
 # SDK Constants & Defaults
 export DREAMCAST_SDK="${DREAMCAST_SDK:-/opt/toolchains/dc}"
 
+# Container detection (Docker/Podman/etc)
+IS_CONTAINER=0
+if [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
+	IS_CONTAINER=1
+fi
+
 # On Host, if we have PROJECTS_HOST_DIR, use it for PROJECTS_DIR
-if [ ! -f /.dockerenv ] && [ -n "${PROJECTS_HOST_DIR:-}" ]; then
+if [ "$IS_CONTAINER" -eq 0 ] && [ -n "${PROJECTS_HOST_DIR:-}" ]; then
 	# If PROJECTS_DIR is unset or points to the default container path, override it
 	if [ -z "${PROJECTS_DIR:-}" ] || [ "${PROJECTS_DIR}" == "/opt/projects" ]; then
 		export PROJECTS_DIR="$PROJECTS_HOST_DIR"
@@ -132,7 +138,7 @@ function kosaio_get_tool_dir() {
 		# If the system path is missing but we are on a HOST, check if the dev path exists.
 		# This prevents "environ.sh missing" errors if the user is running on host 
 		# and has a local workspace ready, but hasn't explicitly switched mode.
-		if [ ! -f /.dockerenv ] && [ ! -d "$final_path" ]; then
+		if [ "$IS_CONTAINER" -eq 0 ] && [ ! -d "$final_path" ]; then
 			if [ -d "${KOSAIO_DEV_ROOT}/${tool}" ]; then
 				final_path="${KOSAIO_DEV_ROOT}/${tool}"
 			fi

@@ -106,10 +106,11 @@ function _ports_check_update_status() {
 			log_info "Version update detected for ${lib_name}: ${C_YELLOW}${installed_ver}${C_RESET} -> ${C_GREEN}${current_ver}${C_RESET}"
 			eval "${force_reinstall_ref}=true"
 		elif [ -n "$git_repo" ] && [[ "${FUNCNAME[2]}" == "ports_update" ]]; then
-			if [[ "$current_ver" =~ ^[0-9] ]] && [ "${!force_reinstall_ref}" = false ]; then
+			if [[ "$current_ver" =~ ^[0-9] ]] && [ "${!force_reinstall_ref}" = false ] && [ "${KOSAIO_BULK_UPDATE:-0}" = "1" ]; then
 				local hash_file="${KOS_PORTS_DIR}/lib/.kos-ports/${lib_name}.hash"
 				if [ -f "$hash_file" ]; then
-					log_success "${lib_name} is already installed (${installed_ver}) and is a stable version. Skipping git check."
+					echo ""
+					log_success "${lib_name} is already installed (${installed_ver}) and is a stable version. Skipping git check in bulk update."
 					return 10 # SKIP
 				fi
 			fi
@@ -127,6 +128,7 @@ function _ports_check_update_status() {
 				[ -n "$local_hash" ] && log_info "New commits found on Git remote for ${lib_name} (branch: ${git_branch:-default})."
 				eval "${force_reinstall_ref}=true"
 			else
+				echo ""
 				log_success "${lib_name} is already installed and is latest version."
 				return 10 # SKIP
 			fi
@@ -134,6 +136,7 @@ function _ports_check_update_status() {
 			log_warn "Reinstalling ${lib_name} (forcing uninstall first)..."
 			ports_uninstall "${lib_name}"
 		else
+			echo ""
 			log_success "${lib_name} is already installed (${installed_ver}). Use --reinstall to force."
 			return 10 # SKIP
 		fi

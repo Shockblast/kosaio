@@ -21,15 +21,25 @@ class StatusService:
             # For tools, check directories
             holy_list = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "extras", "bin", "toolchain"}
             
+            c_base = Path(cfg.sdk_root) / "extras" / item_id
             if item_id in holy_list:
                 c_base = Path(cfg.sdk_root) / item_id
-            else:
-                c_base = Path(cfg.sdk_root) / "extras" / item_id
-                
+            
             h_base = Path(cfg.dev_root) / item_id
             
             c_inst = c_base.exists()
             h_inst = h_base.exists()
+
+            # FALLBACK: Some libraries (like dreamroq) install inside kos-ports
+            if not c_inst:
+                c_alt = Path(cfg.sdk_root) / "kos-ports" / item_id
+                if c_alt.exists():
+                    c_inst = True
+            
+            if not h_inst:
+                h_alt = Path(cfg.dev_root) / "kos-ports" / item_id
+                if h_alt.exists():
+                    h_inst = True
 
             if item_id == "toolchain":
                 # Toolchain Specific: Check for sh-elf and arm-eabi

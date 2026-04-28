@@ -166,6 +166,7 @@ function _router_handle_update_all() {
 
 	# Force non-interactive mode for bulk update
 	export KOSAIO_NON_INTERACTIVE=1
+	export KOSAIO_BULK_UPDATE=1
 	
 	local results=()
 
@@ -178,6 +179,7 @@ function _router_handle_update_all() {
 	
 	# Restore interactive mode
 	unset KOSAIO_NON_INTERACTIVE
+	unset KOSAIO_BULK_UPDATE
 	
 	echo ""
 	log_info --draw-line "BULK UPDATE SUMMARY"
@@ -203,7 +205,7 @@ function _router_handle_update_all() {
 				if [ -f "$log_file" ]; then
 					while read -r line; do
 						printf "                    ${C_GRAY}* %s${C_RESET}\n" "$line"
-					done < <(head -n 3 "$log_file") # Show only top 3 commits
+					done < "$log_file" # Show all commits
 				fi
 				((count_updated++))
 				;;
