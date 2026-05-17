@@ -47,6 +47,7 @@ libelf-dev
 libisofs-dev
 libjpeg-dev
 libpng-dev
+zlib1g-dev
 
 # Graphics & Sound
 libgtk-3-dev
@@ -55,6 +56,8 @@ libvulkan-dev
 libsdl2-ttf-dev
 libfontconfig-dev
 qtbase5-dev
+libopenal-dev
+libgl1-mesa-dev
 
 # Scripting
 python3

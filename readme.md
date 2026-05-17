@@ -40,7 +40,7 @@ You can install these tools with kosaio:
 | **dcload-ip**     | Allows loading and executing binaries on the Dreamcast over a network (with a Broadband Adapter).   |
 | **dcload-serial** | Allows loading and executing binaries on the Dreamcast via the serial port (with a "Coders Cable"). |
 | **flycast**       | A Dreamcast emulator with GDB support, ideal for debugging and testing without real hardware.       |
-| **lxdream-nitro** | A high-fidelity Dreamcast emulator (Community Edition).                                             |
+| **nitrocast**     | A high-fidelity Dreamcast emulator (Community Edition).                                             |
 | **makeip**        | Tool for creating 'IP.BIN' boot files for Dreamcast executables.                                    |
 | **mkdcdisc**      | Allows creating disc images in CDI format, compatible with emulators and for burning to CD-R.       |
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
@@ -50,7 +50,7 @@ You can install these tools with kosaio:
 
 * **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.
 * **makeip** is already included in KOS, but this version is more updated.
-* **flycast**, **lxdream-nitro** and **mame** emulators compile in the container but run on the host. They require BIOS files installed on the host.
+* **flycast**, **nitrocast** and **mame** emulators compile in the container but run on the host. They require BIOS files installed on the host.
 * Dependencies are installed automatically when a tool is requested. If you need to manually refresh them, use `kosaio install-deps system`.
 * More tools will be implemented. If you want to contribute, check the `scripts/registry` structure. If you have a tool suggestion, please open an issue!
 
