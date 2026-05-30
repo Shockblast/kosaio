@@ -100,15 +100,20 @@ export KOSAIO_LOG_MODE="${KOSAIO_LOG_MODE:-SIMPLE}"
 # =============================================================================
 function kosaio_get_tool_dir() {
 	local tool="$1"
-	local state_file="${KOSAIO_STATE_DIR}/${tool}_dev"
-	local base_dir
 
-	# 1. Determine base path based on mode and tool criticality
-	# PRIORITY: 
-	#   1. KOSAIO_DEV_MODE=1 (Forced Host/Dev)
-	#   2. KOSAIO_DEV_MODE=0 (Forced Container/Sys)
-	#   3. Persistent state file (dev-switch)
-	
+	# Delegate to Python engine (Single Source of Truth) when available
+	local ENGINE_PY="${KOSAIO_DIR}/scripts/engine/py/main.py"
+	if [ -f "$ENGINE_PY" ] && command -v python3 >/dev/null 2>&1; then
+		local py_result
+		py_result=$(python3 "$ENGINE_PY" get_tool_path "$tool" 2>/dev/null) && {
+			echo "$py_result"
+			return 0
+		}
+	fi
+
+	# Fallback: static resolution for bootstrap / minimal environments
+	local state_file="${KOSAIO_STATE_DIR}/${tool}_dev"
+
 	local use_dev=0
 	if [ "${KOSAIO_DEV_MODE:-}" = "1" ]; then
 		use_dev=1
@@ -120,24 +125,18 @@ function kosaio_get_tool_dir() {
 
 	local final_path
 	if [ "$use_dev" = "1" ]; then
-		# Host / Dev Mode always uses kosaio-dev root
 		final_path="${KOSAIO_DEV_ROOT}/${tool}"
 	else
-		# System / Container Mode
 		case "$tool" in
 			kos|kos-ports|sh-elf|arm-eabi|aicaos|extras|bin)
 				final_path="${DREAMCAST_SDK}/${tool}"
 				;;
 			*)
-				# Registry tools/libs go to extras/
 				final_path="${DREAMCAST_SDK}/extras/${tool}"
 				;;
 		esac
 
-		# 2. AUTO-PIVOT (Smart Detection)
-		# If the system path is missing but we are on a HOST, check if the dev path exists.
-		# This prevents "environ.sh missing" errors if the user is running on host 
-		# and has a local workspace ready, but hasn't explicitly switched mode.
+		# AUTO-PIVOT: on host, if system path missing, try dev path
 		if [ "$IS_CONTAINER" -eq 0 ] && [ ! -d "$final_path" ]; then
 			if [ -d "${KOSAIO_DEV_ROOT}/${tool}" ]; then
 				final_path="${KOSAIO_DEV_ROOT}/${tool}"

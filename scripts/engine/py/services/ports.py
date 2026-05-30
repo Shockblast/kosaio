@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List, Optional, Dict, Any
 
 from core.manifest import ManifestParser
@@ -56,6 +57,17 @@ class PortService:
         }
 
     @staticmethod
+    def _sanitize_port_name(name: str) -> Optional[str]:
+        """Validate and sanitize a port name. Returns None if name is unsafe."""
+        if not name or name.startswith("."):
+            return None
+        p = Path(name)
+        # Reject path traversal or absolute paths
+        if len(p.parts) != 1 or ".." in p.parts:
+            return None
+        return p.name
+
+    @staticmethod
     def resolve_port_name(input_name: str) -> Optional[str]:
         """
         Case-insensitive port name resolution.
@@ -63,18 +75,25 @@ class PortService:
         """
         from core.config import cfg
 
+        safe_name = PortService._sanitize_port_name(input_name)
+        if safe_name is None:
+            return None
+
+        ports_dir = cfg.system_kos_ports_dir
+        if not ports_dir.exists():
+            return None
+
         # 1. Exact match check
-        exact_path = cfg.system_kos_ports_dir / input_name / "Makefile"
+        exact_path = ports_dir / safe_name / "Makefile"
         if exact_path.exists():
-            return input_name
+            return safe_name
 
         # 2. Case-insensitive search
-        input_lower = input_name.lower()
-        if cfg.system_kos_ports_dir.exists():
-            for path in cfg.system_kos_ports_dir.iterdir():
-                if path.is_dir() and path.name.lower() == input_lower:
-                    if (path / "Makefile").exists():
-                        return path.name
+        input_lower = safe_name.lower()
+        for path in ports_dir.iterdir():
+            if path.is_dir() and path.name.lower() == input_lower:
+                if (path / "Makefile").exists():
+                    return path.name
 
         return None
 

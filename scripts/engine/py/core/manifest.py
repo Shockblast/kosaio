@@ -1,4 +1,5 @@
 import re
+import sys
 from pathlib import Path
 from typing import Optional, List, Dict
 from core.config import cfg
@@ -40,10 +41,15 @@ class ManifestParser:
         if not data['id']:
             return None
 
+        desc = data['desc']
+        if '|' in desc:
+            print(f"Warning: Description for '{data['id']}' contains '|' character (will be replaced)", file=sys.stderr)
+            desc = desc.replace('|', ' ')
+
         return Manifest(
             data['id'],
             data['name'],
-            data['desc'].replace('|', ' '),
+            desc,
             data['tags'],
             data['type'],
             str(path)
@@ -59,7 +65,10 @@ class ManifestParser:
             short_desc = "No description"
             match_desc = re.search(r'^SHORT_DESC\s*=\s*(.*)$', content, re.MULTILINE)
             if match_desc:
-                short_desc = match_desc.group(1).strip().replace('|', ' ')
+                short_desc = match_desc.group(1).strip()
+            if '|' in short_desc:
+                print(f"Warning: SHORT_DESC for '{lib_name}' contains '|' character (will be replaced)", file=sys.stderr)
+                short_desc = short_desc.replace('|', ' ')
 
             # Extract more technical fields for updates
             version = "unknown"
