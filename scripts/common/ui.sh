@@ -128,7 +128,3 @@ function log_box() {
 	fi
 }
 
-# Legacy Alias
-function log_alert_box() {
-	log_box --type=alert "$@"
-}

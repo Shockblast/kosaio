@@ -42,8 +42,6 @@ if [ -f "${KOSAIO_DIR}/kosaio.cfg" ]; then
 		
 		case "$key" in
 			PROJECTS_HOST_DIR) export PROJECTS_HOST_DIR="${value%/}" ;;
-			TOOL) export KOSAIO_TOOL="$value" ;;
-			CONTAINER_NAME) export KOSAIO_CONTAINER_NAME="$value" ;;
 		esac
 	done < "${KOSAIO_DIR}/kosaio.cfg"
 fi
@@ -149,15 +147,12 @@ function kosaio_get_tool_dir() {
 
 # --- Legacy and Global Exports ---
 export KOS_DIR="$(kosaio_get_tool_dir "kos")"
-export KOS_PORTS_DIR="$(kosaio_get_tool_dir "kos-ports")"
+export KOS_PORTS="$(kosaio_get_tool_dir "kos-ports")"
 
 export KOS_BASE="${KOS_DIR}"
-export KOS_PORTS="${KOS_PORTS_DIR}"
-export KOS_PORTS_BASE="${KOS_PORTS_DIR}"
 
 # Binaries location: We move it to extras/bin to keep root clean
 export DREAMCAST_BIN_PATH="${DREAMCAST_SDK}/extras/bin"
-export DREAMCAST_SDK_EXTRAS="${DREAMCAST_SDK}/extras"
 
 if [ "${KOSAIO_DEV_MODE:-0}" = "1" ]; then
 	export DREAMCAST_BIN_PATH="${KOSAIO_DEV_ROOT}/bin"
@@ -172,37 +167,6 @@ fi
 if [ -d "${KOS_BASE}/utils/build_wrappers" ]; then
 	export PATH="${KOS_BASE}/utils/build_wrappers:${PATH}"
 fi
-
-# --- Environment Validation Functions ---
-
-function kosaio_check_environment_vars() {
-	local errors=0
-	local required_vars=(
-		"DREAMCAST_SDK"
-		"PROJECTS_DIR"
-		"KOS_BASE"
-		"KOS_PORTS"
-	)
-
-	for var in "${required_vars[@]}"; do
-		if [ -z "${!var}" ]; then
-			echo "FAIL: $var is NOT set."
-			((errors++))
-		elif [ ! -d "${!var}" ]; then
-			# Not necessarily fatal for some wrappers, but worth noting
-			: 
-		fi
-	done
-	return $errors
-}
-
-function kosaio_check_toolchain() {
-	if ! command -v sh-elf-gcc >/dev/null 2>&1; then
-		echo "CRITICAL: sh-elf-gcc not found in PATH."
-		return 1
-	fi
-	return 0
-}
 
 # --- Configuration Self-Healing ---
 

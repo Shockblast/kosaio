@@ -3,8 +3,8 @@ set -e
 
 # Attempts to load the current KOSAIO environment
 if [ -z "$KOS_BASE" ]; then
-	if [ -f "/opt/kosaio/scripts/common/kos-pivot.sh" ]; then
-		source /opt/kosaio/scripts/common/kos-pivot.sh
+	if [ -f "/opt/kosaio/scripts/common/kos_pivot.sh" ]; then
+		source /opt/kosaio/scripts/common/kos_pivot.sh
 		kosaio_kos_pivot > /dev/null
 	fi
 fi

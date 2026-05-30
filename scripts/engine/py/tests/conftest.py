@@ -1,7 +1,6 @@
 import pytest
 import os
 import sys
-from pathlib import Path
 
 # Calculate project root: scripts/engine/py/tests/conftest.py -> kosaio/
 _test_dir = os.path.dirname(os.path.abspath(__file__))

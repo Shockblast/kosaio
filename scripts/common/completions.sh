@@ -1,6 +1,35 @@
 # scripts/common/completions.sh
 # Bash completion for KOSAIO
 
+__KOSAIO_CACHE_DIR="${TMPDIR:-/tmp}/kosaio-completions"
+__KOSAIO_CACHE_FILE="${__KOSAIO_CACHE_DIR}/targets"
+__KOSAIO_CACHE_TTL=60  # seconds
+
+function _kosaio_build_target_cache() {
+	local python_engine="${KOSAIO_DIR}/scripts/engine/py/main.py"
+	if [ ! -f "$python_engine" ] || ! command -v python3 >/dev/null 2>&1; then
+		return 1
+	fi
+	mkdir -p "$__KOSAIO_CACHE_DIR" 2>/dev/null || return 1
+	python3 "$python_engine" update_cache 2>/dev/null | cut -d'|' -f1 > "$__KOSAIO_CACHE_FILE"
+}
+
+function _kosaio_get_targets() {
+	local cache_age
+	if [ -f "$__KOSAIO_CACHE_FILE" ]; then
+		local now mtime
+		now=$(date +%s)
+		mtime=$(stat -c %Y "$__KOSAIO_CACHE_FILE" 2>/dev/null || echo 0)
+		cache_age=$(( now - mtime ))
+		if [ "$cache_age" -lt "$__KOSAIO_CACHE_TTL" ]; then
+			cat "$__KOSAIO_CACHE_FILE" 2>/dev/null
+			return
+		fi
+	fi
+	_kosaio_build_target_cache
+	cat "$__KOSAIO_CACHE_FILE" 2>/dev/null
+}
+
 function _kosaio_completions() {
 	local cur prev opts targets
 	COMPREPLY=()
@@ -10,13 +39,8 @@ function _kosaio_completions() {
 	# Main actions (Updated to match driver_manager capabilities)
 	opts="list search dev-switch create-project self-update info install uninstall update diagnose apply build"
 
-	# Dynamic Target Discovery via Python Engine (Fast)
-	# We fetch both Registry Tools and Ports
-	local python_engine="${KOSAIO_DIR}/scripts/engine/py/main.py"
-	if [ -f "$python_engine" ] && command -v python3 >/dev/null 2>&1; then
-		# Using 'update_cache' internally just to dump the list raw
-		targets=$(python3 "$python_engine" update_cache 2>/dev/null | cut -d'|' -f1)
-	fi
+	# Dynamic Target Discovery via Python Engine (cached)
+	targets=$(_kosaio_get_targets)
 
 	case "${prev}" in
 		kosaio)

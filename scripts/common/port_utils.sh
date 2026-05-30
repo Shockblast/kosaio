@@ -6,7 +6,7 @@
 # Checks if a port is installed and returns its version
 function ports_get_installed_version() {
 	local lib_name="$1"
-	local version_file="${KOS_PORTS_DIR}/lib/.kos-ports/${lib_name}"
+	local version_file="${KOS_PORTS}/lib/.kos-ports/${lib_name}"
 
 	if [ -f "${version_file}" ]; then
 		cat "${version_file}"

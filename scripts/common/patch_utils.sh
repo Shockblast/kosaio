@@ -19,10 +19,6 @@ function kosaio_apply_patches() {
 
 	log_info "Applying patches for ${C_BLUE}${patch_group}${C_RESET}..."
 
-	# Ensure we have git or patch installed (DEPS should cover this)
-	local has_patch=false
-	command -v patch &> /dev/null && has_patch=true
-
 	while IFS= read -r -d '' patch_file; do
 		local patch_name="$(basename "$patch_file")"
 		

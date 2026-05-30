@@ -37,8 +37,7 @@ function kosaio_kos_pivot() {
 
 	# 4b. PATH PROTECTION: Re-enforce KOSAIO's choice for Ports
 	# This prevents environ.sh from hijacking the path back to container defaults.
-	export KOS_PORTS="${KOS_PORTS_DIR}"
-	export KOS_PORTS_BASE="${KOS_PORTS_DIR}"
+	export KOS_PORTS="${KOS_PORTS}"
 
 	# 5. Re-inject KOSAIO Extras Bin (it might have been wiped by cleanup)
 	if [ -d "${DREAMCAST_BIN_PATH:-}" ]; then

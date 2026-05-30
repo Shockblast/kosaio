@@ -32,7 +32,6 @@ else
 	function log_info() { echo -e "[INFO] $*"; }
 	function log_warn() { echo -e "[WARN] $*"; }
 	function log_error() { echo -e "[ERROR] $*" >&2; }
-	function kosaio_echo() { echo -e "$*"; }
 fi
 
 log_info --draw-line "	KOSAIO Environment Setup Tool	  "
@@ -93,7 +92,7 @@ function status_check() {
 	if "${TOOL}" images -q "${IMAGE_NAME}" >/dev/null 2>&1; then
 		printf "  %-20s: ${C_GREEN}EXISTS${NC}\n" "Image"
 	else
-		printf "  %-20s: ${P_RED}MISSING${NC}\n" "Image"
+		printf "  %-20s: ${RED}MISSING${NC}\n" "Image"
 	fi
 	
 	if "${TOOL}" ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then

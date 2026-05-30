@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 from services.ui import UI
 from services.status import StatusService
 from core.config import cfg

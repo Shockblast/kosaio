@@ -107,7 +107,7 @@ function _ports_check_update_status() {
 			eval "${force_reinstall_ref}=true"
 		elif [ -n "$git_repo" ] && [[ "${FUNCNAME[2]}" == "ports_update" ]]; then
 			if [[ "$current_ver" =~ ^[0-9] ]] && [ "${!force_reinstall_ref}" = false ] && [ "${KOSAIO_BULK_UPDATE:-0}" = "1" ]; then
-				local hash_file="${KOS_PORTS_DIR}/lib/.kos-ports/${lib_name}.hash"
+				local hash_file="${KOS_PORTS}/lib/.kos-ports/${lib_name}.hash"
 				if [ -f "$hash_file" ]; then
 					echo ""
 					log_success "${lib_name} is already installed (${installed_ver}) and is a stable version. Skipping git check in bulk update."
@@ -121,7 +121,7 @@ function _ports_check_update_status() {
 			[ -n "$git_branch" ] && ref_match="refs/heads/${git_branch}"
 			
 			remote_hash=$(git ls-remote "$git_repo" "$ref_match" 2>/dev/null | awk '{print $1}')
-			local hash_file="${KOS_PORTS_DIR}/lib/.kos-ports/${lib_name}.hash"
+			local hash_file="${KOS_PORTS}/lib/.kos-ports/${lib_name}.hash"
 			[ -f "$hash_file" ] && local_hash=$(cat "$hash_file")
 
 			if [ -n "$remote_hash" ] && [ "$remote_hash" != "$local_hash" ]; then
@@ -163,8 +163,7 @@ function _ports_execute_install() {
 	[ -f "${KOS_BASE}/environ.sh" ] && source "${KOS_BASE}/environ.sh"
 	
 	# PATH PROTECTION: Re-enforce KOSAIO's Choice
-	export KOS_PORTS="${KOS_PORTS_DIR}"
-	export KOS_PORTS_BASE="${KOS_PORTS_DIR}"
+	export KOS_PORTS="${KOS_PORTS}"
 
 	local make_targets="install"
 	[ "${KOSAIO_CLEAN_AFTER:-false}" = true ] && make_targets="install clean"
@@ -177,12 +176,12 @@ function _ports_execute_install() {
 
 	_ports_snapshot "${pre_snap}"
 	
-	if ! check_dir_soft "${KOS_PORTS_DIR}/${lib_name}"; then
+	if ! check_dir_soft "${KOS_PORTS}/${lib_name}"; then
 		log_warn "Source for ${lib_name} not found. Skipping."
 		return 1
 	fi
 
-	if (cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} ${make_targets}); then
+	if (cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} ${make_targets}); then
 		_ports_snapshot "${post_snap}"
 		comm -13 "${pre_snap}" "${post_snap}" > "${manifest_file}"
 
@@ -190,7 +189,7 @@ function _ports_execute_install() {
 			local ref_match="HEAD"
 			[ -n "$git_branch" ] && ref_match="refs/heads/${git_branch}"
 			local current_hash=$(git ls-remote "$git_repo" "$ref_match" 2>/dev/null | awk '{print $1}')
-			[ -n "$current_hash" ] && echo "$current_hash" > "${KOS_PORTS_DIR}/lib/.kos-ports/${lib_name}.hash"
+			[ -n "$current_hash" ] && echo "$current_hash" > "${KOS_PORTS}/lib/.kos-ports/${lib_name}.hash"
 		fi
 
 		log_success "${lib_name} installed."
@@ -252,9 +251,9 @@ function ports_uninstall() {
 		fi
 
 		log_info --draw-line "Uninstalling ${lib_name}..."
-		local lib_dir="${KOS_PORTS_DIR}/${lib_name}"
+		local lib_dir="${KOS_PORTS}/${lib_name}"
 		local manifest_file="${KOS_BASE}/.kos-manifest/${lib_name}.manifest"
-		local tracking_file="${KOS_PORTS_DIR}/lib/.kos-ports/${lib_name}"
+		local tracking_file="${KOS_PORTS}/lib/.kos-ports/${lib_name}"
 
 		# 1. Try standard uninstall (Best Effort) + Deep Cleanup
 		# Use 'distclean' to remove downloaded source tarballs/folders
@@ -283,7 +282,7 @@ function ports_uninstall() {
 
 		# 3. Cleanup tracking and common include dirs
 		rm -f "${tracking_file}"
-		rm -rf "${KOS_PORTS_DIR}/include/${lib_name}" 2>/dev/null || true
+		rm -rf "${KOS_PORTS}/include/${lib_name}" 2>/dev/null || true
 		rm -rf "${KOS_BASE}/include/${lib_name}" 2>/dev/null || true
 
 		log_success "${lib_name} uninstalled."

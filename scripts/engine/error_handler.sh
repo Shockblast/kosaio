@@ -19,8 +19,4 @@ function kosaio_suggest_fix() {
 
 }
 
-# Optional: Global Trap (Use with caution in legacy scripts)
-function kosaio_enable_strict_mode() {
-	set -e
-	trap 'log_error "Command failed at line $LINENO"; kosaio_suggest_fix "$BASH_COMMAND" "$?"' ERR
-}
+

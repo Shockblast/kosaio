@@ -18,7 +18,7 @@ function _ports_snapshot() {
 	local file="$1"
 	# Snapshot relevant directories, including KOS_PORTS symlinks
 	find "${KOS_BASE}/lib" "${KOS_BASE}/include" "${KOS_BASE}/addons" \
-		 "${KOS_PORTS_DIR}/lib" "${KOS_PORTS_DIR}/include" \
+		 "${KOS_PORTS}/lib" "${KOS_PORTS}/include" \
 		 \( -type f -o -type l \) 2>/dev/null | sort > "${file}"
 }
 

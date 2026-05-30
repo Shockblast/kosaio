@@ -1,14 +1,11 @@
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Dict, Union
 from core.config import cfg
 
 
 class StatusService:
     @staticmethod
     def get_status_data(item_id: str, item_type: str) -> Dict[str, Union[str, bool]]:
-        c_source = False
-        h_source = False
-
         c_inst = cfg.get_installed_version(item_id, mode="0") is not None
         h_inst = cfg.get_installed_version(item_id, mode="1") is not None
 

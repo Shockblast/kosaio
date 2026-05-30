@@ -9,7 +9,7 @@ function ports_clone() {
 	local targets=()
 
 	if [ "$#" -eq 0 ] || [ "$1" = "all" ]; then
-		for lib_dir in $(find "${KOS_PORTS_DIR}" -maxdepth 1 -type d); do
+		for lib_dir in $(find "${KOS_PORTS}" -maxdepth 1 -type d); do
 			if [ -f "${lib_dir}/Makefile" ]; then
 				local lib_name=$(basename "${lib_dir}")
 				# Skip special directories
@@ -31,7 +31,7 @@ function ports_clone() {
 		fi
 
 		log_info --draw-line "Fetching source for ${lib_name}..."
-		if (cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} fetch); then
+		if (cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} fetch); then
 			log_success "Source for ${lib_name} downloaded."
 			success_libs+=("${lib_name}")
 		else
@@ -50,7 +50,7 @@ function ports_checkout() {
 		return 1
 	fi
 
-	local lib_dir="${KOS_PORTS_DIR}/${lib_name}"
+	local lib_dir="${KOS_PORTS}/${lib_name}"
 	check_dir_soft "${lib_dir}" "Port source not found for ${lib_name}" || return 1
 	local git_dist_dir=$(find "${lib_dir}/dist" -maxdepth 2 -name ".git" -type d -print -quit 2>/dev/null | xargs dirname 2>/dev/null)
 
@@ -75,9 +75,9 @@ function ports_reset() {
 		return 1
 	fi
 
-	check_dir_soft "${KOS_PORTS_DIR}/${lib_name}" "Port source not found" || return 1
+	check_dir_soft "${KOS_PORTS}/${lib_name}" "Port source not found" || return 1
 	log_info --draw-line "Resetting ${lib_name} to official version..."
-	if (cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} fetch); then
+	if (cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} fetch); then
 		log_success "${lib_name} reset successful."
 	else
 		log_error "Failed to reset ${lib_name}."
@@ -89,7 +89,7 @@ function ports_clean() {
 	for lib_name in "$@"; do
 		if _ports_validate_library "${lib_name}"; then
 			log_info --draw-line "Cleaning ${lib_name}..."
-			(cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} clean)
+			(cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} clean)
 			log_success "${lib_name} cleaned."
 		fi
 	done
@@ -104,7 +104,7 @@ function ports_update() {
 	# If there are arguments, we handle them individually
 	if [ "$#" -gt 0 ]; then
 		# Always update the recipe repository first
-		kosaio_git_common_update "${KOS_PORTS_DIR}" || true
+		kosaio_git_common_update "${KOS_PORTS}" || true
 		
 		# Now run install for each target. 
 		# Our new smart ports_install will detect version changes.
@@ -113,9 +113,9 @@ function ports_update() {
 	else
 		# Just pull changes for the main repo
 		local status=0
-		kosaio_git_common_update "${KOS_PORTS_DIR}" || status=$?
+		kosaio_git_common_update "${KOS_PORTS}" || status=$?
 		if [ $status -eq 1 ]; then
-			(cd "${KOS_PORTS_DIR}" && git submodule update --init --recursive)
+			(cd "${KOS_PORTS}" && git submodule update --init --recursive)
 			log_success "kos-ports updated successfully."
 			return 11
 		elif [ $status -eq 0 ]; then
@@ -140,13 +140,13 @@ function ports_build() {
 			continue
 		fi
 
-		check_dir_soft "${KOS_PORTS_DIR}/${lib_name}" "Port source not found" || continue
+		check_dir_soft "${KOS_PORTS}/${lib_name}" "Port source not found" || continue
 		log_info --draw-line "Building ${lib_name}..."
 		local make_targets="build-stamp"
 		[ "${KOSAIO_CLEAN_AFTER:-false}" = true ] && make_targets="build-stamp clean"
 
 		local broken_marker="${HOME}/.kosaio/states/${lib_name}_broken"
-		if (cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} ${make_targets}); then
+		if (cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} ${make_targets}); then
 			rm -f "${broken_marker}"
 			log_success "${lib_name} built."
 			success_libs+=("${lib_name}")
@@ -173,10 +173,10 @@ function ports_apply() {
 			continue
 		fi
 
-		check_dir_soft "${KOS_PORTS_DIR}/${lib_name}" "Port source not found" || continue
+		check_dir_soft "${KOS_PORTS}/${lib_name}" "Port source not found" || continue
 		log_info --draw-line "Applying ${lib_name}..."
 		local broken_marker="${HOME}/.kosaio/states/${lib_name}_broken"
-		if (cd "${KOS_PORTS_DIR}/${lib_name}" && ${KOS_MAKE} install); then
+		if (cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} install); then
 			rm -f "${broken_marker}"
 			log_success "${lib_name} applied."
 			success_libs+=("${lib_name}")

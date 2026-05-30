@@ -94,7 +94,6 @@ function kosaio_standard_update_flow() {
 	local repo_dir="$3"
 	local build_cmd="${4:-}"
 	local apply_cmd="${5:-}"
-	local original_args=("$@")
 	shift 5 || shift 3 # Handle 3 or 5 positional args
 	
 	local force_build=0

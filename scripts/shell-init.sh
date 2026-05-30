@@ -54,7 +54,7 @@ function kreload() {
 
 alias ksdk='cd /opt/toolchains/dc'
 alias kkos='cd ${KOS_BASE}'
-alias kports='cd ${KOS_PORTS_DIR}'
+alias kports='cd ${KOS_PORTS}'
 alias kproj='cd /opt/projects'
 alias kreload='kreload'
 

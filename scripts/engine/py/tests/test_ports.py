@@ -1,4 +1,3 @@
-import pytest
 from services.ports import PortService
 
 class TestPortNameSanitization:

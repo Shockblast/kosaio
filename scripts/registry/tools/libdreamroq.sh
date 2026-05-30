@@ -13,27 +13,27 @@ DEPS="build-essential git"
 
 function reg_check_health() {
 	# 1. Require kos-ports
-	[ -d "${KOS_PORTS_DIR}" ] || return 1
+	[ -d "${KOS_PORTS}" ] || return 1
 	
 	# 2. Check source inside kos-ports
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
+	local tool_dir="${KOS_PORTS}/${ID}"
 	[ -d "$tool_dir" ] || return 2
 	
 	# 3. Check for the compiled library
 	[ -f "${tool_dir}/libdreamroq.a" ] || return 3
 	
 	# 4. Check for headers link (created by Makefile)
-	[ -d "${KOS_PORTS_DIR}/include/dreamroq" ] || return 4
+	[ -d "${KOS_PORTS}/include/dreamroq" ] || return 4
 	
 	return 0
 }
 
 function reg_info() {
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
+	local tool_dir="${KOS_PORTS}/${ID}"
 	local status="${C_RED}Not Compiled${C_RESET}"
 	local kos_ports_status="${C_GREEN}Found${C_RESET}"
 	
-	if [ ! -d "${KOS_PORTS_DIR}" ]; then
+	if [ ! -d "${KOS_PORTS}" ]; then
 		kos_ports_status="${C_RED}MISSING${C_RESET}"
 	fi
 
@@ -50,19 +50,19 @@ function reg_info() {
 }
 
 function reg_clone() {
-	if [ ! -d "${KOS_PORTS_DIR}" ]; then
+	if [ ! -d "${KOS_PORTS}" ]; then
 		log_error "KOS-PORTS is missing. libdreamroq requires it to be installed first."
 		log_info "Tip: Run ${C_CYAN}kosaio install kos-ports${C_RESET}"
 		return 1
 	fi
 
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
+	local tool_dir="${KOS_PORTS}/${ID}"
 	log_info --draw-line "Cloning libdreamroq into KOS-PORTS..."
 	kosaio_git_clone https://github.com/Shockblast/libdreamroq.git "${tool_dir}"
 }
 
 function reg_build() {
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
+	local tool_dir="${KOS_PORTS}/${ID}"
 	[ -d "$tool_dir" ] || { log_error "libdreamroq source missing. Run 'kosaio clone ${ID}' first."; return 1; }
 	
 	if [ -z "${KOS_BASE:-}" ]; then
@@ -73,7 +73,7 @@ function reg_build() {
 	log_info --draw-line "Building libdreamroq..."
 	
 	# We must ensure the parent include directory exists in kos-ports.
-	mkdir -p "${KOS_PORTS_DIR}/include"
+	mkdir -p "${KOS_PORTS}/include"
 
 	# We use defaultall which builds lib, samples AND creates the symlink
 	(cd "${tool_dir}" && make defaultall)
@@ -81,8 +81,8 @@ function reg_build() {
 
 function reg_apply() {
 	log_info "Verifying libdreamroq installation..."
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
-	local link_path="${KOS_PORTS_DIR}/include/dreamroq"
+	local tool_dir="${KOS_PORTS}/${ID}"
+	local link_path="${KOS_PORTS}/include/dreamroq"
 
 	# Check if it exists and is a valid directory (or valid link to directory)
 	if [ -d "${link_path}" ]; then
@@ -95,7 +95,7 @@ function reg_apply() {
 		fi
 		
 		if [ -d "${tool_dir}/include" ]; then
-			mkdir -p "${KOS_PORTS_DIR}/include"
+			mkdir -p "${KOS_PORTS}/include"
 			ln -sf "../${ID}/include" "${link_path}"
 			log_success "Headers link restored."
 		else
@@ -113,19 +113,19 @@ function reg_install() {
 }
 
 function reg_uninstall() {
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
+	local tool_dir="${KOS_PORTS}/${ID}"
 	rm -rf "$tool_dir"
-	rm -f "${KOS_PORTS_DIR}/include/dreamroq"
+	rm -f "${KOS_PORTS}/include/dreamroq"
 	log_success "libdreamroq removed from KOS-PORTS."
 }
 
 function reg_update() {
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
+	local tool_dir="${KOS_PORTS}/${ID}"
 	kosaio_standard_update_flow "${ID}" "libdreamroq" "$tool_dir" "$@"
 }
 
 function reg_clean() {
-	local tool_dir="${KOS_PORTS_DIR}/${ID}"
+	local tool_dir="${KOS_PORTS}/${ID}"
 	[ -d "$tool_dir" ] && (cd "${tool_dir}" && make clean)
 	log_success "libdreamroq cleaned."
 }

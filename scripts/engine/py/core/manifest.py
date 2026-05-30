@@ -1,7 +1,7 @@
 import re
 import sys
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional, List
 from core.config import cfg
 
 class Manifest:
@@ -114,7 +114,7 @@ class ManifestParser:
             match = re.search(r'^DEPENDENCIES\s*=\s*(.*)$', content, re.MULTILINE)
             if match:
                 return match.group(1).split('#')[0].split()
-        except:
+        except Exception:
             pass
         return []
 

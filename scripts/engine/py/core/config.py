@@ -10,7 +10,7 @@ class Config:
         self.dev_root = self.projects_root / "kosaio-dev"
         self.state_dir = Path.home() / ".kosaio" / "states"
         self.dev_mode = os.environ.get("KOSAIO_DEV_MODE")
-        self.kos_ports_dir_override = os.environ.get("KOS_PORTS_DIR")
+        self.kos_ports_dir_override = os.environ.get("KOS_PORTS")
 
     def get_tool_dir(self, tool: str, force_mode: Optional[str] = None) -> Path:
         mode = force_mode if force_mode is not None else self.dev_mode
