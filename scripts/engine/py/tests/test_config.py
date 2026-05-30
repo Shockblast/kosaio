@@ -9,13 +9,13 @@ class TestConfig:
         monkeypatch.delenv("DREAMCAST_SDK", raising=False)
         monkeypatch.delenv("PROJECTS_DIR", raising=False)
         c = Config()
-        assert c.kosaio_dir == "/opt/kosaio"
-        assert c.sdk_root == "/opt/toolchains/dc"
-        assert c.projects_root == "/opt/projects"
+        assert c.kosaio_dir == Path("/opt/kosaio")
+        assert c.sdk_root == Path("/opt/toolchains/dc")
+        assert c.projects_root == Path("/opt/projects")
 
     def test_dev_root_uses_path_join(self):
         c = Config()
-        assert c.dev_root == "/opt/projects/kosaio-dev"
+        assert c.dev_root == Path("/opt/projects/kosaio-dev")
 
     def test_get_tool_dir_container_mode(self):
         c = Config()

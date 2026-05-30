@@ -55,12 +55,54 @@ class UI:
         return f"{s}{padding}"
 
     @staticmethod
+    def _char_width(char: str) -> int:
+        """Visible column width of a single character (0 for combining marks)."""
+        import unicodedata
+        if unicodedata.category(char) == 'Mn':
+            return 0
+        if unicodedata.east_asian_width(char) in ('W', 'F', 'A'):
+            return 2
+        return 1
+
+    @staticmethod
     def truncate(s: str, width: int) -> str:
-        """Truncates string to visible width."""
-        vlen = UI.visual_len(s)
-        if vlen > width:
-            return s[:width-3] + "..."
-        return s
+        """Truncate to visible width, preserving ANSI codes and cutting at word boundaries."""
+        if UI.visual_len(s) <= width:
+            return s
+
+        result_chars = []
+        vis = 0
+        target = width - 3
+        in_ansi = False
+        ansi_buf = ""
+
+        for c in s:
+            if in_ansi:
+                ansi_buf += c
+                if c == 'm':
+                    result_chars.append(ansi_buf)
+                    ansi_buf = ""
+                    in_ansi = False
+                continue
+            if c == '\033':
+                in_ansi = True
+                ansi_buf = c
+                continue
+
+            cw = UI._char_width(c)
+            if vis + cw > target:
+                break
+            result_chars.append(c)
+            vis += cw
+
+        result = "".join(result_chars)
+
+        # Cut at last word boundary for readability
+        last_space = result.rfind(' ')
+        if last_space > 3:
+            result = result[:last_space]
+
+        return result + "..."
 
     @staticmethod
     def render_box(title: str, lines: List[str], type: str = "default", width: int = 66) -> str:
