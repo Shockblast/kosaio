@@ -1,13 +1,4 @@
-import sys
-import os
 from typing import List, Optional, Dict, Any
-
-# Fix path to allow absolute imports within the package
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
 
 from core.manifest import ManifestParser
 

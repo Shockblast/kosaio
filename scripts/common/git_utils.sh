@@ -57,7 +57,7 @@ function kosaio_git_common_update() {
 		fi
 
 		local base_rev=$(git merge-base HEAD "${upstream}")
-		local log_file="/tmp/kosaio_update_${id:-unknown}.log"
+		local log_file="/tmp/kosaio_update_$(basename "${repo_dir}").log"
 		rm -f "$log_file"
 
 		if [[ "${local_rev}" == "${remote_rev}" ]]; then

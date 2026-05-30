@@ -51,7 +51,7 @@ fi
 # Framework Update Branch (Defaults to current branch)
 if [ -z "${KOSAIO_BRANCH:-}" ]; then
 	if [ -d "${KOSAIO_DIR}/.git" ]; then
-		export KOSAIO_BRANCH=$(git -C "${KOSAIO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "master")
+		export KOSAIO_BRANCH="$(git -C "${KOSAIO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "master")"
 	else
 		export KOSAIO_BRANCH="master"
 	fi
@@ -149,8 +149,8 @@ function kosaio_get_tool_dir() {
 }
 
 # --- Legacy and Global Exports ---
-export KOS_DIR=$(kosaio_get_tool_dir "kos")
-export KOS_PORTS_DIR=$(kosaio_get_tool_dir "kos-ports")
+export KOS_DIR="$(kosaio_get_tool_dir "kos")"
+export KOS_PORTS_DIR="$(kosaio_get_tool_dir "kos-ports")"
 
 export KOS_BASE="${KOS_DIR}"
 export KOS_PORTS="${KOS_PORTS_DIR}"

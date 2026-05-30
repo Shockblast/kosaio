@@ -1,4 +1,5 @@
 #!/bin/bash
+set -Eeuo pipefail
 # scripts/commands/tool.sh
 # KOSAIO Utility Wrapper specific to Dreamcast SDK tools
 

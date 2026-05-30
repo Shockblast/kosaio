@@ -7,7 +7,6 @@ Exit Codes:
     2: Target found but action not supported
     3: Dependency missing (e.g., kos-ports not installed for port targets)
 """
-import sys
 from pathlib import Path
 
 from core.config import cfg

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -Eeuo pipefail
 # scripts/engine/ports/checks.sh
 
 function _ports_check_exists() {

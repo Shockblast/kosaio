@@ -45,10 +45,11 @@ function kosaio_install_core_sdk_deps() {
 	log_info --draw-line "Installing KOSAIO Master dependencies from file..."
 
 	# Parse file: remove comments, remove empty lines, and join into a single line
-	local deps=$(grep -v '^#' "$deps_file" | grep -v '^$' | xargs)
+	local deps
+	mapfile -t deps < <(grep -v '^#' "$deps_file" | grep -v '^$')
 
-	if [ -n "$deps" ]; then
-		kosaio_install_apt_deps $deps
+	if [ ${#deps[@]} -gt 0 ]; then
+		kosaio_install_apt_deps "${deps[@]}"
 		log_success "All master dependencies are installed."
 	else
 		log_warn "Dependency file is empty."

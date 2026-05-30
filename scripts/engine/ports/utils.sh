@@ -1,4 +1,5 @@
 #!/bin/bash
+set -Eeuo pipefail
 # scripts/engine/ports/utils.sh
 
 function ports_resolve_name() {

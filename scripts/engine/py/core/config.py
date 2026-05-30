@@ -7,7 +7,7 @@ class Config:
         self.kosaio_dir = os.environ.get("KOSAIO_DIR", "/opt/kosaio")
         self.sdk_root = os.environ.get("DREAMCAST_SDK", "/opt/toolchains/dc")
         self.projects_root = os.environ.get("PROJECTS_DIR", "/opt/projects")
-        self.dev_root = f"{self.projects_root}/kosaio-dev"
+        self.dev_root = str(Path(self.projects_root) / "kosaio-dev")
         self.state_dir = Path.home() / ".kosaio" / "states"
         self.dev_mode = os.environ.get("KOSAIO_DEV_MODE")
         self.kos_ports_dir_override = os.environ.get("KOS_PORTS_DIR")

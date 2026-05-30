@@ -23,8 +23,8 @@ function kosaio_apply_patches() {
 	local has_patch=false
 	command -v patch &> /dev/null && has_patch=true
 
-	for patch_file in $(find "$patches_dir" -name "*.patch" | sort); do
-		local patch_name=$(basename "$patch_file")
+	while IFS= read -r -d '' patch_file; do
+		local patch_name="$(basename "$patch_file")"
 		
 		# 1. Check if already applied (can it be reversed?)
 		if (cd "$target_dir" && patch -p1 -Rs --dry-run < "$patch_file" &> /dev/null); then
@@ -45,7 +45,7 @@ function kosaio_apply_patches() {
 			log_error "Error: ${patch_name} cannot be applied (Conflict or already modified)."
 			return 1
 		fi
-	done
+	done < <(find "$patches_dir" -name "*.patch" -print0 | sort -z)
 
 	return 0
 }

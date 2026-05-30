@@ -131,11 +131,7 @@ function reg_install() {
 }
 
 function reg_uninstall() {
-	log_warn "This will remove the entire Dreamcast Toolchain."
-	log_warn "paths: ${DREAMCAST_SDK}/sh-elf, ${DREAMCAST_SDK}/arm-eabi"
-	log_warn "Are you sure? (y/n)"
-	read -r CONFIRM
-	if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+	if confirm "This will remove the entire Dreamcast Toolchain (${DREAMCAST_SDK}/sh-elf, ${DREAMCAST_SDK}/arm-eabi). Are you sure?" "N"; then
 		log_info "Removing Toolchain..."
 		rm -rf "${DREAMCAST_SDK}/sh-elf"
 		rm -rf "${DREAMCAST_SDK}/arm-eabi"

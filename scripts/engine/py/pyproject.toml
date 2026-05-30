@@ -1,0 +1,8 @@
+[project]
+name = "kosaio-engine"
+version = "1.0.0"
+description = "KOSAIO Python Engine - Single Source of Truth"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["."]

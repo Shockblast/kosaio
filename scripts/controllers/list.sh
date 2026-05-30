@@ -1,4 +1,5 @@
 #!/bin/bash
+set -Eeuo pipefail
 # scripts/controllers/list.sh
 # Handles list and search operations
 

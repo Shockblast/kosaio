@@ -1,4 +1,5 @@
 #!/bin/bash
+set -Eeuo pipefail
 # scripts/controllers/dev.sh
 # Handles development environment switching (Container vs Host)
 
