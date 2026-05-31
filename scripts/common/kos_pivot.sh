@@ -18,7 +18,8 @@ function kosaio_kos_pivot() {
 	unset DC_ARM_BASE DC_ARM_PREFIX DC_ARM_LDFLAGS
 
 	# Path Cleanup (Remove previous toolchains and dev workspace from PATH)
-	local CLEAN_PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "toolchains" | grep -v "kosaio-dev" | tr "\n" ":" | sed 's/:$//')
+	local CLEAN_PATH
+	CLEAN_PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "toolchains" | grep -v "kosaio-dev" | tr "\n" ":" | sed 's/:$//')
 	export PATH="${CLEAN_PATH}"
 
 	# 3. Check if the target environment exists
@@ -33,6 +34,7 @@ function kosaio_kos_pivot() {
 
 	# 4. Source the environment
 	# Standard KOS environ.sh will populate PATH and variables
+	# shellcheck source=/dev/null
 	source "${target_environ}" > /dev/null 2>&1
 
 	# 4b. PATH PROTECTION: Re-enforce KOSAIO's choice for Ports

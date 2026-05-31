@@ -229,5 +229,9 @@ function _router_handle_update_all() {
 	echo ""
 	log_info "Summary: ${C_B_CYAN}$count_updated${C_RESET} updated, ${C_GRAY}$count_uptodate${C_RESET} up-to-date, ${C_RED}$count_error${C_RESET} failed."
 	
-	[ $count_error -eq 0 ] && log_success "Bulk update complete." || log_error "Bulk update finished with some errors."
+	if [ $count_error -eq 0 ]; then
+		log_success "Bulk update complete."
+	else
+		log_error "Bulk update finished with some errors."
+	fi
 }

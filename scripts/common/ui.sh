@@ -1,15 +1,19 @@
+#!/bin/bash
 # --- Color Palette ---
 # Using raw ESC characters for reliable printing
 ESC=$'\e'
 C_RESET="${ESC}[0m"
+# shellcheck disable=SC2034
 C_BOLD="${ESC}[1m"
 C_CYAN="${ESC}[0;36m"
 C_B_CYAN="${ESC}[1;36m"
+# shellcheck disable=SC2034
 C_BLUE="${ESC}[1;34m"
 C_GREEN="${ESC}[1;32m"
 C_YELLOW="${ESC}[1;33m"
 C_RED="${ESC}[1;31m"
 C_GRAY="${ESC}[0;90m"
+# shellcheck disable=SC2034
 C_MAGENTA="${ESC}[0;35m"
 C_B_MAGENTA="${ESC}[1;35m"
 
@@ -28,7 +32,8 @@ function _log_msg() {
 	local level="$1"
 	local color="$2"
 	local msg="$3"
-	local ts=$(_get_timestamp)
+	local ts
+	ts=$(_get_timestamp)
 
 	if [ -n "$ts" ]; then
 		printf "%s[%s] %s:%s %s\n" "${color}" "${ts}" "${level}" "${C_RESET}" "${msg}" >&2
@@ -83,7 +88,7 @@ function confirm() {
 		prompt="[y/N]"
 	fi
 
-	printf "${C_B_MAGENTA}?? ${C_RESET}${msg} ${C_GRAY}${prompt}${C_RESET} " >&2
+	printf '%s?? %s%s %s%s ' "${C_B_MAGENTA}" "${C_RESET}" "${msg}" "${C_GRAY}${prompt}" "${C_RESET}" >&2
 	read -r response
 	response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 

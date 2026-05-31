@@ -1,3 +1,4 @@
+#!/bin/bash
 # scripts/common/port_utils.sh
 # Shared utilities for checking KOS-PORTS installation state.
 

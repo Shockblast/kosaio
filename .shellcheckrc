@@ -1,0 +1,2 @@
+# shellcheck cannot resolve source paths using variables like ${KOSAIO_DIR}
+disable=SC1091

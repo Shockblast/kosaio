@@ -40,24 +40,32 @@ function kosaio_git_common_update() {
 			fi
 		fi
 
-		local old_head=$(git rev-parse HEAD)
-		local current_branch=$(git rev-parse --abbrev-ref HEAD)
-		local branch_to_update="${target_branch:-$current_branch}"
+		local old_head
+		old_head=$(git rev-parse HEAD)
+		local current_branch
+		current_branch=$(git rev-parse --abbrev-ref HEAD)
+		local branch_to_update
+		branch_to_update="${target_branch:-$current_branch}"
 
 		log_info "Fetching ${branch_to_update} from origin..."
 		git fetch origin "${branch_to_update}" --depth=1 || return 2
 
-		local upstream="origin/${branch_to_update}"
-		local local_rev=$(git rev-parse HEAD)
-		local remote_rev=$(git rev-parse "${upstream}" 2>/dev/null)
+		local upstream
+		upstream="origin/${branch_to_update}"
+		local local_rev
+		local_rev=$(git rev-parse HEAD)
+		local remote_rev
+		remote_rev=$(git rev-parse "${upstream}" 2>/dev/null)
 
 		if [[ -z "$remote_rev" ]]; then
 			log_warn "Target branch '${branch_to_update}' not found on remote. Skipping."
 			return 0
 		fi
 
-		local base_rev=$(git merge-base HEAD "${upstream}")
-		local log_file="/tmp/kosaio_update_$(basename "${repo_dir}").log"
+		local base_rev
+		base_rev=$(git merge-base HEAD "${upstream}")
+		local log_file
+		log_file="/tmp/kosaio_update_$(basename "${repo_dir}").log"
 		rm -f "$log_file"
 
 		if [[ "${local_rev}" == "${remote_rev}" ]]; then
@@ -105,15 +113,8 @@ function kosaio_standard_update_flow() {
 	kosaio_git_common_update "${repo_dir}" || status=$?
 
 	# If forced build, we treat it as if changes were found (status 1)
-	local default_confirm="Y"
 	if [ $force_build -eq 1 ]; then
 		status=1
-	else
-		# By default, in updates we might want to ask. 
-		# If non-interactive, update-all will skip building unless --build is passed.
-		if [[ "${KOSAIO_NON_INTERACTIVE:-0}" == "1" ]]; then
-			default_confirm="N"
-		fi
 	fi
 
 	if [ $status -eq 1 ]; then
@@ -121,7 +122,7 @@ function kosaio_standard_update_flow() {
 		# Try to update submodules if any
 		if [ -f "${repo_dir}/.gitmodules" ]; then
 			log_info "Updating submodules..."
-			(cd "${repo_dir}" && git submodule update --init --recursive 2>/dev/null || true)
+			(cd "${repo_dir}" && git submodule update --init --recursive 2>/dev/null) || true
 		fi
 
 		if [ $force_build -eq 1 ]; then

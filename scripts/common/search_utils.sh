@@ -1,3 +1,4 @@
+#!/bin/bash
 # scripts/common/search_utils.sh
 # Main search engine wrapper. Calls Python Engine for all logic.
 

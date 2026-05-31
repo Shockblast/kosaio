@@ -30,7 +30,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
       - name: Run shellcheck on core scripts
         run: |
-          shellcheck scripts/kosaio
-          shellcheck scripts/common/*.sh
-          shellcheck scripts/engine/driver_manager.sh
-          shellcheck scripts/controllers/*.sh
+          shellcheck -x scripts/kosaio
+          shellcheck -x scripts/common/*.sh
+          shellcheck -x scripts/engine/driver_manager.sh
+          shellcheck -x scripts/controllers/*.sh

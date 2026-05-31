@@ -20,8 +20,10 @@ function kosaio_check_updates() {
 
 	# 2. Check cached timestamp (24h as a reasonable default, but we check branch change)
 	if [ -f "$update_file" ]; then
-		local last_check=$(cat "$update_file")
-		local current_time=$(date +%s)
+		local last_check
+		last_check=$(cat "$update_file")
+		local current_time
+		current_time=$(date +%s)
 		
 		# 24 hours = 86400 seconds
 		epoch_target=$((last_check + 86400))
@@ -35,7 +37,8 @@ function kosaio_check_updates() {
 	(
 		cd "${KOSAIO_DIR}" || exit 0
 		
-		local local_rev=$(git rev-parse HEAD 2>/dev/null)
+		local local_rev
+		local_rev=$(git rev-parse HEAD 2>/dev/null)
 		local remote_rev
 		
 		# Get remote HEAD for the current branch
@@ -53,8 +56,8 @@ function kosaio_check_updates() {
 			# as we assume users won't force-push ahead of origin on managed branches usually)
 			
 			printf "\n"
-			printf "  ${C_B_YELLOW}[KOSAIO] ${C_B_CYAN}Update available in branch ${current_branch}!${C_RESET}\n"
-			printf "  ${C_GRAY}Run ${C_YELLOW}kosaio update self${C_GRAY} to see the changelog and upgrade.${C_RESET}\n"
+			printf '  %s[KOSAIO] %sUpdate available in branch %s!%s\n' "${C_B_YELLOW}" "${C_B_CYAN}" "${current_branch}" "${C_RESET}"
+			printf '  %sRun %skosaio update self%s to see the changelog and upgrade.%s\n' "${C_GRAY}" "${C_YELLOW}" "${C_GRAY}" "${C_RESET}"
 			printf "\n"
 		fi
 		

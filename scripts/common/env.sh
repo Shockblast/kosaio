@@ -49,10 +49,11 @@ fi
 # Framework Update Branch (Defaults to current branch)
 if [ -z "${KOSAIO_BRANCH:-}" ]; then
 	if [ -d "${KOSAIO_DIR}/.git" ]; then
-		export KOSAIO_BRANCH="$(git -C "${KOSAIO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "master")"
+		KOSAIO_BRANCH="$(git -C "${KOSAIO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "master")"
 	else
-		export KOSAIO_BRANCH="master"
+		KOSAIO_BRANCH="master"
 	fi
+	export KOSAIO_BRANCH
 fi
 
 # SDK Constants & Defaults
@@ -146,8 +147,10 @@ function kosaio_get_tool_dir() {
 }
 
 # --- Legacy and Global Exports ---
-export KOS_DIR="$(kosaio_get_tool_dir "kos")"
-export KOS_PORTS="$(kosaio_get_tool_dir "kos-ports")"
+KOS_DIR="$(kosaio_get_tool_dir "kos")"
+export KOS_DIR
+KOS_PORTS="$(kosaio_get_tool_dir "kos-ports")"
+export KOS_PORTS
 
 export KOS_BASE="${KOS_DIR}"
 
@@ -179,9 +182,11 @@ function ensure_bashrc_config() {
 		if ! grep -Fxq "$INIT_LINE" "$BASHRC"; then
 			# If we are root (inside container), we can fix it
 			if [ "$(id -u)" -eq 0 ]; then
-				echo "" >> "$BASHRC"
-				echo "# KOSAIO Auto-Init" >> "$BASHRC"
-				echo "$INIT_LINE" >> "$BASHRC"
+				{
+					echo ""
+					echo "# KOSAIO Auto-Init"
+					echo "$INIT_LINE"
+				} >> "$BASHRC"
 				# Quietly fixed
 			fi
 		fi

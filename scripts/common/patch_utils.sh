@@ -20,7 +20,8 @@ function kosaio_apply_patches() {
 	log_info "Applying patches for ${C_BLUE}${patch_group}${C_RESET}..."
 
 	while IFS= read -r -d '' patch_file; do
-		local patch_name="$(basename "$patch_file")"
+		local patch_name
+		patch_name="$(basename "$patch_file")"
 		
 		# 1. Check if already applied (can it be reversed?)
 		if (cd "$target_dir" && patch -p1 -Rs --dry-run < "$patch_file" &> /dev/null); then

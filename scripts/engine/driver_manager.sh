@@ -20,11 +20,15 @@ function manager_execute() {
 	}
 
 	# Source Manifest (Scoped to this function/process)
+	# shellcheck source=/dev/null
 	source "$MANIFEST"
 
 	case "$COMMAND" in
 		"install")
-			[ -n "${DEPS:-}" ] && kosaio_install_apt_deps $DEPS
+			if [ -n "${DEPS:-}" ]; then
+			read -ra DEPS_ARR <<< "$DEPS"
+			kosaio_install_apt_deps "${DEPS_ARR[@]}"
+		fi
 			if [ "$(type -t reg_install)" == "function" ]; then
 				reg_install "$@"
 			else
@@ -64,7 +68,7 @@ function manager_execute() {
 			;;
 		"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"export")
 			FUNC_NAME="reg_${COMMAND}"
-			if [ "$(type -t ${FUNC_NAME})" == "function" ]; then
+			if [ "$(type -t "${FUNC_NAME}")" == "function" ]; then
 				${FUNC_NAME} "$@"
 			else
 				log_error "Action '${COMMAND}' is not supported by ${ID}"

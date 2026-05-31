@@ -1,3 +1,4 @@
+#!/bin/bash
 # scripts/common/completions.sh
 # Bash completion for KOSAIO
 
@@ -44,18 +45,18 @@ function _kosaio_completions() {
 
 	case "${prev}" in
 		kosaio)
-			COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+			mapfile -t COMPREPLY < <(compgen -W "${opts}" -- "${cur}")
 			return 0
 			;;
 		dev-switch|install|uninstall|update|diagnose|apply|build|info|clone|checkout|reset|clean)
-			COMPREPLY=( $(compgen -W "${targets}" -- ${cur}) )
+			mapfile -t COMPREPLY < <(compgen -W "${targets}" -- "${cur}")
 			return 0
 			;;
 		list|search)
 			if [[ "${cur}" == -* ]]; then
-				COMPREPLY=( $(compgen -W "--installed -i" -- ${cur}) )
+				mapfile -t COMPREPLY < <(compgen -W "--installed -i" -- "${cur}")
 			else
-				COMPREPLY=( $(compgen -W "${targets}" -- ${cur}) )
+				mapfile -t COMPREPLY < <(compgen -W "${targets}" -- "${cur}")
 			fi
 			return 0
 			;;
@@ -63,25 +64,25 @@ function _kosaio_completions() {
 
 	# Sub-options for dev-switch
 	if [[ ${COMP_CWORD} -eq 3 && ${COMP_WORDS[1]} == "dev-switch" ]]; then
-		COMPREPLY=( $(compgen -W "host container" -- ${cur}) )
+		mapfile -t COMPREPLY < <(compgen -W "host container" -- "${cur}")
 		return 0
 	fi
 }
 
 # Quick Project Jump
-function kcd() {
+	function kcd() {
 	if [ -z "$1" ]; then
-		cd /opt/projects
+		cd /opt/projects || return 1
 	else
-		cd "/opt/projects/$1"
+		cd "/opt/projects/$1" || return 1
 	fi
 }
 
 function _kcd_completions() {
 	local cur projects
 	cur="${COMP_WORDS[COMP_CWORD]}"
-	projects=$(ls -d /opt/projects/*/ 2>/dev/null | xargs -n1 basename)
-	COMPREPLY=( $(compgen -W "${projects}" -- ${cur}) )
+	projects=$(find /opt/projects -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | xargs -0 -n1 basename)
+	mapfile -t COMPREPLY < <(compgen -W "${projects}" -- "${cur}")
 }
 
 # Register completions
