@@ -20,9 +20,9 @@ This document contains a list of tools and libraries that were previously in the
   * Description: Hardware abstraction library (HAL) for Dreamcast/SH4.
   * URL: [https://github.com/sega-dreamcast/dreamhal.git](https://github.com/sega-dreamcast/dreamhal.git)
 
-- **SDL**
-  * Description: SDL with updated Dreamcast code.
-  * URL: [https://github.com/DreamcastSDK/SDL.git](https://github.com/DreamcastSDK/SDL.git)
+- ~~**SDL**~~ (DONE — 4 variants available as `sdl2`, `sdl3`, `sdl2-dc`, `sdl3-dc`)
+  * ~~Description: SDL with updated Dreamcast code.~~
+  * ~~URL: [https://github.com/DreamcastSDK/SDL.git](https://github.com/DreamcastSDK/SDL.git)~~
 
 - **raylib4Dreamcast**
   * Description: raylib port for Dreamcast.

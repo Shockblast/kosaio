@@ -49,6 +49,7 @@ source "${KOSAIO_DIR}/scripts/common/errors.sh"
 source "${KOSAIO_DIR}/scripts/common/git_utils.sh"
 source "${KOSAIO_DIR}/scripts/common/patch_utils.sh"
 source "${KOSAIO_DIR}/scripts/common/port_utils.sh"
+source "${KOSAIO_DIR}/scripts/common/sdl_aliases.sh"
 
 function show_usage() {
 	# Version Extraction
