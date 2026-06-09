@@ -36,7 +36,7 @@ class Config:
         if tool in holy_list:
             return self.sdk_root / tool
         else:
-            return self.sdk_root / "extras" / tool
+            return self.kosaio_dir / "repos" / tool
 
     @property
     def kos_ports_dir(self) -> Path:
@@ -47,6 +47,8 @@ class Config:
         sys_path = self.sdk_root / "kos-ports"
         if sys_path.exists():
             return sys_path
+        if self.kos_ports_dir_override:
+            return Path(self.kos_ports_dir_override)
         return self.get_tool_dir("kos-ports", force_mode="1")
 
     @property
@@ -56,6 +58,14 @@ class Config:
     @property
     def diagnostics_dir(self) -> Path:
         return self.kosaio_dir / "scripts" / "engine" / "diagnostics"
+
+    @property
+    def config_tools_dir(self) -> Path:
+        return self.kosaio_dir / "configs" / "tools"
+
+    @property
+    def template_path(self) -> Path:
+        return self.registry_dir / "process-standard.sh"
 
     def get_installed_version(self, lib_name: str, mode: Optional[str] = None) -> Optional[str]:
         ports_dir = self.get_tool_dir("kos-ports", force_mode=mode)

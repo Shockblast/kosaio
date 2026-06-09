@@ -19,9 +19,20 @@ function manager_execute() {
 		return 1
 	}
 
-	# Source Manifest (Scoped to this function/process)
+	# Load mandatory tool configuration
+	kosaio_load_tool_config "$TARGET_ID" || return 1
+
+	# Load tool-specific helpers (PREBUILD_FUNC, etc.)
+	kosaio_load_tool_helpers "$TARGET_ID"
+
+	# Source template (generic reg_* functions)
 	# shellcheck source=/dev/null
-	source "$MANIFEST"
+	source "${KOSAIO_DIR}/scripts/registry/process-standard.sh"
+
+	# If a custom manifest exists (not the template itself), source it as override
+	if [ "$MANIFEST" != "${KOSAIO_DIR}/scripts/registry/process-standard.sh" ]; then
+		source "$MANIFEST"
+	fi
 
 	case "$COMMAND" in
 		"install")

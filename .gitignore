@@ -22,3 +22,6 @@ venv/
 .venv/
 
 # projects/ is managed by user, usually ignored or managed separately
+
+### Cloned Repositories ###
+repos/

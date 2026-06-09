@@ -32,6 +32,14 @@ function kosaio_router_dispatch() {
 			_router_handle_lifecycle "$ACTION" "$TARGET" "${ARGS[@]}"
 			;;
 
+		"config")
+			_router_handle_config "$TARGET"
+			;;
+
+		"rebuild")
+			_router_handle_rebuild "$TARGET"
+			;;
+
 		"diagnose")
 			_router_handle_diagnose "$TARGET"
 			;;
@@ -131,6 +139,60 @@ function _router_handle_project() {
 	cp -rv "${KOSAIO_DIR}/basic-project/." "${target_dir}/" > /dev/null
 	chown -R --reference=/opt/projects "${target_dir}"
 	log_success "Project created at ${target_dir}."
+}
+
+function _router_handle_config() {
+	local target="$1"
+	require_var "target" "Target is required" || show_usage
+
+	local engine_py="${KOSAIO_DIR}/scripts/engine/py/main.py"
+	local manifest
+	manifest=$(python3 "$engine_py" get_manifest_path "$target" 2>/dev/null) || {
+		log_error "Target '${target}' not found in registry."
+		return 1
+	}
+
+	local config_path="${KOSAIO_DIR}/configs/tools/${target}.conf"
+	if [ ! -f "$config_path" ]; then
+		log_warn "Config for '${target}' does not exist. Creating template..."
+		cat > "$config_path" << 'CONF_EOF'
+# === SOURCE CONTROL ===
+KOSAIO_TOOL_REPO=""
+KOSAIO_TOOL_BRANCH=""
+# KOSAIO_TOOL_TAG=""
+
+# === BUILD OPTIONS ===
+KOSAIO_TOOL_ARGS=()
+
+# === INSTALLATION ===
+KOSAIO_TOOL_INSTALLATION_FOLDER="${KOS_BASE}/addons"
+KOSAIO_TOOL_INSTALLATION_LIBDIR="lib/dreamcast"
+KOSAIO_TOOL_INSTALLATION_INCLUDEDIR="include"
+
+# === COMPILER/LINKER FLAGS ===
+# KOSAIO_TOOL_FLAGS=("-O2" "-ffast-math")
+
+# === CONTAINER ENVIRONMENT ===
+# KOSAIO_TOOL_ENV=()
+
+# === UNINSTALL & HEALTH ===
+KOSAIO_TOOL_LIBS=()
+KOSAIO_TOOL_INCLUDE_DIRS=()
+CONF_EOF
+		log_success "Template created at ${config_path}"
+		log_info "Edit the file, save, and run 'kosaio install ${target}' to use it."
+	fi
+
+	nano "$config_path"
+}
+
+function _router_handle_rebuild() {
+	local target="$1"
+	require_var "target" "Target is required" || show_usage
+	export KOSAIO_NON_INTERACTIVE=1
+	_router_handle_lifecycle "uninstall" "$target" || true
+	_router_handle_lifecycle "install" "$target"
+	unset KOSAIO_NON_INTERACTIVE
 }
 
 function _router_handle_deps() {

@@ -131,7 +131,7 @@ function kosaio_get_tool_dir() {
 				final_path="${DREAMCAST_SDK}/${tool}"
 				;;
 			*)
-				final_path="${DREAMCAST_SDK}/extras/${tool}"
+				final_path="${KOSAIO_DIR}/repos/${tool}"
 				;;
 		esac
 

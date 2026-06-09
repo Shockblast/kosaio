@@ -26,6 +26,46 @@ class ManifestParser:
         'type': re.compile(r'^[ \t]*TYPE="([^"]+)"', re.MULTILINE),
     }
 
+    # Regex patterns for Config (.conf files)
+    CONFIG_PATTERNS = {
+        'id': re.compile(r'^[ \t]*KOSAIO_TOOL_ID="([^"]+)"', re.MULTILINE),
+        'name': re.compile(r'^[ \t]*KOSAIO_TOOL_NAME="([^"]+)"', re.MULTILINE),
+        'desc': re.compile(r'^[ \t]*KOSAIO_TOOL_DESC="([^"]+)"', re.MULTILINE),
+        'tags': re.compile(r'^[ \t]*KOSAIO_TOOL_TAGS=\(([^)]*)\)', re.MULTILINE),
+        'type': re.compile(r'^[ \t]*KOSAIO_TOOL_TYPE=\(([^)]*)\)', re.MULTILINE),
+    }
+
+    @staticmethod
+    def parse_config_file(path: Path) -> Optional[Manifest]:
+        try:
+            content = path.read_text(encoding='utf-8', errors='ignore')
+        except Exception:
+            return None
+
+        data = {}
+        for key, p in ManifestParser.CONFIG_PATTERNS.items():
+            match = p.search(content)
+            if match:
+                raw = match.group(1).strip()
+                if key in ('tags', 'type'):
+                    parts = [t.strip(' "\'') for t in raw.split()]
+                    raw = ','.join(parts)
+                data[key] = raw
+            else:
+                data[key] = ""
+
+        if not data['id']:
+            return None
+
+        return Manifest(
+            data['id'],
+            data['name'],
+            data['desc'],
+            data['tags'],
+            data['type'],
+            str(path)
+        )
+
     @staticmethod
     def parse_registry_file(path: Path) -> Optional[Manifest]:
         try:

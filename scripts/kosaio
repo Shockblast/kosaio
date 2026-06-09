@@ -43,13 +43,15 @@ source "${KOSAIO_DIR}/scripts/common/ui.sh"
 source "${KOSAIO_DIR}/scripts/common/deps.sh"
 source "${KOSAIO_DIR}/scripts/common/errors.sh"
 
-
-
 # Load common utilities
 source "${KOSAIO_DIR}/scripts/common/git_utils.sh"
 source "${KOSAIO_DIR}/scripts/common/patch_utils.sh"
 source "${KOSAIO_DIR}/scripts/common/port_utils.sh"
-source "${KOSAIO_DIR}/scripts/common/sdl_aliases.sh"
+source "${KOSAIO_DIR}/scripts/common/config_loader.sh"
+source "${KOSAIO_DIR}/scripts/common/helper_loader.sh"
+source "${KOSAIO_DIR}/scripts/common/cmake.sh"
+source "${KOSAIO_DIR}/scripts/common/make.sh"
+source "${KOSAIO_DIR}/scripts/common/meson.sh"
 
 function show_usage() {
 	# Version Extraction
@@ -88,6 +90,8 @@ function show_usage() {
 	printf "  ${lrow_life} %s\n" "install" "<id>" "[args...]" "Complete setup (Clone, Build, Apply)"
 	printf "  ${lrow_life} %s\n" "update" "<id>|all" "[args...]" "Pull latest source and rebuild (all ignores prompts)"
 	printf "  ${lrow_life} %s\n" "uninstall" "<id>" "" "Remove tool/sdk from the system"
+	printf "  ${lrow_life} %s\n" "rebuild" "<id>" "" "Uninstall + reinstall with current config"
+	printf "  ${lrow_life} %s\n" "config" "<id>" "" "Edit tool configuration in nano"
 	printf "  ${lrow_life} %s\n" "clone" "<id>" "[args...]" "Download source code only"
 	printf "  ${lrow_life} %s\n" "build" "<id>" "[args...]" "Run compilation on local source"
 	printf "  ${lrow_life} %s\n" "apply" "<id>" "" "Register local build binaries"

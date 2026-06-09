@@ -27,7 +27,12 @@ class SearchService:
              if (diag_dir / f"{target_id}.sh").exists():
                  return "core"
 
-        # 2. Check Ports
+        # 3. Check Config (template-covered tool)
+        if cfg.config_tools_dir.exists():
+            if (cfg.config_tools_dir / f"{target_id}.conf").exists():
+                return "tool"
+
+        # 4. Check Ports
         # Use SYSTEM path for identification (Authoritative registry)
         ports_path = cfg.system_kos_ports_dir
         if ports_path.exists():
@@ -64,6 +69,13 @@ class SearchService:
              diag_path = diag_dir / f"{target_id}.sh"
              if diag_path.exists():
                  return diag_path
+
+        # Fallback to template if config exists
+        if cfg.config_tools_dir.exists():
+            if (cfg.config_tools_dir / f"{target_id}.conf").exists():
+                if cfg.template_path.exists():
+                    return cfg.template_path
+
         return None
 
     @staticmethod
@@ -105,19 +117,33 @@ class SearchService:
 
     @staticmethod
     def search_registry(query: str = "") -> List[Manifest]:
-        if not cfg.registry_dir.exists():
-            return []
-
         query_lower = query.lower()
         results: List[Manifest] = []
-        for manifest_path in cfg.registry_dir.rglob("*.sh"):
-            if manifest_path.name.endswith(".sample"):
-                continue
 
-            m = ManifestParser.parse_registry_file(manifest_path)
-            if m:
-                if not query or any(query_lower in str(getattr(m, f)).lower() for f in ['id', 'name', 'desc', 'tags']):
-                    results.append(m)
+        # 1. Search registry manifests
+        if cfg.registry_dir.exists():
+            for manifest_path in cfg.registry_dir.rglob("*.sh"):
+                if manifest_path.name.endswith(".sample"):
+                    continue
+                if manifest_path.name == "process-standard.sh":
+                    continue
+
+                m = ManifestParser.parse_registry_file(manifest_path)
+                if m:
+                    if not query or any(query_lower in str(getattr(m, f)).lower() for f in ['id', 'name', 'desc', 'tags']):
+                        results.append(m)
+
+        # 2. Search config files for template-covered tools
+        if cfg.config_tools_dir.exists():
+            existing_ids = {m.id for m in results}
+            for config_path in cfg.config_tools_dir.glob("*.conf"):
+                tool_id = config_path.stem
+                if tool_id not in existing_ids:
+                    m = ManifestParser.parse_config_file(config_path)
+                    if m:
+                        if not query or any(query_lower in str(getattr(m, f)).lower() for f in ['id', 'name', 'desc', 'tags']):
+                            results.append(m)
+
         return results
 
     @staticmethod
