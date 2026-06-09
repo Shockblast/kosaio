@@ -32,7 +32,7 @@ class Config:
         if is_dev:
             return self.dev_root / tool
 
-        holy_list = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "extras", "bin"}
+        holy_list = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "bin"}
         if tool in holy_list:
             return self.sdk_root / tool
         else:

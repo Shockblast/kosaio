@@ -42,7 +42,8 @@ TARGET_DIRS=(
 	"${PROJECTS_DIR}"
 	"${DREAMCAST_SDK}"
 	"${DREAMCAST_SDK}/bin"
-	"${DREAMCAST_SDK}/extras"
+	"${KOSAIO_DIR}/repos"
+	"${KOSAIO_DIR}/out/bin"
 )
 
 for dir in "${TARGET_DIRS[@]}"; do

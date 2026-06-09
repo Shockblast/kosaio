@@ -65,3 +65,42 @@ kosaio_tool_apply() {
 
 	log_success "KOS Environment configured at ${target_env}."
 }
+
+kosaio_tool_check_health() {
+	local tool_dir=$(__get_tool_dir)
+
+	if [ ! -d "$tool_dir" ]; then
+		log_box --info "KallistiOS — Health Check" \
+			"${C_YELLOW}Status:${C_RESET} ${C_RED}Not Installed${C_RESET}" \
+			"" \
+			"${C_RED}✗${C_RESET} Source missing at ${tool_dir}"
+		return 1
+	fi
+
+	if [ ! -f "${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc" ]; then
+		log_box --info "KallistiOS — Health Check" \
+			"${C_YELLOW}Status:${C_RESET} ${C_RED}Toolchain Missing${C_RESET}" \
+			"" \
+			"${C_GREEN}✓${C_RESET} Source: ${tool_dir}" \
+			"${C_RED}✗${C_RESET} Toolchain: SH4 compiler not found"
+		return 3
+	fi
+
+	if [ ! -f "${tool_dir}/lib/dreamcast/libkallisti.a" ]; then
+		log_box --info "KallistiOS — Health Check" \
+			"${C_YELLOW}Status:${C_RESET} ${C_YELLOW}Not Compiled${C_RESET}" \
+			"" \
+			"${C_GREEN}✓${C_RESET} Source: ${tool_dir}" \
+			"${C_GREEN}✓${C_RESET} Toolchain: Ready" \
+			"${C_RED}✗${C_RESET} Libraries: libkallisti.a not found"
+		return 2
+	fi
+
+	log_box --info "KallistiOS — Health Check" \
+		"${C_YELLOW}Status:${C_RESET} ${C_GREEN}Healthy${C_RESET}" \
+		"" \
+		"${C_GREEN}✓${C_RESET} Source: ${tool_dir}" \
+		"${C_GREEN}✓${C_RESET} Toolchain: Ready" \
+		"${C_GREEN}✓${C_RESET} Libraries: Compiled"
+	return 0
+}

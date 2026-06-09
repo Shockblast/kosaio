@@ -20,7 +20,7 @@ class TestConfig:
         c = Config()
         c.dev_mode = "0"
         assert c.get_tool_dir("kos") == Path("/opt/toolchains/dc/kos")
-        assert c.get_tool_dir("flycast") == Path("/opt/toolchains/dc/extras/flycast")
+        assert c.get_tool_dir("flycast") == Path("/opt/kosaio/repos/flycast")
 
     def test_get_tool_dir_dev_mode(self):
         c = Config()

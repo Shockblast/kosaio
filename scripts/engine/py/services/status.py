@@ -30,14 +30,14 @@ class StatusService:
 
     # --- Internal helpers ---
 
-    _HOLY_LIST = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "extras", "bin", "toolchain"}
+    _HOLY_LIST = {"kos", "kos-ports", "sh-elf", "arm-eabi", "aicaos", "bin", "toolchain"}
 
     @staticmethod
     def _resolve_bases(item_id: str):
         if item_id in StatusService._HOLY_LIST:
             c_base = cfg.sdk_root / item_id
         else:
-            c_base = cfg.sdk_root / "extras" / item_id
+            c_base = cfg.kosaio_dir / "repos" / item_id
         h_base = cfg.dev_root / item_id
         return c_base, h_base
 

@@ -127,7 +127,7 @@ function kosaio_get_tool_dir() {
 		final_path="${KOSAIO_DEV_ROOT}/${tool}"
 	else
 		case "$tool" in
-			kos|kos-ports|sh-elf|arm-eabi|aicaos|extras|bin)
+			kos|kos-ports|sh-elf|arm-eabi|aicaos|bin)
 				final_path="${DREAMCAST_SDK}/${tool}"
 				;;
 			*)
@@ -154,16 +154,16 @@ export KOS_PORTS
 
 export KOS_BASE="${KOS_DIR}"
 
-# Binaries location: We move it to extras/bin to keep root clean
-export DREAMCAST_BIN_PATH="${DREAMCAST_SDK}/extras/bin"
+# Binaries location: Host tools compiled for Dreamcast dev go here
+export KOSAIO_BIN_PATH="${KOSAIO_DIR}/out/bin"
 
 if [ "${KOSAIO_DEV_MODE:-0}" = "1" ]; then
-	export DREAMCAST_BIN_PATH="${KOSAIO_DEV_ROOT}/bin"
+	export KOSAIO_BIN_PATH="${KOSAIO_DEV_ROOT}/bin"
 fi
 
 # Inject Extras Bin into PATH
-if [ -d "${DREAMCAST_BIN_PATH}" ]; then
-	export PATH="${PATH}:${DREAMCAST_BIN_PATH}"
+if [ -d "${KOSAIO_BIN_PATH}" ]; then
+	export PATH="${PATH}:${KOSAIO_BIN_PATH}"
 fi
 
 # Ensure CMake wrappers are in PATH (Vital for modern KOS Ports)

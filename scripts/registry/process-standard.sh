@@ -155,20 +155,58 @@ function reg_apply() {
 }
 
 function reg_check_health() {
-	local all_ok=0
+	# Tool health check hook (from helper) overrides standard check
+	if declare -F kosaio_tool_check_health &>/dev/null; then
+		kosaio_tool_check_health "$@"
+		return $?
+	fi
+
+	local found=0
+	local missing=0
+	local items=()
 
 	for lib in "${KOSAIO_TOOL_LIBS[@]}"; do
-		[ -f "$lib" ] || { log_error "Missing: $lib"; all_ok=1; }
+		if [ -f "$lib" ]; then
+			found=1
+			items+=("${C_GREEN}✓${C_RESET} $lib")
+		else
+			items+=("${C_RED}✗${C_RESET} $lib")
+			missing=1
+		fi
 	done
 
-	if [ "$all_ok" -eq 0 ]; then
+	if [ "$missing" -eq 0 ]; then
 		for dir in "${KOSAIO_TOOL_INCLUDE_DIRS[@]}"; do
-			[ -d "$dir" ] || { log_error "Missing: $dir"; all_ok=1; }
+			if [ -d "$dir" ]; then
+				items+=("${C_GREEN}✓${C_RESET} $dir")
+			else
+				items+=("${C_RED}✗${C_RESET} $dir")
+				missing=1
+			fi
 		done
 	fi
 
-	[ "$all_ok" -eq 0 ] || return 2
-	return 0
+	if [ "$found" -eq 0 ]; then
+		log_box --info "${NAME} — Health Check" \
+			"${C_YELLOW}Status:${C_RESET} ${C_RED}Not Installed${C_RESET}" \
+			"" \
+			"${items[@]}"
+		return 1
+	fi
+
+	if [ "$missing" -eq 0 ]; then
+		log_box --info "${NAME} — Health Check" \
+			"${C_YELLOW}Status:${C_RESET} ${C_GREEN}Healthy${C_RESET}" \
+			"" \
+			"${items[@]}"
+		return 0
+	fi
+
+	log_box --type=warn "${NAME} — Health Check" \
+		"${C_YELLOW}Status:${C_RESET} ${C_RED}Incomplete${C_RESET}" \
+		"" \
+		"${items[@]}"
+	return 2
 }
 
 function reg_uninstall() {
@@ -211,6 +249,7 @@ function reg_info() {
 	done
 
 	log_box --info "${NAME}" \
+		"${C_YELLOW}Description:${C_RESET} ${DESC}" \
 		"${C_YELLOW}Type:${C_RESET}   ${KOSAIO_TOOL_TYPE[*]}" \
 		"${C_YELLOW}Status:${C_RESET} ${status}" \
 		"${C_YELLOW}Path:${C_RESET}   $(__get_tool_dir)"

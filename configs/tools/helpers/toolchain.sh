@@ -42,6 +42,48 @@ kosaio_tool_info() {
 		"  ${C_CYAN}--with-gdb${C_RESET}     : Ensure SH4 GDB is built"
 }
 
+kosaio_tool_check_health() {
+	local sh_gcc="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc"
+	local arm_gcc="${DREAMCAST_SDK}/arm-eabi/bin/arm-eabi-gcc"
+	local sh_gdb="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gdb"
+
+	local sh_ok=0; [ -f "$sh_gcc" ] && sh_ok=1
+	local arm_ok=0; [ -f "$arm_gcc" ] && arm_ok=1
+	local gdb_ok=0; [ -f "$sh_gdb" ] && gdb_ok=1
+
+	local sh_icon="${C_RED}✗${C_RESET}"; [ "$sh_ok" -eq 1 ] && sh_icon="${C_GREEN}✓${C_RESET}"
+	local arm_icon="${C_RED}✗${C_RESET}"; [ "$arm_ok" -eq 1 ] && arm_icon="${C_GREEN}✓${C_RESET}"
+	local gdb_icon="${C_RED}✗${C_RESET}"; [ "$gdb_ok" -eq 1 ] && gdb_icon="${C_GREEN}✓${C_RESET}"
+
+	if [ "$sh_ok" -eq 0 ]; then
+		log_box --info "Dreamcast Toolchain — Health Check" \
+			"${C_YELLOW}Status:${C_RESET} ${C_RED}Not Installed${C_RESET}" \
+			"" \
+			"${sh_icon} SH4 (Game CPU):    $sh_gcc" \
+			"${arm_icon} ARM (Sound CPU):   $arm_gcc" \
+			"${gdb_icon} Debugger (GDB):    $sh_gdb"
+		return 1
+	fi
+
+	if [ "$arm_ok" -eq 0 ] || [ "$gdb_ok" -eq 0 ]; then
+		log_box --type=warn "Dreamcast Toolchain — Health Check" \
+			"${C_YELLOW}Status:${C_RESET} ${C_YELLOW}Partial${C_RESET} (SH4 present, some components missing)" \
+			"" \
+			"${sh_icon} SH4 (Game CPU):    $sh_gcc" \
+			"${arm_icon} ARM (Sound CPU):   $arm_gcc" \
+			"${gdb_icon} Debugger (GDB):    $sh_gdb"
+		return 2
+	fi
+
+	log_box --info "Dreamcast Toolchain — Health Check" \
+		"${C_YELLOW}Status:${C_RESET} ${C_GREEN}Healthy${C_RESET}" \
+		"" \
+		"${sh_icon} SH4 (Game CPU):    $sh_gcc" \
+		"${arm_icon} ARM (Sound CPU):   $arm_gcc" \
+		"${gdb_icon} Debugger (GDB):    $sh_gdb"
+	return 0
+}
+
 kosaio_tool_install() {
 	kosaio_tool_build "$@"
 }

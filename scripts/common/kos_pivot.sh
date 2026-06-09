@@ -42,8 +42,8 @@ function kosaio_kos_pivot() {
 	export KOS_PORTS="${KOS_PORTS}"
 
 	# 5. Re-inject KOSAIO Extras Bin (it might have been wiped by cleanup)
-	if [ -d "${DREAMCAST_BIN_PATH:-}" ]; then
-		export PATH="${PATH}:${DREAMCAST_BIN_PATH}"
+	if [ -d "${KOSAIO_BIN_PATH:-}" ]; then
+		export PATH="${PATH}:${KOSAIO_BIN_PATH}"
 	fi
 
 	# 6. Success Message

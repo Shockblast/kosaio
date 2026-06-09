@@ -40,6 +40,8 @@ function health_check() {
 				return 4
 			fi
 
+			kosaio_load_tool_config "$TARGET_ID" || return 1
+			kosaio_load_tool_helpers "$TARGET_ID"
 			source "$MANIFEST"
 
 			# Check OS Dependencies (Manifest-defined)
@@ -62,6 +64,8 @@ function health_check() {
 		*)
 			# Unknown type but maybe manifest exists (forced resolution)
 			if [ -n "$MANIFEST" ] && [ -f "$MANIFEST" ]; then
+				# Try loading config (may not exist for unknown types)
+				kosaio_load_tool_config "$TARGET_ID" 2>/dev/null || true
 				source "$MANIFEST"
 				if [ "$(type -t reg_check_health)" == "function" ]; then
 					reg_check_health
