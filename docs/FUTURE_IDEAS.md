@@ -98,3 +98,51 @@ This document contains a list of tools and libraries that were previously in the
 
 - **unzip**
   * Note: Found as a placeholder requirement.
+
+## Infrastructure
+
+- **Config-driven tool system** — user-editable `.conf` files per tool, replacing hardcoded defaults.
+
+  * **Location**: `configs/tools/<tool-id>.conf` (e.g. `configs/tools/sdl2-dc.conf`)
+  * **Format**: bash sourceable variables
+
+  ```bash
+  # === BUILD OPTIONS ===
+  KOSAIO_TOOL_ARGS=(
+      "-DSDL_PTHREADS=ON"
+      "-DSDL_OPENGL=ON"
+      "-DSDL_HAPTIC=ON"
+      "-DSDL_TESTS=OFF"
+  )
+
+  # === SOURCE CONTROL ===
+  # KOSAIO_TOOL_BRANCH="dreamcastSDL2"
+  # KOSAIO_TOOL_TAG="v2.0.0"
+
+  # === INSTALLATION ===
+  KOSAIO_TOOL_INSTALLATION_FOLDER="${KOS_BASE}/addons"
+  KOSAIO_TOOL_INSTALLATION_LIBDIR="lib/dreamcast"
+  KOSAIO_TOOL_INSTALLATION_INCLUDEDIR="include"
+
+  # === COMPILER/LINKER FLAGS ===
+  KOSAIO_TOOL_FLAGS=(
+      "-O2"
+      "-ffast-math"
+  )
+
+  # === CONTAINER ENVIRONMENT ===
+  KOSAIO_TOOL_ENV=(
+      "KOS_BASE=/opt/kos"
+      "KOS_PORTS=/opt/kos/ports"
+  )
+  ```
+
+  * **Precedence** (last wins): config file < CLI flags
+  * **New subcommands**:
+    - `kosaio config <tool>` — opens `configs/tools/<tool>.conf` in `$EDITOR`
+    - `kosaio rebuild <tool>` — uninstall + install with current config
+  * **Remove hardcoded defaults** from existing tool scripts (sdl2-dc.sh, sdl3-dc.sh, etc.)
+  * **Future considerations**:
+    - Generic tool type `sdl-cmake` to share logic across similar tools
+    - `KOSAIO_TOOL_PATCHES` for post-clone patches
+  * **Status**: PENDING
