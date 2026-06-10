@@ -1,0 +1,68 @@
+# ── Build Configuration: SDL2 ─────────────────────────
+# SDL2 uses ./configure. Uncomment flags you need.
+# Run `kosaio apply-config sdl2` after changing this file.
+# Run `kosaio reset-config sdl2` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+KOSAIO_TOOL_ARGS=(
+    # --prefix=/usr/local             # Install prefix (default)
+
+    # ── Feature Subsystems ──
+    # --disable-audio                 # Disable audio subsystem
+    # --disable-video                 # Disable video subsystem
+    # --disable-joystick              # Disable joystick subsystem
+    # --disable-haptic                # Disable haptic/force-feedback
+    # --disable-render                # Disable 2D render API
+    # --disable-events                # Disable event subsystem
+    # --disable-power                 # Disable power management
+    # --disable-filesystem            # Disable filesystem access
+    # --disable-timers                # Disable timer subsystem
+    # --disable-pthreads              # Disable pthreads
+    # --disable-opengl                # Disable OpenGL support
+
+    # ── Library Type ──
+    # --enable-static                 # Build static libraries [default=yes]
+    # --disable-shared                # Disable shared libraries [default=yes]
+
+    # ── Video Drivers ──
+    # --enable-video-x11              # Use X11 video driver [default=maybe]
+    # --enable-video-wayland          # Use Wayland video driver [default=yes]
+    # --enable-video-opengl           # Include OpenGL support [default=yes]
+    # --enable-video-vulkan           # Include Vulkan support [default=yes]
+    # --enable-video-kmsdrm           # Use KMS/DRM video driver [default=yes]
+    # --enable-video-dummy            # Use dummy video driver [default=yes]
+
+    # ── Audio Drivers ──
+    # --enable-alsa                   # Support ALSA audio [default=yes]
+    # --enable-pulseaudio             # Support PulseAudio [default=yes]
+    # --enable-pipewire               # Support Pipewire [default=yes]
+    # --enable-oss                    # Support OSS audio [default=maybe]
+    # --enable-jack                   # Use JACK audio [default=yes]
+    # --enable-diskaudio              # Disk writer audio driver [default=yes]
+    # --enable-dummyaudio             # Dummy audio driver [default=yes]
+
+    # ── Assembly Optimizations ──
+    # --enable-mmx                    # Use MMX assembly [default=yes]
+    # --enable-sse                    # Use SSE assembly [default=yes]
+    # --enable-sse2                   # Use SSE2 assembly [default=maybe]
+    # --enable-sse3                   # Use SSE3 assembly [default=maybe]
+    # --enable-3dnow                  # Use 3DNow! assembly [default=no]
+    # --enable-altivec                # Use Altivec assembly [default=yes]
+    # --enable-ssemath                # Allow GCC to use SSE float math [default=maybe]
+
+    # ── Build Options ──
+    # --enable-assertions             # Enable internal sanity checks
+    # --enable-rpath                  # Use rpath when linking SDL [default=yes]
+    # --enable-sdl2-config            # Install sdl2-config [default=yes]
+    # --enable-atomic                 # Enable atomic operations [default=yes]
+    # --disable-tests                 # Skip building tests
+
+    # ── Misc ──
+    # --enable-sensor                 # Enable sensor subsystem (experimental)
+    # --enable-hidapi                 # Enable HID API
+    # --enable-hidapi-joystick        # Use HIDAPI for low level joystick drivers [default=yes]
+    # --disable-alsatest              # Do not try to compile/run ALSA test
+    # --enable-ibus                   # Enable IBus support [default=yes]
+    # --enable-fcitx                  # Enable fcitx support [default=yes]
+    # --enable-ime                    # Enable IME support [default=yes]
+)

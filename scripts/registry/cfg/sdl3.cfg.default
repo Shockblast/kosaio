@@ -1,0 +1,39 @@
+# ── Build Configuration: SDL3 ─────────────────────────
+# SDL3 uses CMake. Uncomment flags you need.
+# Run `kosaio apply-config sdl3` after changing this file.
+# Run `kosaio reset-config sdl3` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+KOSAIO_TOOL_ARGS=(
+    # ── Feature Subsystems ──
+    # -DSDL_AUDIO=OFF                 # Disable audio subsystem
+    # -DSDL_VIDEO=OFF                 # Disable video subsystem
+    # -DSDL_JOYSTICK=OFF              # Disable joystick subsystem
+    # -DSDL_HAPTIC=OFF                # Disable haptic/force-feedback
+    # -DSDL_RENDER=OFF                # Disable 2D render API
+    # -DSDL_EVENTS=OFF                # Disable event subsystem
+    # -DSDL_FILESYSTEM=OFF            # Disable filesystem access
+    # -DSDL_POWER=OFF                 # Disable power management
+    # -DSDL_SENSOR=OFF                # Disable sensor subsystem
+    # -DSDL_CAMERA=OFF                # Disable camera subsystem
+
+    # ── Graphics ──
+    # -DSDL_OPENGL=OFF                # Disable OpenGL support
+    # -DSDL_VULKAN=OFF                # Disable Vulkan support
+    # -DSDL_GPU=OFF                   # Disable cross-platform GPU API
+    # -DSDL_RENDER_GPU=OFF            # Disable GPU render driver
+    # -DSDL_OPENVR=OFF                # Disable OpenVR support
+
+    # ── Library Type ──
+    # -DSDL_SHARED=OFF                # Build static library only
+
+    # ── Build Options ──
+    # -DSDL_TESTS=OFF                 # Skip building tests
+    # -DSDL_EXAMPLES=OFF              # Skip building examples
+    # -DSDL_TEST_LIBRARY=OFF          # Skip test library
+
+    # ── Misc ──
+    # -DSDL_HIDAPI=OFF                # Disable HID API
+    # -DSDL_DIALOG=OFF                # Disable dialog subsystem
+    # -DSDL_TRAY=OFF                  # Disable system tray
+)

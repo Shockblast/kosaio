@@ -13,7 +13,7 @@ set -Eeuo pipefail
 source "${KOSAIO_DIR}/scripts/common/deps.sh"
 
 
-function health_check() {
+function kosaio_health_check() {
 	local TARGET_ID="${1,,}"
 
 	# 1. Resolve Target Type & Manifest Path via Python Engine (SSoT)
@@ -50,13 +50,18 @@ function health_check() {
 			fi
 
 			# Execute Manifest Health Logic
-			if [ "$(type -t reg_check_health)" == "function" ]; then
-				reg_check_health
+		if [ "$(type -t kosaio_reg_check_health)" == "function" ]; then
+			kosaio_reg_check_health
+			return $?
+		else
+			# Check for hook-defined health check before falling back
+			if [ "$(type -t kosaio_tool_check_health)" == "function" ]; then
+				kosaio_tool_check_health
 				return $?
-			else
-				# Minimal default logic: Directory check
-				local TOOL_DIR
-				TOOL_DIR=$(validate_get_tool_path "$ID" 2>/dev/null) || TOOL_DIR=$(kosaio_get_tool_dir "$ID")
+			fi
+			# Minimal default logic: Directory check
+			local TOOL_DIR
+			TOOL_DIR=$(kosaio_validate_get_tool_path "$TARGET_ID" 2>/dev/null) || TOOL_DIR=$(kosaio_get_tool_dir "$TARGET_ID")
 				[ -d "$TOOL_DIR" ] && return 0 || return 1
 			fi
 			;;
@@ -67,10 +72,10 @@ function health_check() {
 				# Try loading config (may not exist for unknown types)
 				kosaio_load_tool_config "$TARGET_ID" 2>/dev/null || true
 				source "$MANIFEST"
-				if [ "$(type -t reg_check_health)" == "function" ]; then
-					reg_check_health
-					return $?
-				fi
+			if [ "$(type -t kosaio_reg_check_health)" == "function" ]; then
+				kosaio_reg_check_health
+				return $?
+			fi
 			fi
 			return 4 # Not found / Manifest error
 			;;

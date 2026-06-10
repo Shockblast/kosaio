@@ -1,0 +1,46 @@
+# ── Build Configuration: Flycast ──────────────────────
+# Flycast uses CMake. Uncomment flags you need.
+# Run `kosaio apply-config flycast` after changing this file.
+# Run `kosaio reset-config flycast` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+KOSAIO_TOOL_ARGS=(
+    # ── Active Defaults (uncomment to override) ──
+    -DUSE_VULKAN=ON                  # Build with Vulkan support
+    -DUSE_OPENGL=ON                  # Use OpenGL API
+    -DUSE_OPENMP=ON                  # Use OpenMP if available
+    -DUSE_ALSA=ON                    # Build with ALSA support
+    -DUSE_PULSEAUDIO=ON              # Build with PulseAudio support
+    -DUSE_BREAKPAD=ON                # Build and link with breakpad library
+    -DUSE_LUA=ON                     # Build with Lua support
+    -DUSE_HOST_SDL=ON                # Use host SDL library (vs bundled)
+
+    # ── Graphics ──
+    # -DUSE_GLES=ON                   # Use GLES[3] API instead of OpenGL
+    # -DUSE_GLES2=ON                  # Use GLES2 API instead of OpenGL
+    # -DUSE_VIDEOCORE=ON              # RPI: legacy Broadcom GLES libraries
+
+    # ── Audio ──
+    # -DUSE_LIBAO=ON                  # Build with AO support [default=ON]
+    # -DUSE_OSS=ON                    # Build with OSS support [default=OFF]
+    # -DUSE_LIBCDIO=ON                # Use libcdio for CDROM access
+
+    # ── Debug & Profiling ──
+    -DENABLE_GDB_SERVER=ON            # Build with GDB debugging support
+    # -DENABLE_DC_PROFILER=ON         # Support for SH4 profiler
+    # -DENABLE_FC_PROFILER=ON         # Support for host app profiler
+    # -DENABLE_LOG=ON                 # Enable full logging
+    # -DASAN=ON                       # Enable address sanitizer
+    -DCMAKE_BUILD_TYPE=Release        # Build type (default: none/Release/Debug)
+
+    # ── Misc ──
+    # -DUSE_DISCORD=ON                # Use Discord Presence API
+    # -DUSE_HOST_LIBZIP=OFF           # Use host libzip vs bundled [default=ON]
+    # -DUSE_HOST_GLSLANG=ON           # Use host glslang vs bundled
+    # -DUSE_HOST_LIBCHDR=ON           # Use host libchdr vs bundled
+    # -DUSE_DX9=OFF                   # Direct3D 9 (Windows only) [default=ON]
+    # -DUSE_DX11=OFF                  # Direct3D 11 (Windows only) [default=ON]
+    # -DLIBRETRO=ON                   # Build libretro core instead of standalone
+    # -DENABLE_CTEST=ON               # Enables unit tests
+    # -DTEST_AUTOMATION=ON            # Enable test automation
+)

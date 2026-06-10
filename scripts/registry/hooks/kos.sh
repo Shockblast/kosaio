@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/kos.sh
+# scripts/registry/hooks/kos.sh
 # Tool hooks for KallistiOS: custom build (sources environ.sh), apply (generates environ.sh)
 # Loaded automatically by helper_loader.sh
 

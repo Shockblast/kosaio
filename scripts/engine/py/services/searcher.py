@@ -18,7 +18,7 @@ class SearchService:
         # 1. Check Registry (Tools)
         registry_dir = cfg.registry_dir
         if registry_dir.exists():
-            for manifest_path in registry_dir.rglob(f"{target_id}.sh"):
+            for manifest_path in registry_dir.rglob(f"{target_id}.tool"):
                 return "tool"
 
         # 2. Check Diagnostics (Core/Internal)
@@ -29,7 +29,7 @@ class SearchService:
 
         # 3. Check Config (template-covered tool)
         if cfg.config_tools_dir.exists():
-            if (cfg.config_tools_dir / f"{target_id}.conf").exists():
+            if (cfg.config_tools_dir / f"{target_id}.tool").exists():
                 return "tool"
 
         # 4. Check Ports
@@ -60,7 +60,7 @@ class SearchService:
 
         registry_dir = cfg.registry_dir
         if registry_dir.exists():
-            for manifest_path in registry_dir.rglob(f"{target_id}.sh"):
+            for manifest_path in registry_dir.rglob(f"{target_id}.tool"):
                 return manifest_path
         
         # Check Diagnostics
@@ -72,7 +72,7 @@ class SearchService:
 
         # Fallback to template if config exists
         if cfg.config_tools_dir.exists():
-            if (cfg.config_tools_dir / f"{target_id}.conf").exists():
+            if (cfg.config_tools_dir / f"{target_id}.tool").exists():
                 if cfg.template_path.exists():
                     return cfg.template_path
 
@@ -120,23 +120,18 @@ class SearchService:
         query_lower = query.lower()
         results: List[Manifest] = []
 
-        # 1. Search registry manifests
+        # 1. Search registry tools (*.tool files are metadata manifests)
         if cfg.registry_dir.exists():
-            for manifest_path in cfg.registry_dir.rglob("*.sh"):
-                if manifest_path.name.endswith(".sample"):
-                    continue
-                if manifest_path.name == "process-standard.sh":
-                    continue
-
-                m = ManifestParser.parse_registry_file(manifest_path)
+            for manifest_path in cfg.registry_dir.rglob("*.tool"):
+                m = ManifestParser.parse_config_file(manifest_path)
                 if m:
                     if not query or any(query_lower in str(getattr(m, f)).lower() for f in ['id', 'name', 'desc', 'tags']):
                         results.append(m)
 
-        # 2. Search config files for template-covered tools
-        if cfg.config_tools_dir.exists():
+        # 2. Search for template-covered tools via config_tools_dir (same as above, avoids dups)
+        if cfg.config_tools_dir.exists() and cfg.config_tools_dir != cfg.registry_dir / "tools":
             existing_ids = {m.id for m in results}
-            for config_path in cfg.config_tools_dir.glob("*.conf"):
+            for config_path in cfg.config_tools_dir.glob("*.tool"):
                 tool_id = config_path.stem
                 if tool_id not in existing_ids:
                     m = ManifestParser.parse_config_file(config_path)

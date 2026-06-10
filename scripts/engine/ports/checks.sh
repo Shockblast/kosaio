@@ -10,7 +10,7 @@ function _ports_check_exists() {
 		if [ "${KOSAIO_DEV_MODE:-0}" == "1" ] || [[ "${KOS_PORTS}" == "${KOSAIO_DEV_ROOT}"* ]]; then
 			if confirm "kos-ports is missing in your HOST workspace. Do you want to clone it now?" "Y"; then
 				# Use the registry command to clone it correctly
-				manager_execute "clone" "kos-ports"
+				kosaio_manager_execute "clone" "kos-ports"
 				# Verify if it worked
 				[ -d "${KOS_PORTS}" ] && return 0
 			fi

@@ -2,7 +2,7 @@
 # scripts/registry/process-standard.sh
 # Generic registry template for tools that follow standard build patterns.
 # Reads all data from KOSAIO_TOOL_* config variables.
-# Override individual reg_* functions in a custom manifest for specialized tools.
+# Override individual kosaio_reg_* functions in a custom manifest for specialized tools.
 
 ID="${KOSAIO_TOOL_ID}"
 NAME="${KOSAIO_TOOL_NAME}"
@@ -18,12 +18,12 @@ __get_tool_dir() {
 	echo "${KOSAIO_TOOL_DIR_OVERRIDE:-$(kosaio_get_tool_dir "$ID")}"
 }
 
-function reg_clone() {
+function kosaio_reg_clone() {
 	local tool_dir=$(__get_tool_dir)
 
 	if [ -z "${KOSAIO_TOOL_REPO:-}" ]; then
-		log_error "${NAME} has no repository configured. Cannot clone."
-		return 1
+		log_info "${NAME} has no repository — nothing to clone."
+		return 0
 	fi
 
 	log_info --draw-line "Cloning ${NAME}..."
@@ -35,9 +35,61 @@ function reg_clone() {
 	kosaio_git_clone "${clone_args[@]}" "${KOSAIO_TOOL_REPO}" "${tool_dir}"
 }
 
-function reg_build() {
+function kosaio_reg_apply_config() {
+	# Tool apply-config hook (from helper) overrides default
+	if declare -F kosaio_tool_apply_config &>/dev/null; then
+		kosaio_tool_apply_config "$@"
+		return $?
+	fi
+
 	local tool_dir=$(__get_tool_dir)
-	[ -d "$tool_dir" ] || { log_error "${NAME} source missing. Run 'kosaio clone ${ID}' first."; return 1; }
+	[ -d "$tool_dir" ] || return 0
+
+	local cfg_path="${KOSAIO_DIR}/scripts/registry/cfg/${ID}.cfg"
+	local cfg_default="${KOSAIO_DIR}/scripts/registry/cfg/${ID}.cfg.default"
+	local cfg_file=""
+
+	local build_args=()
+
+	if [ -f "$cfg_path" ]; then
+		cfg_file="$cfg_path"
+	elif [ -f "$cfg_default" ]; then
+		cfg_file="$cfg_default"
+	fi
+
+	if [ -n "$cfg_file" ]; then
+		source "$cfg_file"
+		build_args=("${KOSAIO_TOOL_ARGS[@]}")
+	fi
+
+	# Pre-build translation (e.g. sdl2 user-friendly args)
+	if [ -n "${KOSAIO_TOOL_PREBUILD_FUNC:-}" ]; then
+		$KOSAIO_TOOL_PREBUILD_FUNC "${build_args[@]}" || return 1
+		[ ${#KOSAIO_TRANSLATED_ARGS[@]} -gt 0 ] && build_args=("${KOSAIO_TRANSLATED_ARGS[@]}")
+	fi
+
+	case "${KOSAIO_TOOL_BUILD_SYSTEM}" in
+		configure)
+			cd "$tool_dir"
+			[ -f Makefile ] && return 0
+			./configure --prefix="${KOSAIO_TOOL_INSTALLATION_FOLDER:-/usr/local}" "${build_args[@]}"
+			;;
+		cmake)
+			cd "$tool_dir"
+			cmake -S . -B "${KOSAIO_TOOL_BUILD_DIR:-build}" "${build_args[@]}"
+			;;
+		meson)
+			cd "$tool_dir"
+			meson setup "${KOSAIO_TOOL_BUILD_DIR:-builddir}" "${build_args[@]}"
+			;;
+		make)
+			:
+			;;
+	esac
+}
+
+function kosaio_reg_build() {
+	local tool_dir=$(__get_tool_dir)
 
 	# Tool build hook (from helper) overrides standard build
 	if declare -F kosaio_tool_build &>/dev/null; then
@@ -45,18 +97,17 @@ function reg_build() {
 		return $?
 	fi
 
+	[ -d "$tool_dir" ] || { log_error "${NAME} source missing. Run 'kosaio clone ${ID}' first."; return 1; }
+
+	# Apply config before building (reads .cfg if present)
+	kosaio_reg_apply_config "$@"
+
 	# Build warning from config (for tools without build hooks)
 	if [ ${#KOSAIO_TOOL_BUILD_WARNING[@]} -gt 0 ]; then
 		log_box --type=warn "${KOSAIO_TOOL_BUILD_WARNING[0]}" "${KOSAIO_TOOL_BUILD_WARNING[@]:1}"
 		if [ "${KOSAIO_TOOL_INSTALL_CONFIRM:-false}" = true ]; then
 			confirm "Proceed with build?" || return 1
 		fi
-	fi
-
-	# Pre-build hook for dynamic arg translation (e.g. sdl2)
-	if [ -n "${KOSAIO_TOOL_PREBUILD_FUNC:-}" ]; then
-		$KOSAIO_TOOL_PREBUILD_FUNC "$@" || return 1
-		[ ${#KOSAIO_TRANSLATED_ARGS[@]} -gt 0 ] && set -- "${KOSAIO_TRANSLATED_ARGS[@]}"
 	fi
 
 	case "${KOSAIO_TOOL_BUILD_SYSTEM}" in
@@ -69,12 +120,6 @@ function reg_build() {
 				toolchain="${KOS_BASE}/utils/cmake/dreamcast.toolchain.cmake"
 			fi
 
-			cd "${tool_dir}"
-			kosaio_cmake_configure \
-				--toolchain "$toolchain" \
-				--build-dir "${KOSAIO_TOOL_BUILD_DIR:-build}" \
-				"$@"
-
 			cd "${tool_dir}/${KOSAIO_TOOL_BUILD_DIR:-build}"
 			make -j$(nproc)
 			;;
@@ -84,17 +129,10 @@ function reg_build() {
 			;;
 		configure)
 			cd "${tool_dir}/${KOSAIO_TOOL_BUILD_SUBDIR:-.}"
-			./configure --prefix="${KOSAIO_TOOL_INSTALLATION_FOLDER:-/usr/local}" "$@"
 			make -j$(nproc)
 			;;
 		meson)
-			cd "${tool_dir}"
-			local meson_build_dir="${KOSAIO_TOOL_BUILD_DIR:-builddir}"
-			if [ "${KOSAIO_TOOL_MESON_CLEAN_BUILD:-false}" = true ]; then
-				rm -rf "${tool_dir}/${meson_build_dir}"
-			fi
-			kosaio_meson_configure --build-dir "$meson_build_dir"
-			kosaio_meson_build --build-dir "$meson_build_dir" "$@"
+			kosaio_meson_build "$@"
 			;;
 		none)
 			log_info "No compilation needed for ${NAME}."
@@ -102,7 +140,7 @@ function reg_build() {
 	esac
 }
 
-function reg_apply() {
+function kosaio_reg_apply() {
 	local tool_dir=$(__get_tool_dir)
 
 	# Tool apply hook (from helper) overrides standard install
@@ -143,7 +181,7 @@ function reg_apply() {
 	esac
 
 	# Post-install symlinks
-	if [ ${#KOSAIO_TOOL_SYMLINKS[@]} -gt 0 ]; then
+	if [ -n "${KOSAIO_TOOL_SYMLINKS+set}" ] && [ ${#KOSAIO_TOOL_SYMLINKS[@]} -gt 0 ]; then
 		for entry in "${KOSAIO_TOOL_SYMLINKS[@]}"; do
 			local target="${entry%%:*}"
 			local link="${entry#*:}"
@@ -154,7 +192,7 @@ function reg_apply() {
 	fi
 }
 
-function reg_check_health() {
+function kosaio_reg_check_health() {
 	# Tool health check hook (from helper) overrides standard check
 	if declare -F kosaio_tool_check_health &>/dev/null; then
 		kosaio_tool_check_health "$@"
@@ -209,7 +247,7 @@ function reg_check_health() {
 	return 2
 }
 
-function reg_uninstall() {
+function kosaio_reg_uninstall() {
 	# Tool uninstall hook (from helper) overrides standard uninstall
 	if declare -F kosaio_tool_uninstall &>/dev/null; then
 		kosaio_tool_uninstall "$@"
@@ -235,7 +273,7 @@ function reg_uninstall() {
 	log_success "${NAME} removed."
 }
 
-function reg_info() {
+function kosaio_reg_info() {
 	# Tool info hook (from helper) overrides standard info
 	if declare -F kosaio_tool_info &>/dev/null; then
 		kosaio_tool_info "$@"
@@ -259,7 +297,7 @@ function reg_info() {
 	done
 }
 
-function reg_update() {
+function kosaio_reg_update() {
 	# Tool update hook (from helper) overrides standard update
 	if declare -F kosaio_tool_update &>/dev/null; then
 		kosaio_tool_update "$@"
@@ -270,7 +308,7 @@ function reg_update() {
 	kosaio_standard_update_flow "${ID}" "${NAME}" "$tool_dir" "$@"
 }
 
-function reg_clean() {
+function kosaio_reg_clean() {
 	local tool_dir=$(__get_tool_dir)
 	[ -d "$tool_dir" ] || return 0
 
@@ -283,7 +321,7 @@ function reg_clean() {
 	log_success "${NAME} cleaned."
 }
 
-function reg_export() {
+function kosaio_reg_export() {
 	# Tool export hook (from helper) overrides standard export
 	if declare -F kosaio_tool_export &>/dev/null; then
 		kosaio_tool_export "$@"
@@ -310,7 +348,7 @@ function reg_export() {
 	log_success "${NAME} exported to ${host_out}."
 }
 
-function reg_install() {
+function kosaio_reg_install() {
 	# Tool install hook (from helper) overrides standard install pipeline
 	if declare -F kosaio_tool_install &>/dev/null; then
 		kosaio_tool_install "$@"
@@ -325,9 +363,9 @@ function reg_install() {
 		confirm "Proceed with installation?" || return 1
 	fi
 
-	reg_clone
-	reg_build
-	reg_apply
+	kosaio_reg_clone
+	kosaio_reg_build
+	kosaio_reg_apply
 
 	if [ -n "${KOSAIO_TOOL_POSTINSTALL_MESSAGE:-}" ]; then
 		log_info "$KOSAIO_TOOL_POSTINSTALL_MESSAGE"

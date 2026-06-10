@@ -1,0 +1,35 @@
+# ── Build Configuration: SDL2 (Dreamcast) ────────────
+# SDL2-DC uses CMake with the Dreamcast toolchain.
+# Run `kosaio apply-config sdl2-dc` after changing this file.
+# Run `kosaio reset-config sdl2-dc` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+KOSAIO_TOOL_ARGS=(
+    # ── Active Defaults (uncomment to override) ──
+    -DSDL_OPENGL=ON                  # OpenGL support
+    -DSDL_HAPTIC=ON                  # Haptic/force-feedback (coupled with OPENGL)
+    -DSDL_PTHREADS=ON                # POSIX threads (mutex, thread API)
+    -DSDL_TIMER_UNIX=ON              # UNIX timer subsystem
+    -DSDL_TESTS=OFF                  # Skip building tests
+
+    # ── Feature Subsystems ──
+    # -DSDL_AUDIO=OFF                 # Disable audio subsystem
+    # -DSDL_VIDEO=OFF                 # Disable video subsystem
+    # -DSDL_JOYSTICK=OFF              # Disable joystick subsystem
+    # -DSDL_RENDER=OFF                # Disable 2D render API
+    # -DSDL_EVENTS=OFF                # Disable event subsystem
+    # -DSDL_FILESYSTEM=OFF            # Disable filesystem access
+    # -DSDL_TIMER=OFF                 # Disable timer subsystem
+
+    # ── Dreamcast-Specific ──
+    # -DSDL_SH4ZAM=ON                 # Enable SH4 Zam GPU acceleration (Dreamcast)
+    # -DSDL_POWER=OFF                 # No power management on Dreamcast
+    # -DSDL_SENSOR=OFF                # No sensors on Dreamcast
+    # -DSDL_HIDAPI=OFF                # No HID API on Dreamcast
+    # -DSDL_CAMERA=OFF                # No camera on Dreamcast
+    # -DSDL_DIALOG=OFF                # No dialog on Dreamcast
+    # -DSDL_TRAY=OFF                  # No system tray on Dreamcast
+
+    # ── Library Type ──
+    # -DSDL_SHARED=OFF                # Build static library only
+)

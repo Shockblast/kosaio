@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/libdreamroq.sh
+# scripts/registry/hooks/libdreamroq.sh
 # Tool hooks for libdreamroq: KOS_PORTS integration, symlink management
 # Loaded automatically by helper_loader.sh
 

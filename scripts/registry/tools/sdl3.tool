@@ -41,14 +41,9 @@ KOSAIO_TOOL_POSTINSTALL_MESSAGE=""
 KOSAIO_TOOL_BUILD_WARNING=()
 KOSAIO_TOOL_INSTALL_WARNING=(
     "CUSTOMIZABLE BUILD"
-    "${C_YELLOW}Tip:${C_RESET} Run ${C_CYAN}kosaio info sdl3${C_RESET} for available build flags."
+    "${C_YELLOW}Tip:${C_RESET} Edit build options with ${C_CYAN}kosaio config sdl3${C_RESET}."
     "Proceeding will use standard defaults."
 )
 KOSAIO_TOOL_INFO_EXTRA=(
     "${C_YELLOW}Usage:${C_RESET}   Add ${C_CYAN}-lSDL3${C_RESET} to your Makefile."
-    "${C_YELLOW}Flags:${C_RESET}   ${C_CYAN}--no-audio${C_RESET}, ${C_CYAN}--no-joystick${C_RESET}, ${C_CYAN}--no-opengl${C_RESET},"
-    "             ${C_CYAN}--no-haptic${C_RESET}, ${C_CYAN}--no-pthreads${C_RESET}, ${C_CYAN}--no-timers${C_RESET},"
-    "             ${C_CYAN}--no-events${C_RESET}, ${C_CYAN}--no-render${C_RESET}, ${C_CYAN}--no-tests${C_RESET},"
-    "             ${C_CYAN}--static${C_RESET}, ${C_CYAN}--no-gpu${C_RESET}, ${C_CYAN}--no-camera${C_RESET},"
-    "             ${C_CYAN}--no-dialog${C_RESET}, ${C_CYAN}--no-tray${C_RESET}"
 )

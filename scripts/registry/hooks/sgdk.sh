@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/sgdk.sh
+# scripts/registry/hooks/sgdk.sh
 # Tool hook for SGDK: custom build (make -f makefile.gen + GDK export)
 # Loaded automatically by helper_loader.sh
 

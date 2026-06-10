@@ -43,5 +43,4 @@ KOSAIO_TOOL_BUILD_WARNING=()
 KOSAIO_TOOL_INSTALL_WARNING=()
 KOSAIO_TOOL_INFO_EXTRA=(
     "${C_YELLOW}Context:${C_RESET} CDI/GDI disc image generation tools."
-    "${C_YELLOW}Flags:${C_RESET}   ${C_CYAN}cdi4dc${C_RESET}, ${C_CYAN}gdi4dc${C_RESET}, ${C_CYAN}mds4dc${C_RESET}"
 )

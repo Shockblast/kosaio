@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/kos-ports.sh
+# scripts/registry/hooks/kos-ports.sh
 # Tool hooks for kos-ports: custom build (--force-build guard), install (clone + build only),
 # update (pull + submodules), uninstall (rm -rf)
 # Loaded automatically by helper_loader.sh

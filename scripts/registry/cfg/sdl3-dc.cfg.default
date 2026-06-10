@@ -1,0 +1,39 @@
+# ── Build Configuration: SDL3 (Dreamcast) ────────────
+# SDL3-DC uses CMake with the Dreamcast toolchain.
+# Run `kosaio apply-config sdl3-dc` after changing this file.
+# Run `kosaio reset-config sdl3-dc` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+KOSAIO_TOOL_ARGS=(
+    # ── Active Defaults (uncomment to override) ──
+    -DSDL_OPENGL=ON                  # OpenGL support
+    -DSDL_PTHREADS=ON                # POSIX threads (mutex, thread API)
+    -DSDL_TEST_LIBRARY=ON            # Build SDL3 test library
+    -DSDL_SH4ZAM=ON                  # Enable SH4 Zam GPU acceleration (Dreamcast)
+    -DSDL_TESTS=OFF                  # Skip building tests
+    -DSDL_EXAMPLES=OFF               # Skip building examples
+    -DSDL_GPU=OFF                    # Disable cross-platform GPU API
+    -DSDL_CAMERA=OFF                 # No camera on Dreamcast
+    -DSDL_DIALOG=OFF                 # No dialog on Dreamcast
+    -DSDL_TRAY=OFF                   # No system tray on Dreamcast
+    -DSDL_HIDAPI=OFF                 # No HID API on Dreamcast
+    -DSDL_SENSOR=OFF                 # No sensors on Dreamcast
+    -DSDL_VULKAN=OFF                 # Vulkan (not available on DC)
+    -DSDL_OPENVR=OFF                 # OpenVR (not available on DC)
+    -DSDL_RENDER_GPU=OFF             # GPU render (not available on DC)
+
+    # ── Feature Subsystems ──
+    # -DSDL_AUDIO=OFF                 # Disable audio subsystem
+    # -DSDL_VIDEO=OFF                 # Disable video subsystem
+    # -DSDL_JOYSTICK=OFF              # Disable joystick subsystem
+    # -DSDL_HAPTIC=OFF                # Disable haptic/force-feedback
+    # -DSDL_RENDER=OFF                # Disable 2D render API
+    # -DSDL_EVENTS=OFF                # Disable event subsystem
+    # -DSDL_FILESYSTEM=OFF            # Disable filesystem access
+
+    # ── Unavailable on Dreamcast ──
+    # -DSDL_POWER=ON                  # Power management (not on DC)
+
+    # ── Library Type ──
+    # -DSDL_SHARED=OFF                # Build static library only
+)

@@ -23,5 +23,8 @@ venv/
 
 # projects/ is managed by user, usually ignored or managed separately
 
+### Registry Config (user-editable, not tracked) ###
+scripts/registry/cfg/*.cfg
+
 ### Cloned Repositories ###
 repos/

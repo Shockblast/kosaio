@@ -16,6 +16,6 @@ function controller_list_handle() {
 		log_info --draw-line "KOSAIO Registry Status"
 	fi
 
-	search_execute "$@"
+	kosaio_search_execute "$@"
 	echo ""
 }

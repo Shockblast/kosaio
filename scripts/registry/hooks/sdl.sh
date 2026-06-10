@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/sdl2.sh
+# scripts/registry/hooks/sdl.sh
 # Prebuild arg translator for SDL2: translates --no-audio, --static, etc.
 # Loaded automatically by helper_loader.sh when using kosaio * sdl2
 

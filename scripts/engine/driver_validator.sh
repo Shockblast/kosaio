@@ -8,7 +8,7 @@ set -Eeuo pipefail
 
 ENGINE_PY="${KOSAIO_DIR}/scripts/engine/py/main.py"
 
-function validate_get_target_type() {
+function kosaio_validate_get_target_type() {
 	local target="$1"
 	local action="${2:-}"
 
@@ -54,7 +54,7 @@ function validate_get_target_type() {
 }
 
 # Utility: Get tool path (delegates to Python)
-function validate_get_tool_path() {
+function kosaio_validate_get_tool_path() {
 	local tool="$1"
 	local mode="${2:-}"
 

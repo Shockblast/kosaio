@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/aicaos.sh
+# scripts/registry/hooks/aicaos.sh
 # Tool hooks for AICAOS: custom build (ARM driver + SH4 lib), install, export
 # Loaded automatically by helper_loader.sh
 

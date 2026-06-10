@@ -33,7 +33,15 @@ function kosaio_router_dispatch() {
 			;;
 
 		"config")
-			_router_handle_config "$TARGET"
+			_router_handle_config "$TARGET" "${ARGS[0]:-}"
+			;;
+
+		"reset-config")
+			_router_handle_reset_config "$TARGET"
+			;;
+
+		"apply-config")
+			_router_handle_lifecycle "apply-config" "$TARGET" "${ARGS[@]}"
 			;;
 
 		"rebuild")
@@ -75,7 +83,7 @@ function _router_handle_lifecycle() {
 
 	# Validate Target
 	local target_type
-	if ! target_type=$(validate_get_target_type "$target" "$action"); then
+	if ! target_type=$(kosaio_validate_get_target_type "$target" "$action"); then
 		return 1
 	fi
 
@@ -98,7 +106,7 @@ function _router_handle_lifecycle() {
 			;;
 		"tool"|"core"|"unknown")
 			# Default to Registry Manager
-			manager_execute "$action" "$target" "$@"
+			kosaio_manager_execute "$action" "$target" "$@"
 			;;
 		*)
 			log_error "Unknown Target Type: '$target_type'"
@@ -113,7 +121,7 @@ function _router_handle_diagnose() {
 	log_info --draw-line "Diagnosing $TARGET..."
 	
 	local CODE=0
-	health_check "$TARGET" || CODE=$?
+	kosaio_health_check "$TARGET" || CODE=$?
 
 	case $CODE in
 		0) log_success "Target '${TARGET}' is healthy and installed." ;;
@@ -143,47 +151,53 @@ function _router_handle_project() {
 
 function _router_handle_config() {
 	local target="$1"
+	local mode="${2:-}"
 	require_var "target" "Target is required" || show_usage
 
-	local engine_py="${KOSAIO_DIR}/scripts/engine/py/main.py"
-	local manifest
-	manifest=$(python3 "$engine_py" get_manifest_path "$target" 2>/dev/null) || {
-		log_error "Target '${target}' not found in registry."
-		return 1
-	}
-
-	local config_path="${KOSAIO_DIR}/configs/tools/${target}.conf"
-	if [ ! -f "$config_path" ]; then
-		log_warn "Config for '${target}' does not exist. Creating template..."
-		cat > "$config_path" << 'CONF_EOF'
-# === SOURCE CONTROL ===
-KOSAIO_TOOL_REPO=""
-KOSAIO_TOOL_BRANCH=""
-# KOSAIO_TOOL_TAG=""
-
-# === BUILD OPTIONS ===
-KOSAIO_TOOL_ARGS=()
-
-# === INSTALLATION ===
-KOSAIO_TOOL_INSTALLATION_FOLDER="${KOS_BASE}/addons"
-KOSAIO_TOOL_INSTALLATION_LIBDIR="lib/dreamcast"
-KOSAIO_TOOL_INSTALLATION_INCLUDEDIR="include"
-
-# === COMPILER/LINKER FLAGS ===
-# KOSAIO_TOOL_FLAGS=("-O2" "-ffast-math")
-
-# === CONTAINER ENVIRONMENT ===
-# KOSAIO_TOOL_ENV=()
-
-# === UNINSTALL & HEALTH ===
-KOSAIO_TOOL_LIBS=()
-KOSAIO_TOOL_INCLUDE_DIRS=()
-CONF_EOF
-		log_success "Template created at ${config_path}"
-		log_info "Edit the file, save, and run 'kosaio install ${target}' to use it."
+	# --meta flag opens the .tool file (metadata)
+	if [ "$mode" = "--meta" ]; then
+		local tool_path="${KOSAIO_DIR}/scripts/registry/tools/${target}.tool"
+		if [ ! -f "$tool_path" ]; then
+			log_error "Metadata not found for '${target}'."
+			return 1
+		fi
+		${EDITOR:-nano} "$tool_path"
+		return $?
 	fi
 
-	nano "$config_path"
+	# Default: open .cfg (build configuration)
+	local cfg_path="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg"
+	local cfg_default="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg.default"
+
+	if [ ! -f "$cfg_default" ]; then
+		log_info "No build configuration available for '${target}'."
+		log_info "Use 'kosaio config ${target} --meta' to edit metadata."
+		return 0
+	fi
+
+	if [ ! -f "$cfg_path" ]; then
+		cp "$cfg_default" "$cfg_path"
+		log_success "Created personal config from default template."
+	fi
+
+	${EDITOR:-nano} "$cfg_path"
+}
+
+function _router_handle_reset_config() {
+	local target="$1"
+	require_var "target" "Target is required" || show_usage
+
+	local cfg_path="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg"
+	local cfg_default="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg.default"
+
+	if [ ! -f "$cfg_default" ]; then
+		log_error "No default configuration exists for '${target}'. Cannot reset."
+		return 1
+	fi
+
+	cp "$cfg_default" "$cfg_path"
+	log_success "Reset '${target}' configuration to defaults."
+	${EDITOR:-nano} "$cfg_path"
 }
 
 function _router_handle_rebuild() {

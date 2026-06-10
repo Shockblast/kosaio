@@ -22,7 +22,7 @@ To prevent "configuration drift" between the Shell environment and the Python en
 *   **Runtime Authority**: The **Python Engine** (`services.validator`) is the single source of truth for where tools and ports are located during runtime.
 *   **Bootstrap Fallback**: Bash functions (`env.sh`) are allowed to resolve paths **ONLY** during shell initialization (when Python might not be ready) or for exporting initial variables.
 
-> **Rule**: If a script needs to know where `kos-ports` is installed, it MUST ask the Python Engine via `validate_get_tool_path`.
+> **Rule**: If a script needs to know where `kos-ports` is installed, it MUST ask the Python Engine via `kosaio_validate_get_tool_path`.
 
 ## 3. Directory Structure
 

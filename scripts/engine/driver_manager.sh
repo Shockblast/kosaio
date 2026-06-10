@@ -7,7 +7,7 @@ set -Eeuo pipefail
 
 ENGINE_PY="${KOSAIO_DIR}/scripts/engine/py/main.py"
 
-function manager_execute() {
+function kosaio_manager_execute() {
 	local COMMAND="${1,,}"
 	local TARGET_ID="${2,,}"
 	shift 2
@@ -25,7 +25,7 @@ function manager_execute() {
 	# Load tool-specific helpers (PREBUILD_FUNC, etc.)
 	kosaio_load_tool_helpers "$TARGET_ID"
 
-	# Source template (generic reg_* functions)
+	# Source template (generic kosaio_reg_* functions)
 	# shellcheck source=/dev/null
 	source "${KOSAIO_DIR}/scripts/registry/process-standard.sh"
 
@@ -40,24 +40,24 @@ function manager_execute() {
 			read -ra DEPS_ARR <<< "$DEPS"
 			kosaio_install_apt_deps "${DEPS_ARR[@]}"
 		fi
-			if [ "$(type -t reg_install)" == "function" ]; then
-				reg_install "$@"
+			if [ "$(type -t kosaio_reg_install)" == "function" ]; then
+				kosaio_reg_install "$@"
 			else
 				log_error "Target '${ID}' does not support installation."
 				return 1
 			fi
 			;;
 		"uninstall")
-			if [ "$(type -t reg_uninstall)" == "function" ]; then
-				reg_uninstall "$@"
+			if [ "$(type -t kosaio_reg_uninstall)" == "function" ]; then
+				kosaio_reg_uninstall "$@"
 			else
 				log_error "Target '${ID}' does not support uninstallation."
 				return 1
 			fi
 			;;
 		"update")
-			if [ "$(type -t reg_update)" == "function" ]; then
-				reg_update "$@"
+			if [ "$(type -t kosaio_reg_update)" == "function" ]; then
+				kosaio_reg_update "$@"
 			else
 				log_error "Target '${ID}' does not support updates."
 				return 1
@@ -72,13 +72,14 @@ function manager_execute() {
 			[ -z "${REPO:-}" ] || printf "${C_CYAN}Repository:  ${C_RESET}%s\n" "${REPO}"
 			
 			# Call custom info if available
-			if [ "$(type -t reg_info)" == "function" ]; then
+			if [ "$(type -t kosaio_reg_info)" == "function" ]; then
 				echo ""
-				reg_info "$@"
+				kosaio_reg_info "$@"
 			fi
 			;;
-		"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"export")
-			FUNC_NAME="reg_${COMMAND}"
+		"build"|"apply"|"apply-config"|"reset"|"checkout"|"clone"|"clean"|"export")
+			local func_suffix="${COMMAND//-/_}"
+			FUNC_NAME="kosaio_reg_${func_suffix}"
 			if [ "$(type -t "${FUNC_NAME}")" == "function" ]; then
 				${FUNC_NAME} "$@"
 			else

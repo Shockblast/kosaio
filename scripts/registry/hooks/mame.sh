@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/mame.sh
+# scripts/registry/hooks/mame.sh
 # Tool hooks for MAME: custom build with RAM-aware throttling, Eggman mode, rich dashboard
 # Loaded automatically by helper_loader.sh
 
@@ -15,8 +15,7 @@ kosaio_tool_info() {
 		"${C_YELLOW}Source:${C_RESET}  ${tool_dir}" \
 		"${C_YELLOW}Optimization:${C_RESET} Builds ${C_GREEN}dccons${C_RESET} driver only (Dreamcast)." \
 		"${C_YELLOW}Mode:${C_RESET} Auto-scales build threads based on RAM to prevent crashes." \
-		"${C_YELLOW}Flag:${C_RESET} ${C_CYAN}--full-power${C_RESET} : Use ALL cores (Eggman Mode)" \
-		"${C_YELLOW}Flag:${C_RESET} ${C_CYAN}--debug${C_RESET}      : Build with debug symbols (high RAM)" \
+		"${C_YELLOW}Config:${C_RESET} Edit with ${C_CYAN}kosaio config mame${C_RESET}" \
 		"${C_YELLOW}Disk:${C_RESET}  Requires ~2GB storage (Dreamcast driver only)." \
 		"${C_YELLOW}RAM:${C_RESET}   Requires 4GB+ RAM during linking phase." \
 		"${C_YELLOW}BIOS:${C_RESET}  Requires MAME-compatible 'dc.zip' BIOS in rompath." \

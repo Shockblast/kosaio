@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/flycast.sh
+# scripts/registry/hooks/flycast.sh
 # Prebuild arg translator for Flycast: --with-gdb, --debug, --release
 # Loaded automatically by helper_loader.sh
 
@@ -13,10 +13,7 @@ kosaio_tool_info() {
 
 	log_box --info "FLYCAST: DREAMCAST EMULATOR" \
 		"${C_YELLOW}Status:${C_RESET}  ${status}" \
-		"${C_YELLOW}Source:${C_RESET}  ${tool_dir}" \
-		"${C_YELLOW}Flag:${C_RESET}   ${C_CYAN}--with-gdb${C_RESET} : Enable GDB Server for debugging" \
-		"${C_YELLOW}Flag:${C_RESET}   ${C_CYAN}--debug${C_RESET}    : Debug build" \
-		"${C_YELLOW}Flag:${C_RESET}   ${C_CYAN}--release${C_RESET}  : Release build (default)"
+		"${C_YELLOW}Source:${C_RESET}  ${tool_dir}"
 }
 
 kosaio_tool_check_health() {
@@ -46,35 +43,4 @@ kosaio_tool_check_health() {
 		"${C_GREEN}✓${C_RESET} Source: ${tool_dir}" \
 		"${C_GREEN}✓${C_RESET} Binary: ${binary}"
 	return 0
-}
-
-kosaio_translate_flycast_args() {
-	KOSAIO_TRANSLATED_ARGS=()
-	local build_system="${1:?}"
-	shift
-
-	local gdb_state="OFF"
-	local build_type="Release"
-
-	for arg in "$@"; do
-		case "$arg" in
-			--with-gdb)
-				gdb_state="ON"
-				;;
-			--debug)
-				build_type="Debug"
-				;;
-			--release)
-				build_type="Release"
-				;;
-			*)
-				KOSAIO_TRANSLATED_ARGS+=("$arg")
-				;;
-		esac
-	done
-
-	KOSAIO_TRANSLATED_ARGS=(
-		"-DENABLE_GDB_SERVER=${gdb_state}"
-		"-DCMAKE_BUILD_TYPE=${build_type}"
-	)
 }

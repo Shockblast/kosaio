@@ -8,7 +8,7 @@ DESC="Internal health check for KOSAIO engine and scripts"
 TYPE="core"
 TAGS="core,diag"
 
-function reg_check_health() {
+function kosaio_reg_check_health() {
 	local warnings=0
 	local errors=0
 

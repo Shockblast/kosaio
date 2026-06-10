@@ -61,7 +61,7 @@ class Config:
 
     @property
     def config_tools_dir(self) -> Path:
-        return self.kosaio_dir / "configs" / "tools"
+        return self.kosaio_dir / "scripts" / "registry" / "tools"
 
     @property
     def template_path(self) -> Path:

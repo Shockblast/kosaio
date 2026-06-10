@@ -8,7 +8,7 @@ DESC="Host environment, toolchain, and critical variables"
 TYPE="core"
 TAGS="core,env,diag"
 
-function reg_check_health() {
+function kosaio_reg_check_health() {
 	local errors=0
 	
 	log_info "--- Environment Variables ---"

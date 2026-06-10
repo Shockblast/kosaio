@@ -69,18 +69,18 @@ class StatusService:
 
         c_has_sh = (c_sh / "bin" / "sh-elf-gcc").exists()
         c_has_arm = (c_arm / "bin" / "arm-eabi-gcc").exists()
-        if c_has_sh and c_has_arm:
-            c_inst = True
-        elif c_has_sh:
+        if c_has_sh:
+            c_inst = True  # SH4 is sufficient; ARM is optional
+        elif c_has_arm:
             c_inst = "c"
         else:
             c_inst = False
 
         h_has_sh = (h_sh / "bin" / "sh-elf-gcc").exists()
         h_has_arm = (h_arm / "bin" / "arm-eabi-gcc").exists()
-        if h_has_sh and h_has_arm:
+        if h_has_sh:
             h_inst = True
-        elif h_has_sh:
+        elif h_has_arm:
             h_inst = "c"
         else:
             h_inst = False

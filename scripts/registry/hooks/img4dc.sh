@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/img4dc.sh
+# scripts/registry/hooks/img4dc.sh
 # Tool hooks for img4dc: multi-location binary discovery in apply + export
 # Loaded automatically by helper_loader.sh
 

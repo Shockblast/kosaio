@@ -134,11 +134,11 @@ function kosaio_standard_update_flow() {
 				[ -n "$apply_cmd" ] && $apply_cmd "$@"
 			# Case B: Standard Registry functions
 			else
-				if [ "$(type -t reg_build)" == "function" ]; then
-					reg_build "$@"
+				if [ "$(type -t kosaio_reg_build)" == "function" ]; then
+					kosaio_reg_build "$@"
 				fi
-				if [ "$(type -t reg_apply)" == "function" ]; then
-					reg_apply "$@"
+				if [ "$(type -t kosaio_reg_apply)" == "function" ]; then
+					kosaio_reg_apply "$@"
 				fi
 			fi
 			return 11 # SUCCESS - UPDATED & BUILT

@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/tools/helpers/toolchain.sh
+# scripts/registry/hooks/toolchain.sh
 # Tool hooks for Dreamcast Toolchain (dc-chain in KOS utils)
 # Builds SH4 + ARM toolchains via kos/utils/dc-chain
 # Loaded automatically by helper_loader.sh

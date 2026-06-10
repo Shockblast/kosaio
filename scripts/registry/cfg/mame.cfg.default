@@ -1,0 +1,11 @@
+# ── Build Configuration: MAME ────────────────────────
+# MAME uses make with custom options for Dreamcast.
+# Run `kosaio apply-config mame` after changing this file.
+# Run `kosaio reset-config mame` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+# MAME build options (passed via command line to make)
+KOSAIO_TOOL_ARGS=(
+    # --full-power                   # Use all CPU cores (ignore RAM throttle)
+    # --debug                        # Build with debug symbols (high RAM)
+)
