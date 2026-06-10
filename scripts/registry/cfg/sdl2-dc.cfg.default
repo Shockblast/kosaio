@@ -11,6 +11,7 @@ KOSAIO_TOOL_ARGS=(
     -DSDL_PTHREADS=ON                # POSIX threads (mutex, thread API)
     -DSDL_TIMER_UNIX=ON              # UNIX timer subsystem
     -DSDL_TESTS=OFF                  # Skip building tests
+    -DSDL2_CONFIG=OFF                # Not needed on DC; projects link via KOS flags
 
     # ── Feature Subsystems ──
     # -DSDL_AUDIO=OFF                 # Disable audio subsystem
