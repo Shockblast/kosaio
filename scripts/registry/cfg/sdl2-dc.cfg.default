@@ -22,7 +22,6 @@ KOSAIO_TOOL_ARGS=(
     # -DSDL_TIMER=OFF                 # Disable timer subsystem
 
     # ── Dreamcast-Specific ──
-    # -DSDL_SH4ZAM=ON                 # Enable SH4 Zam GPU acceleration (Dreamcast)
     # -DSDL_POWER=OFF                 # No power management on Dreamcast
     # -DSDL_SENSOR=OFF                # No sensors on Dreamcast
     # -DSDL_HIDAPI=OFF                # No HID API on Dreamcast

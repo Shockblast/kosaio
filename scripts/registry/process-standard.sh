@@ -374,6 +374,8 @@ function kosaio_reg_install() {
 		confirm "Proceed with installation?" || return 1
 	fi
 
+	local tool_dir=$(__get_tool_dir)
+
 	kosaio_reg_clone
 	kosaio_reg_build
 	kosaio_reg_apply
