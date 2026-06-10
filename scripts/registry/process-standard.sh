@@ -45,7 +45,7 @@ function kosaio_reg_apply_config() {
 	local tool_dir=$(__get_tool_dir)
 	[ -d "$tool_dir" ] || return 0
 
-	local cfg_path="${KOSAIO_DIR}/scripts/registry/cfg/${ID}.cfg"
+	local cfg_path="${KOSAIO_DIR}/data/cfg/${ID}.cfg"
 	local cfg_default="${KOSAIO_DIR}/scripts/registry/cfg/${ID}.cfg.default"
 	local cfg_file=""
 
@@ -190,6 +190,8 @@ function kosaio_reg_apply() {
 			log_info "Symlink: $link -> $target"
 		done
 	fi
+
+	touch "$tool_dir/.kosaio_installed"
 }
 
 function kosaio_reg_check_health() {
@@ -233,12 +235,19 @@ function kosaio_reg_check_health() {
 	fi
 
 	if [ "$missing" -eq 0 ]; then
+		# Reconcile: marker exists only if all libs are present
+		if [ -n "${KOSAIO_TOOL_LIBS[0]:-}" ]; then
+			touch "$tool_dir/.kosaio_installed"
+		fi
 		log_box --info "${NAME} — Health Check" \
 			"${C_YELLOW}Status:${C_RESET} ${C_GREEN}Healthy${C_RESET}" \
 			"" \
 			"${items[@]}"
 		return 0
 	fi
+
+	# Reconcile: remove marker if anything is missing
+	rm -f "$tool_dir/.kosaio_installed"
 
 	log_box --type=warn "${NAME} — Health Check" \
 		"${C_YELLOW}Status:${C_RESET} ${C_RED}Incomplete${C_RESET}" \
@@ -270,6 +279,7 @@ function kosaio_reg_uninstall() {
 	done
 
 	rm -rf "$tool_dir"
+	rm -f "$tool_dir/.kosaio_installed"
 	log_success "${NAME} removed."
 }
 
@@ -318,6 +328,7 @@ function kosaio_reg_clean() {
 		local build_dir="${KOSAIO_TOOL_BUILD_DIR:-build}"
 		[ -d "${tool_dir}/${build_dir}" ] && rm -rf "${tool_dir}/${build_dir}"
 	fi
+	rm -f "$(dirname "$tool_dir")/.kosaio_installed"
 	log_success "${NAME} cleaned."
 }
 
@@ -330,7 +341,7 @@ function kosaio_reg_export() {
 
 	local tool_dir=$(__get_tool_dir)
 	local src="${tool_dir}/${KOSAIO_TOOL_BINARY_SUBDIR:-.}"
-	local host_out="${KOSAIO_DIR}/out/${ID}"
+	local host_out="${KOSAIO_DIR}/data/out/${ID}"
 
 	if [ ${#KOSAIO_TOOL_BINARIES[@]} -eq 0 ]; then
 		log_info "Nothing to export for ${NAME}."
@@ -370,5 +381,6 @@ function kosaio_reg_install() {
 	if [ -n "${KOSAIO_TOOL_POSTINSTALL_MESSAGE:-}" ]; then
 		log_info "$KOSAIO_TOOL_POSTINSTALL_MESSAGE"
 	fi
+	touch "$tool_dir/.kosaio_installed"
 	log_success "${NAME} installation complete."
 }

@@ -79,7 +79,7 @@ export KOSAIO_DEV_ROOT="${PROJECTS_DIR}/kosaio-dev"
 export KOS_MAKE="${KOS_MAKE:-make}"
 
 # State Directory for Dev Mode
-KOSAIO_STATE_DIR="${HOME}/.kosaio/states"
+KOSAIO_STATE_DIR="${KOSAIO_DIR}/data/states"
 
 # Logging Configuration
 # FULL: [YYYY-MM-DD HH:MM:SS] INFO: Message
@@ -131,7 +131,7 @@ function kosaio_get_tool_dir() {
 				final_path="${DREAMCAST_SDK}/${tool}"
 				;;
 			*)
-				final_path="${KOSAIO_DIR}/repos/${tool}"
+				final_path="${KOSAIO_DIR}/data/repos/${tool}"
 				;;
 		esac
 
@@ -155,7 +155,7 @@ export KOS_PORTS
 export KOS_BASE="${KOS_DIR}"
 
 # Binaries location: Host tools compiled for Dreamcast dev go here
-export KOSAIO_BIN_PATH="${KOSAIO_DIR}/out/bin"
+export KOSAIO_BIN_PATH="${KOSAIO_DIR}/data/out/bin"
 
 if [ "${KOSAIO_DEV_MODE:-0}" = "1" ]; then
 	export KOSAIO_BIN_PATH="${KOSAIO_DEV_ROOT}/bin"

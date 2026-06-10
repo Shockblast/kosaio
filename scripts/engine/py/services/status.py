@@ -17,6 +17,21 @@ class StatusService:
             c_inst, h_inst = StatusService._apply_fallback(item_id, c_base, h_base, c_inst, h_inst)
             c_inst, h_inst = StatusService._run_specialized_check(item_id, c_base, h_base, c_inst, h_inst)
 
+            # Generic tools (not in _SPECIAL_CASES): check .kosaio_installed marker
+            if item_id not in StatusService._SPECIAL_CASES:
+                if (c_base / ".kosaio_installed").exists():
+                    c_inst = True
+                elif c_base.exists():
+                    c_inst = "c"  # cloned but not compiled
+                else:
+                    c_inst = False
+                if (h_base / ".kosaio_installed").exists():
+                    h_inst = True
+                elif h_base.exists():
+                    h_inst = "c"
+                else:
+                    h_inst = False
+
         is_host_active = StatusService._detect_active_mode(item_id, item_type)
         c_inst, h_inst = StatusService._detect_broken(item_id, is_host_active, c_inst, h_inst)
         c_source, h_source, c_inst, h_inst = StatusService._detect_port_source(item_id, item_type, c_inst, h_inst)

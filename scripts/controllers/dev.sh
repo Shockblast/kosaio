@@ -37,7 +37,8 @@ function controller_dev_handle() {
 		fi
 	fi
 
-	local state_file="${HOME}/.kosaio/states/${target}_dev"
+	local state_dir="${KOSAIO_STATE_DIR:-${KOSAIO_DIR}/data/states}"
+	local state_file="${state_dir}/${target}_dev"
 
 	if [ -z "$mode" ]; then
 		# Check Status

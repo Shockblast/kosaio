@@ -5,6 +5,7 @@
 # Load Controllers
 source "${KOSAIO_DIR}/scripts/controllers/list.sh"
 source "${KOSAIO_DIR}/scripts/controllers/dev.sh"
+source "${KOSAIO_DIR}/scripts/engine/driver_refresh.sh"
 
 function kosaio_router_dispatch() {
 	local ACTION="${1:-}"
@@ -44,11 +45,15 @@ function kosaio_router_dispatch() {
 			_router_handle_lifecycle "apply-config" "$TARGET" "${ARGS[@]}"
 			;;
 
-		"rebuild")
-			_router_handle_rebuild "$TARGET"
-			;;
+	"rebuild")
+		_router_handle_rebuild "$TARGET"
+		;;
 
-		"diagnose")
+	"refresh")
+		kosaio_refresh "$TARGET"
+		;;
+
+	"diagnose")
 			_router_handle_diagnose "$TARGET"
 			;;
 
@@ -166,7 +171,7 @@ function _router_handle_config() {
 	fi
 
 	# Default: open .cfg (build configuration)
-	local cfg_path="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg"
+	local cfg_path="${KOSAIO_DIR}/data/cfg/${target}.cfg"
 	local cfg_default="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg.default"
 
 	if [ ! -f "$cfg_default" ]; then
@@ -187,7 +192,7 @@ function _router_handle_reset_config() {
 	local target="$1"
 	require_var "target" "Target is required" || show_usage
 
-	local cfg_path="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg"
+	local cfg_path="${KOSAIO_DIR}/data/cfg/${target}.cfg"
 	local cfg_default="${KOSAIO_DIR}/scripts/registry/cfg/${target}.cfg.default"
 
 	if [ ! -f "$cfg_default" ]; then

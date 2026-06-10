@@ -11,7 +11,6 @@ Thumbs.db
 ### KOSAIO Config & Scripts ###
 kosaio.cfg
 kosaio-shell
-out/
 
 ### Python Engine ###
 __pycache__/
@@ -21,10 +20,10 @@ __pycache__/
 venv/
 .venv/
 
-# projects/ is managed by user, usually ignored or managed separately
-
-### Registry Config (user-editable, not tracked) ###
-scripts/registry/cfg/*.cfg
-
-### Cloned Repositories ###
+### KOSAIO Runtime Data (generated, not tracked) ###
+data/*
+!data/.gitkeep
+out/
 repos/
+
+# projects/ is managed by user, usually ignored or managed separately

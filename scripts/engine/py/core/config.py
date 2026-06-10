@@ -8,7 +8,7 @@ class Config:
         self.sdk_root = Path(os.environ.get("DREAMCAST_SDK", "/opt/toolchains/dc"))
         self.projects_root = Path(os.environ.get("PROJECTS_DIR", "/opt/projects"))
         self.dev_root = self.projects_root / "kosaio-dev"
-        self.state_dir = Path.home() / ".kosaio" / "states"
+        self.state_dir = self.kosaio_dir / "data" / "states"
         self.dev_mode = os.environ.get("KOSAIO_DEV_MODE")
         self.kos_ports_dir_override = os.environ.get("KOS_PORTS")
 
@@ -36,7 +36,7 @@ class Config:
         if tool in holy_list:
             return self.sdk_root / tool
         else:
-            return self.kosaio_dir / "repos" / tool
+            return self.kosaio_dir / "data" / "repos" / tool
 
     @property
     def kos_ports_dir(self) -> Path:

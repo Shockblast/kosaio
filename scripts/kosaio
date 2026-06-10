@@ -91,6 +91,7 @@ function show_usage() {
 	printf "  ${lrow_life} %s\n" "update" "<id>|all" "[args...]" "Pull latest source and rebuild (all ignores prompts)"
 	printf "  ${lrow_life} %s\n" "uninstall" "<id>" "" "Remove tool/sdk from the system"
 	printf "  ${lrow_life} %s\n" "rebuild" "<id>" "" "Uninstall + reinstall with current config"
+	printf "  ${lrow_life} %s\n" "refresh" "[id|all]" "" "Reconcile installed markers with filesystem"
 	printf "  ${lrow_life} %s\n" "config" "<id>" "" "Edit tool configuration in nano"
 	printf "  ${lrow_life} %s\n" "clone" "<id>" "[args...]" "Download source code only"
 	printf "  ${lrow_life} %s\n" "build" "<id>" "[args...]" "Run compilation on local source"

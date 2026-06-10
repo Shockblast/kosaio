@@ -94,7 +94,7 @@ function _kosaio_set_prompt() {
 	local MODE_COLOR="${SEGA_ORANGE}" # Default: System (US Style)
 	local MODE_TEXT="SYS"
 
-	if [ -f "${HOME}/.kosaio/states/kos_dev" ]; then
+	if [ -f "${KOSAIO_DIR}/data/states/kos_dev" ]; then
 		MODE_COLOR="${SEGA_BLUE}"      # Host/Dev (JP/EU Style)
 		MODE_TEXT="DEV"
 	fi

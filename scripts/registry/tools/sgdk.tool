@@ -31,7 +31,7 @@ KOSAIO_TOOL_PATCHES=()
 
 # === UNINSTALL & HEALTH ===
 KOSAIO_TOOL_LIBS=(
-    "${KOSAIO_DIR}/repos/sgdk/lib/libmd.a"
+    "${KOSAIO_DIR}/data/repos/sgdk/lib/libmd.a"
 )
 KOSAIO_TOOL_INCLUDE_DIRS=()
 
