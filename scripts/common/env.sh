@@ -155,7 +155,7 @@ export KOS_PORTS
 export KOS_BASE="${KOS_DIR}"
 
 # Binaries location: Host tools compiled for Dreamcast dev go here
-export KOSAIO_BIN_PATH="${KOSAIO_DIR}/data/out/bin"
+export KOSAIO_BIN_PATH="${KOSAIO_DIR}/data/bin"
 
 if [ "${KOSAIO_DEV_MODE:-0}" = "1" ]; then
 	export KOSAIO_BIN_PATH="${KOSAIO_DEV_ROOT}/bin"

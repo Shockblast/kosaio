@@ -43,7 +43,8 @@ TARGET_DIRS=(
 	"${DREAMCAST_SDK}"
 	"${DREAMCAST_SDK}/bin"
 	"${KOSAIO_DIR}/data/repos"
-	"${KOSAIO_DIR}/data/out/bin"
+	"${KOSAIO_DIR}/data/bin"
+	"${KOSAIO_DIR}/data/exports"
 	"${KOSAIO_DIR}/data/cfg"
 	"${KOSAIO_DIR}/data/states"
 )

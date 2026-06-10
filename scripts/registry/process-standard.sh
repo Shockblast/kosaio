@@ -341,7 +341,7 @@ function kosaio_reg_export() {
 
 	local tool_dir=$(__get_tool_dir)
 	local src="${tool_dir}/${KOSAIO_TOOL_BINARY_SUBDIR:-.}"
-	local host_out="${KOSAIO_DIR}/data/out/${ID}"
+	local host_out="${KOSAIO_DIR}/data/exports/${ID}"
 
 	if [ ${#KOSAIO_TOOL_BINARIES[@]} -eq 0 ]; then
 		log_info "Nothing to export for ${NAME}."
