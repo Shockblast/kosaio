@@ -7,6 +7,7 @@ kosaio_load_tool_helpers() {
 	local hook="${KOSAIO_DIR}/scripts/registry/hooks/${tool_id}.sh"
 
 	if [ -f "$hook" ]; then
+		# shellcheck disable=SC1090
 		source "$hook"
 		return 0
 	fi
@@ -15,6 +16,7 @@ kosaio_load_tool_helpers() {
 	local base="${tool_id%%[0-9]*}"
 	local fallback="${KOSAIO_DIR}/scripts/registry/hooks/${base}.sh"
 	if [ "$base" != "$tool_id" ] && [ -f "$fallback" ]; then
+		# shellcheck disable=SC1090
 		source "$fallback"
 	fi
 }

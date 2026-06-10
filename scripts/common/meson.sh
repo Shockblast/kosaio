@@ -3,6 +3,7 @@
 # Helper for meson-based tools (configure + build separated)
 
 kosaio_meson_configure() {
+	# shellcheck disable=SC2154
 	local build_dir="${tool_dir}/builddir"
 
 	while [[ $# -gt 0 ]]; do
@@ -26,6 +27,7 @@ kosaio_meson_configure() {
 }
 
 kosaio_meson_build() {
+	# shellcheck disable=SC2154
 	local build_dir="${tool_dir}/builddir"
 
 	while [[ $# -gt 0 ]]; do

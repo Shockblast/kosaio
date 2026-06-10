@@ -31,6 +31,7 @@ function kosaio_manager_execute() {
 
 	# If a custom manifest exists (not the template itself), source it as override
 	if [ "$MANIFEST" != "${KOSAIO_DIR}/scripts/registry/process-standard.sh" ]; then
+		# shellcheck disable=SC1090
 		source "$MANIFEST"
 	fi
 

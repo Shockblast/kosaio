@@ -5,6 +5,7 @@
 kosaio_cmake_configure() {
 	local toolchain=""
 	local source_dir=".."
+	# shellcheck disable=SC2154
 	local build_dir="${tool_dir}/build"
 
 	while [[ $# -gt 0 ]]; do

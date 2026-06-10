@@ -52,7 +52,7 @@ class StatusService:
         if item_id in StatusService._HOLY_LIST:
             c_base = cfg.sdk_root / item_id
         else:
-            c_base = cfg.kosaio_dir / "repos" / item_id
+            c_base = cfg.kosaio_dir / "data" / "repos" / item_id
         h_base = cfg.dev_root / item_id
         return c_base, h_base
 

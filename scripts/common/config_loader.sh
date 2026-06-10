@@ -15,6 +15,7 @@ function kosaio_load_tool_config() {
         return 1
     fi
 
+    # shellcheck disable=SC1090
     source "$config_path"
     return 0
 }
