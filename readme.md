@@ -1,8 +1,8 @@
 # KOSAIO (KallistiOS All In One)
 
-> **The Autonomous Container-Suite for Dreamcast SDK Orchestration.**
+> **Container-based toolchain and SDK manager for Dreamcast development.**
 
-KOSAIO bridges the gap between your Host OS and the SDK through a surgical hybrid architecture, creating a unified workspace for modern homebrew development.
+KOSAIO provides a unified workspace for Dreamcast homebrew development, managing toolchains, libraries, and emulators through containers.
 
 ![KOSAIO Unified HUD](assets/banner.png)
 
@@ -21,12 +21,12 @@ KOSAIO bridges the gap between your Host OS and the SDK through a surgical hybri
 
 ## Core Features
 
-*   **⚡ Integrated Environment**: Comes with KOS and essential tools pre-configured and ready for action.
-*   **🔄🔥 HOT SWAP Mode**: Switch any tool between **Container** (system) and **Host** (workspace) individually with `dev-switch`. Libraries follow a **Collection-First** model via `kos-ports`.
-*   **🛠️ ARM & AICAOS Ready**: Full support for building custom sound drivers with automated ARM toolchain patching.
-*   **📊 Smart Dashboard**: Use `kosaio list` to see instantly which tools are installed and which mode is active.
-*   **🏠 Unified Workspace**: Develop on your Host OS (Antigravity/VSCode/NeoVim) while compiling inside the container effortlessly.
-*   **📟 Terminal HUD**: A dynamic prompt that shows your current region (Host/Container) and system health.
+*   **Integrated Environment**: Comes with KOS and essential tools pre-configured.
+*   **Hot Swap Mode**: Switch any tool between Container (system) and Host (workspace) individually with `dev-switch`. Libraries follow a collection-first model via `kos-ports`.
+*   **ARM & AICAOS Ready**: Full support for building custom sound drivers with automated ARM toolchain patching.
+*   **Smart Dashboard**: Use `kosaio list` to see installed tools and active mode.
+*   **Unified Workspace**: Develop on your Host OS while compiling inside the container.
+*   **Terminal HUD**: A dynamic prompt showing your current region and system health.
 
 ## Included Tools
 
@@ -40,7 +40,7 @@ You can install these tools with kosaio:
 | **dcload-ip**     | Allows loading and executing binaries on the Dreamcast over a network (with a Broadband Adapter).   |
 | **dcload-serial** | Allows loading and executing binaries on the Dreamcast via the serial port (with a "Coders Cable"). |
 | **flycast**       | A Dreamcast emulator with GDB support, ideal for debugging and testing without real hardware.       |
-| **nitrocast**     | A high-fidelity Dreamcast emulator (Community Edition).                                             |
+| **nitrocast**     | A Dreamcast emulator with GDB support, ideal for debugging and testing without real hardware.       |
 | **makeip**        | Tool for creating 'IP.BIN' boot files for Dreamcast executables.                                    |
 | **mkdcdisc**      | Allows creating disc images in CDI format, compatible with emulators and for burning to CD-R.       |
 | **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
@@ -53,7 +53,7 @@ You can install these tools with kosaio:
 | **SDL3-DC**       | SDL3 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
 
 * **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.
-* **SDL Build Customization**: All SDL variants (`sdl2`, `sdl3`, `sdl2-dc`, `sdl3-dc`) accept flags to customize the build — use `--no-audio`, `--no-joystick`, `--no-opengl`, etc. to disable subsystems and produce leaner builds. See [SDL Build Flags](#sdl-build-flags) below.
+* **SDL Build Customization**: All SDL variants (`sdl2`, `sdl3`, `sdl2-dc`, `sdl3-dc`) accept CMake flags to customize the build. See [SDL Build Configuration](#sdl-build-configuration) below.
 * **makeip** is already included in KOS, but this version is more updated.
 * **flycast**, **nitrocast** and **mame** emulators compile in the container but run on the host. They require BIOS files installed on the host.
 * Dependencies are installed automatically when a tool is requested. If you need to manually refresh them, use `kosaio install-deps system`.
@@ -193,72 +193,19 @@ kosaio update libgl
 kosaio uninstall sh4zam
 ```
 
-#### SDL Build Flags
+#### SDL Build Configuration
 
-When building any of the 4 SDL variants (`sdl2`, `sdl3`, `sdl2-dc`, `sdl3-dc`), you can pass flags to enable/disable specific subsystems:
+SDL builds are configured by editing the corresponding `.cfg.default` file under `scripts/registry/cfg/`, or by creating a user override:
 
 ```bash
-# Disable audio and joystick (useful if using ALDC or custom input)
-kosaio build sdl2 -- --no-audio --no-joystick
+# Edit the default configuration for sdl2-dc
+kosaio config sdl2-dc
 
-# SDL3 and Dreamcast variants use CMake flags
-kosaio build sdl3 -DSDL_AUDIO=OFF -DSDL_JOYSTICK=OFF
-kosaio build sdl2-dc -DSDL_AUDIO=OFF -DSDL_HAPTIC=OFF
-
-# Apply GPF-recommended settings (Dreamcast variants only)
-kosaio build sdl2-dc -- --gpf-settings
+# Rebuild with the new configuration
+kosaio build sdl2-dc
 ```
 
-The flags are translated automatically to the right format depending on the build system (configure or CMake):
-
-| Flag | Effect |
-|------|--------|
-| `--no-audio` / `--disable-audio` | Disable audio subsystem |
-| `--no-video` / `--disable-video` | Disable video subsystem |
-| `--no-joystick` / `--disable-joystick` | Disable joystick subsystem |
-| `--no-haptic` / `--disable-haptic` | Disable haptic (force feedback) |
-| `--no-opengl` / `--disable-opengl` | Disable OpenGL support |
-| `--no-pthreads` / `--disable-pthreads` | Disable POSIX threads |
-| `--no-timers` / `--disable-timers` | Disable timer subsystem |
-| `--no-render` / `--disable-render` | Disable render subsystem |
-| `--no-events` / `--disable-events` | Disable events subsystem |
-| `--no-sensor` / `--disable-sensor` | Disable sensor subsystem (CMake only) |
-| `--no-hidapi` / `--disable-hidapi` | Disable HID API (CMake only) |
-| `--no-tests` / `--disable-tests` | Disable test builds |
-| `--static` / `--no-shared` | Build static library only |
-| `--no-gpu` / `--disable-gpu` | Disable GPU subsystem (SDL3+) |
-| `--no-camera` / `--disable-camera` | Disable camera subsystem (SDL3+) |
-| `--no-dialog` / `--disable-dialog` | Disable dialog subsystem (SDL3+) |
-| `--no-tray` / `--disable-tray` | Disable tray subsystem (SDL3+) |
-| `--no-sh4zam` / `--disable-sh4zam` | Disable SH4ZAM acceleration (SDL3-DC) |
-| `--no-vulkan` / `--disable-vulkan` | Disable Vulkan support (SDL3+) |
-| `--no-openvr` / `--disable-openvr` | Disable OpenVR support (SDL3+) |
-| `--no-render-gpu` / `--disable-render-gpu` | Disable GPU renderer (SDL3+) |
-| `--gpf-settings` | Apply GPF-recommended defaults (Dreamcast variants only) |
-| `--enable-audio` | Enable audio subsystem |
-| `--enable-video` | Enable video subsystem |
-| `--enable-joystick` | Enable joystick subsystem |
-| `--enable-haptic` | Enable haptic (force feedback) |
-| `--enable-opengl` | Enable OpenGL support |
-| `--enable-pthreads` | Enable POSIX threads |
-| `--enable-timers` | Enable timer subsystem |
-| `--enable-render` | Enable render subsystem |
-| `--enable-events` | Enable events subsystem |
-| `--enable-sensor` | Enable sensor subsystem (CMake only) |
-| `--enable-hidapi` | Enable HID API (CMake only) |
-| `--enable-filesystem` | Enable filesystem subsystem |
-| `--enable-tests` | Enable test builds |
-| `--enable-shared` | Build shared library (inverse of `--static`) |
-| `--enable-gpu` | Enable GPU subsystem (SDL3+) |
-| `--enable-camera` | Enable camera subsystem (SDL3+) |
-| `--enable-dialog` | Enable dialog subsystem (SDL3+) |
-| `--enable-tray` | Enable tray subsystem (SDL3+) |
-| `--enable-sh4zam` | Enable SH4ZAM acceleration (SDL3-DC) |
-| `--enable-vulkan` | Enable Vulkan support (SDL3+) |
-| `--enable-openvr` | Enable OpenVR support (SDL3+) |
-| `--enable-render-gpu` | Enable GPU renderer (SDL3+) |
-
-You can also pass raw CMake flags (`-DSDL_FOO=ON/OFF`) or configure flags (`--enable-foo`/`--disable-foo`) directly — they are passed through untouched.
+Use CMake-style `-DSDL_*=ON/OFF` flags. Available options are documented with comments in each `.cfg.default` file.
 
 ### Direct Access to KOS Utilities
 You can execute internal KOS tools directly without adding them to your PATH:
