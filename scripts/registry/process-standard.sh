@@ -76,7 +76,16 @@ function kosaio_reg_apply_config() {
 			;;
 		cmake)
 			cd "$tool_dir"
-			cmake -S . -B "${KOSAIO_TOOL_BUILD_DIR:-build}" "${build_args[@]}"
+			local toolchain=""
+			if [ -n "${KOSAIO_TOOL_TOOLCHAIN:-}" ]; then
+				toolchain="$KOSAIO_TOOL_TOOLCHAIN"
+			elif [ -n "${KOS_BASE:-}" ] && [ -f "${KOS_BASE}/utils/cmake/dreamcast.toolchain.cmake" ]; then
+				toolchain="${KOS_BASE}/utils/cmake/dreamcast.toolchain.cmake"
+			fi
+			local cmake_args=()
+			[ -n "$toolchain" ] && cmake_args+=("-DCMAKE_TOOLCHAIN_FILE=$toolchain")
+			[ -n "${KOSAIO_TOOL_INSTALLATION_FOLDER:-}" ] && cmake_args+=("-DCMAKE_INSTALL_PREFIX=${KOSAIO_TOOL_INSTALLATION_FOLDER}")
+			cmake -S . -B "${KOSAIO_TOOL_BUILD_DIR:-build}" "${cmake_args[@]}" "${build_args[@]}"
 			;;
 		meson)
 			cd "$tool_dir"
@@ -112,14 +121,6 @@ function kosaio_reg_build() {
 
 	case "${KOSAIO_TOOL_BUILD_SYSTEM}" in
 		cmake)
-			local toolchain=""
-
-			if [ -n "${KOSAIO_TOOL_TOOLCHAIN:-}" ]; then
-				toolchain="$KOSAIO_TOOL_TOOLCHAIN"
-			elif [ -n "${KOS_BASE:-}" ] && [ -f "${KOS_BASE}/utils/cmake/dreamcast.toolchain.cmake" ]; then
-				toolchain="${KOS_BASE}/utils/cmake/dreamcast.toolchain.cmake"
-			fi
-
 			cd "${tool_dir}/${KOSAIO_TOOL_BUILD_DIR:-build}"
 			make -j$(nproc)
 			;;
