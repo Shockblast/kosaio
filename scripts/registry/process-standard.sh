@@ -79,8 +79,6 @@ function kosaio_reg_apply_config() {
 			local toolchain=""
 			if [ -n "${KOSAIO_TOOL_TOOLCHAIN:-}" ]; then
 				toolchain="$KOSAIO_TOOL_TOOLCHAIN"
-			elif [ -n "${KOS_BASE:-}" ] && [ -f "${KOS_BASE}/utils/cmake/dreamcast.toolchain.cmake" ]; then
-				toolchain="${KOS_BASE}/utils/cmake/dreamcast.toolchain.cmake"
 			fi
 			local cmake_args=()
 			[ -n "$toolchain" ] && cmake_args+=("-DCMAKE_TOOLCHAIN_FILE=$toolchain")
