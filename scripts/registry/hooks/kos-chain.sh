@@ -1,7 +1,7 @@
 #!/bin/bash
 # scripts/registry/hooks/toolchain.sh
-# Tool hooks for Dreamcast Toolchain (dc-chain in KOS utils)
-# Builds SH4 + ARM toolchains via kos/utils/dc-chain
+# Tool hooks for Dreamcast Toolchain
+# Supports both KOS v2 (utils/dc-chain/) and KOS v3 (utils/kos-chain/)
 # Loaded automatically by helper_loader.sh
 
 kosaio_tool_info() {
@@ -39,7 +39,8 @@ kosaio_tool_info() {
 		"  ${C_CYAN}--all${C_RESET}          : Build SH4 + ARM + GDB" \
 		"  ${C_CYAN}--only-sh${C_RESET}      : Build SH4 + GDB (Default)" \
 		"  ${C_CYAN}--only-arm${C_RESET}     : Build only ARM" \
-		"  ${C_CYAN}--with-gdb${C_RESET}     : Ensure SH4 GDB is built"
+		"  ${C_CYAN}--with-gdb${C_RESET}     : Ensure SH4 GDB is built" \
+		"  ${C_CYAN}--no-patches${C_RESET}   : Skip toolchain patches (v2 only)"
 }
 
 kosaio_tool_check_health() {
@@ -88,14 +89,33 @@ kosaio_tool_install() {
 	kosaio_tool_build "$@"
 }
 
-kosaio_tool_build() {
-	local kos_dir=$(kosaio_get_tool_dir "kos")
-	local dc_chain="${kos_dir}/utils/dc-chain"
-
-	if [ ! -d "$kos_dir" ]; then
-		log_error "KOS source missing at ${kos_dir}. Install 'kos' first."
-		return 1
+kosaio_tool_uninstall() {
+	if confirm "This will remove the entire Dreamcast Toolchain (${DREAMCAST_SDK}/sh-elf, ${DREAMCAST_SDK}/arm-eabi). Are you sure?" "N"; then
+		log_info "Removing Toolchain..."
+		rm -rf "${DREAMCAST_SDK}/sh-elf"
+		rm -rf "${DREAMCAST_SDK}/arm-eabi"
+		log_success "Toolchain uninstalled."
+	else
+		log_info "Uninstallation cancelled."
 	fi
+}
+
+# --- Detect build system version ---
+_kosaio_detect_version() {
+	local kos_dir="$1"
+	if [ -d "${kos_dir}/utils/kos-chain" ]; then
+		echo "v3"
+	elif [ -d "${kos_dir}/utils/dc-chain" ]; then
+		echo "v2"
+	else
+		echo "unknown"
+	fi
+}
+
+# --- v2 build (utils/dc-chain/) ---
+_kosaio_build_v2() {
+	local kos_dir="$1"; shift
+	local dc_chain="${kos_dir}/utils/dc-chain"
 
 	local build_arm=false
 	local build_sh=false
@@ -105,10 +125,10 @@ kosaio_tool_build() {
 
 	for arg in "$@"; do
 		case $arg in
-			--all)      force_all=true ;;
-			--only-arm) build_arm=true ;;
-			--only-sh)  build_sh=true ;;
-			--with-gdb) build_gdb=true ;;
+			--all)      force_all=true  ;;
+			--only-arm) build_arm=true  ;;
+			--only-sh)  build_sh=true   ;;
+			--with-gdb) build_gdb=true  ;;
 			--no-patches) no_patches=true ;;
 		esac
 	done
@@ -134,26 +154,93 @@ kosaio_tool_build() {
 			log_box --type=warn "TOOLCHAIN: AGGRESSIVE PATCHING" \
 				"Building ARM toolchain requires dc-chain modification." \
 				"These patches are applied automatically."
-
-			kosaio_apply_patches "$dc_chain" "toolchain" || return 1
+			kosaio_apply_patches "$dc_chain" "kos-chain" || return 1
 		fi
 	fi
 
-	log_info --draw-line "Building Toolchain Target: ${target:-standard (SH4+GDB)}..."
-
+	log_info --draw-line "Building Toolchain Target (v2): ${target:-standard (SH4+GDB)}..."
 	mkdir -p "${dc_chain}"
-	cp "${KOSAIO_DIR}/configs/dc-chain-settings.cfg" "${dc_chain}/Makefile.cfg"
-
+	cp "${KOSAIO_DIR}/configs/kos-v2-dreamcast.cfg" "${dc_chain}/Makefile.cfg"
 	(cd "${dc_chain}" && make -j$(nproc) ${target})
 }
 
-kosaio_tool_uninstall() {
-	if confirm "This will remove the entire Dreamcast Toolchain (${DREAMCAST_SDK}/sh-elf, ${DREAMCAST_SDK}/arm-eabi). Are you sure?" "N"; then
-		log_info "Removing Toolchain..."
-		rm -rf "${DREAMCAST_SDK}/sh-elf"
-		rm -rf "${DREAMCAST_SDK}/arm-eabi"
-		log_success "Toolchain uninstalled."
-	else
-		log_info "Uninstallation cancelled."
+# --- v3 build (utils/kos-chain/) ---
+_kosaio_build_v3() {
+	local kos_dir="$1"; shift
+	local kos_chain="${kos_dir}/utils/kos-chain"
+
+	local build_arm=false
+	local build_sh=false
+	local build_gdb=false
+	local force_all=false
+
+	for arg in "$@"; do
+		case $arg in
+			--all)      force_all=true  ;;
+			--only-arm) build_arm=true  ;;
+			--only-sh)  build_sh=true   ;;
+			--with-gdb) build_gdb=true  ;;
+		esac
+	done
+
+	# Determine what to build
+	if [ "$force_all" = true ]; then
+		build_sh=true
+		build_arm=true
+		build_gdb=true
+	elif [ "$build_arm" = false ] && [ "$build_sh" = false ] && [ "$build_gdb" = false ]; then
+		build_sh=true
+		build_gdb=true
 	fi
+
+	# Copy config files
+	cp "${KOSAIO_DIR}/configs/kos-v3-dreamcast.cfg" "${kos_chain}/Makefile.dreamcast.cfg"
+	cp "${KOSAIO_DIR}/configs/kos-v3-aica.cfg" "${kos_chain}/Makefile.aica.cfg"
+
+	# Build dreamcast (SH4) toolchain
+	if [ "$build_sh" = true ]; then
+		log_info --draw-line "Building SH4 toolchain (v3, platform=dreamcast)..."
+		(cd "${kos_chain}" && make platform=dreamcast distclean 2>/dev/null; true)
+		(cd "${kos_chain}" && make -j$(nproc) platform=dreamcast build) || return 1
+	fi
+
+	# Build GDB (needs SH4 toolchain)
+	if [ "$build_gdb" = true ]; then
+		log_info --draw-line "Building SH4 GDB (v3)..."
+		(cd "${kos_chain}" && make platform=dreamcast gdb) || return 1
+	fi
+
+	# Build aica (ARM) toolchain
+	if [ "$build_arm" = true ]; then
+		log_info --draw-line "Building ARM toolchain (v3, platform=aica)..."
+		(cd "${kos_chain}" && make platform=aica distclean 2>/dev/null; true)
+		(cd "${kos_chain}" && make -j$(nproc) platform=aica build) || return 1
+	fi
+}
+
+# --- Main build entry point ---
+kosaio_tool_build() {
+	local kos_dir=$(kosaio_get_tool_dir "kos")
+
+	if [ ! -d "$kos_dir" ]; then
+		log_error "KOS source missing at ${kos_dir}. Install 'kos' first."
+		return 1
+	fi
+
+	local version=$(_kosaio_detect_version "$kos_dir")
+	case "$version" in
+		v3)
+			log_info "Detected KOS v3 build system (utils/kos-chain/)"
+			_kosaio_build_v3 "$kos_dir" "$@"
+			;;
+		v2)
+			log_info "Detected KOS v2 build system (utils/dc-chain/)"
+			_kosaio_build_v2 "$kos_dir" "$@"
+			;;
+		*)
+			log_error "Cannot detect toolchain build system in ${kos_dir}/utils/"
+			log_error "Expected utils/dc-chain/ (v2) or utils/kos-chain/ (v3)"
+			return 1
+			;;
+	esac
 }

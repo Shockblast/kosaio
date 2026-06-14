@@ -91,7 +91,7 @@ The easiest way to set up your environment is using the assistant script. It wil
 The first SDK you need to install is KallistiOS (KOS). It is a long process, so be prepared for a break!
 
 > [!TIP]
-> Before installing KOS, you can look at the `dc-chain-settings.cfg` file inside the `configs` folder and make adjustments if required (like changing GCC version).
+> Before installing KOS, you can look at the config files inside the `configs` folder and make adjustments if required (like changing GCC version). For KOS v2, the file is `kos-v2-dreamcast.cfg`; for KOS v3, use `kos-v3-dreamcast.cfg` and `kos-v3-aica.cfg`.
 
 ```bash
 kosaio install kos
@@ -153,7 +153,7 @@ Some examples of how to use kosaio:
 
 `kosaio install kos`
 
-`kosaio clone kos-ports` # clone kos-ports to the host (recommended)
+`kosaio clone kos-ports` # clone kos-ports to the container (recommended)
 
 `kosaio diagnose system`
 

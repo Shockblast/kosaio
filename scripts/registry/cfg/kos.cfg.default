@@ -1,0 +1,12 @@
+# ── Build Configuration: KallistiOS ────────────────────
+# Configure KOS source branch without dirtying the .tool file.
+# Run `kosaio apply-config kos` after changing this file.
+# Run `kosaio reset-config kos` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+# Branch to clone and build.
+# Uncomment and set to switch between KOS versions.
+# Supported values:
+#   v2.2.x    — KOS 2.2.x stable (default, recommended for most projects)
+#   master    — KOS 3.x / development branch (bleeding edge)
+#KOSAIO_TOOL_BRANCH="v2.2.x"

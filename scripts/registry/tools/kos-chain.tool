@@ -1,5 +1,5 @@
 # === METADATA ===
-KOSAIO_TOOL_ID="toolchain"
+KOSAIO_TOOL_ID="kos-chain"
 KOSAIO_TOOL_NAME="Dreamcast Toolchain"
 KOSAIO_TOOL_DESC="The compiler suite (GCC/Binutils) for SH4 and ARM architectures."
 KOSAIO_TOOL_TAGS=("core" "compiler" "gcc" "sh4" "arm")
@@ -26,7 +26,7 @@ KOSAIO_TOOL_INSTALLATION_LIBDIR=""
 KOSAIO_TOOL_INSTALLATION_INCLUDEDIR=""
 
 # === PATCHES ===
-KOSAIO_TOOL_PATCHES=("toolchain")
+KOSAIO_TOOL_PATCHES=("kos-chain")
 
 # === UNINSTALL & HEALTH ===
 KOSAIO_TOOL_LIBS=(

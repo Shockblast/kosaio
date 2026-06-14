@@ -75,6 +75,24 @@ class Config:
                 return version_file.read_text().strip()
             except:
                 return None
+
+        # Try canonical name (case-insensitive fs support)
+        from services.ports import PortService
+        resolved = PortService.resolve_port_name(lib_name)
+        if resolved and resolved != lib_name:
+            resolved_file = ports_dir / "lib" / ".kos-ports" / resolved
+            if resolved_file.exists():
+                try:
+                    return resolved_file.read_text().strip()
+                except:
+                    return None
+            resolved_hash = ports_dir / "lib" / ".kos-ports" / f"{resolved}.hash"
+            if resolved_hash.exists():
+                try:
+                    return resolved_hash.read_text().strip()
+                except:
+                    return None
+
         return None
 
 cfg = Config()

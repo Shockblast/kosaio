@@ -149,6 +149,7 @@ function _ports_check_update_status() {
 	# Export these for execute_install
 	export LAST_GIT_REPO="$git_repo"
 	export LAST_GIT_BRANCH="$git_branch"
+	export LAST_PORT_VERSION="${current_ver:-unknown}"
 	return 0
 }
 
@@ -191,6 +192,10 @@ function _ports_execute_install() {
 			local current_hash=$(git ls-remote "$git_repo" "$ref_match" 2>/dev/null | awk '{print $1}')
 			[ -n "$current_hash" ] && echo "$current_hash" > "${KOS_PORTS}/lib/.kos-ports/${lib_name}.hash"
 		fi
+
+		# Write version tracking file for ports_is_installed
+		mkdir -p "${KOS_PORTS}/lib/.kos-ports"
+		echo "${LAST_PORT_VERSION:-unknown}" > "${KOS_PORTS}/lib/.kos-ports/${lib_name}"
 
 		log_success "${lib_name} installed."
 		rm -f "${pre_snap}" "${post_snap}"
@@ -280,8 +285,9 @@ function ports_uninstall() {
 			log_warn "No manifest file found for ${lib_name}. Manual cleanup might be needed."
 		fi
 
-		# 3. Cleanup tracking and common include dirs
+		# 3. Cleanup tracking files and common include dirs
 		rm -f "${tracking_file}"
+		rm -f "${tracking_file}.hash"
 		rm -rf "${KOS_PORTS}/include/${lib_name}" 2>/dev/null || true
 		rm -rf "${KOS_BASE}/include/${lib_name}" 2>/dev/null || true
 

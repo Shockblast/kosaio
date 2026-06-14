@@ -19,6 +19,12 @@ __get_tool_dir() {
 }
 
 function kosaio_reg_clone() {
+	# Tool clone hook (from helper) overrides standard clone
+	if declare -F kosaio_tool_clone &>/dev/null; then
+		kosaio_tool_clone "$@"
+		return $?
+	fi
+
 	local tool_dir=$(__get_tool_dir)
 
 	if [ -z "${KOSAIO_TOOL_REPO:-}" ]; then

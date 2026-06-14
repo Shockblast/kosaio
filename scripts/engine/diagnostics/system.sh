@@ -54,7 +54,7 @@ function kosaio_reg_check_health() {
 		printf "  %-20s: ${C_GRAY}%s${C_RESET}\n" "Location" "$arm_gcc"
 	else
 		printf "  %-20s: ${C_YELLOW}DEACTIVATED${C_RESET}\n" "ARM Compiler"
-		log_info "  ${C_GRAY}Tip: Build with 'kosaio build toolchain --only-arm'${C_RESET}"
+		log_info "  ${C_GRAY}Tip: Build with 'kosaio build kos-chain --only-arm'${C_RESET}"
 	fi
 
 	log_info "--- Host Tools ---"

@@ -146,6 +146,7 @@ function ports_build() {
 		[ "${KOSAIO_CLEAN_AFTER:-false}" = true ] && make_targets="build-stamp clean"
 
 		local broken_marker="${HOME}/.kosaio/states/${lib_name}_broken"
+		mkdir -p "$(dirname "${broken_marker}")"
 		if (cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} ${make_targets}); then
 			rm -f "${broken_marker}"
 			log_success "${lib_name} built."
@@ -176,6 +177,7 @@ function ports_apply() {
 		check_dir_soft "${KOS_PORTS}/${lib_name}" "Port source not found" || continue
 		log_info --draw-line "Applying ${lib_name}..."
 		local broken_marker="${HOME}/.kosaio/states/${lib_name}_broken"
+		mkdir -p "$(dirname "${broken_marker}")"
 		if (cd "${KOS_PORTS}/${lib_name}" && ${KOS_MAKE} install); then
 			rm -f "${broken_marker}"
 			log_success "${lib_name} applied."

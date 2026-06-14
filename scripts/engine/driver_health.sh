@@ -40,8 +40,13 @@ function kosaio_health_check() {
 				return 4
 			fi
 
-			kosaio_load_tool_config "$TARGET_ID" || return 1
+			if [ "$target_type" != "core" ]; then
+				kosaio_load_tool_config "$TARGET_ID" || return 1
+			fi
 			kosaio_load_tool_helpers "$TARGET_ID"
+			if [ "$target_type" = "tool" ]; then
+				source "${KOSAIO_DIR}/scripts/registry/process-standard.sh"
+			fi
 			source "$MANIFEST"
 
 			# Check OS Dependencies (Manifest-defined)

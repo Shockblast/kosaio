@@ -3,6 +3,71 @@
 # Tool hooks for KallistiOS: custom build (sources environ.sh), apply (generates environ.sh)
 # Loaded automatically by helper_loader.sh
 
+# ── Branch Resolution ──────────────────────────────────
+# Reads the user's config (data/cfg/kos.cfg) or the default
+# (scripts/registry/cfg/kos.cfg.default) to resolve the branch.
+# Falls back to KOSAIO_TOOL_BRANCH from kos.tool.
+_kosaio_kos_resolve_branch() {
+	local cfg_path="${KOSAIO_DIR}/data/cfg/kos.cfg"
+	local cfg_default="${KOSAIO_DIR}/scripts/registry/cfg/kos.cfg.default"
+	local cfg_file=""
+
+	[ -f "$cfg_path" ] && cfg_file="$cfg_path"
+	[ -z "$cfg_file" ] && [ -f "$cfg_default" ] && cfg_file="$cfg_default"
+
+	if [ -n "$cfg_file" ]; then
+		source "$cfg_file"
+	fi
+
+	echo "${KOSAIO_TOOL_BRANCH:-master}"
+}
+
+kosaio_tool_clone() {
+	local tool_dir=$(__get_tool_dir)
+
+	local branch
+	branch=$(_kosaio_kos_resolve_branch)
+
+	log_info "Cloning KOS (branch: ${branch})..."
+	kosaio_git_clone --branch "$branch" "${KOSAIO_TOOL_REPO}" "${tool_dir}"
+}
+
+kosaio_tool_update() {
+	local tool_dir=$(__get_tool_dir)
+
+	if [ ! -d "$tool_dir" ]; then
+		log_error "KOS source not cloned yet. Run 'kosaio install kos' first."
+		return 1
+	fi
+
+	local cfg_branch
+	cfg_branch=$(_kosaio_kos_resolve_branch)
+
+	cd "$tool_dir"
+
+	local current_branch
+	current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
+
+	if [ "$current_branch" != "$cfg_branch" ]; then
+		log_info "Branch mismatch: current=${current_branch}, config=${cfg_branch}"
+		if confirm "Switch KOS to branch '${cfg_branch}'? This may discard local changes." "N"; then
+			if kosaio_git_checkout "$tool_dir" "$cfg_branch" true; then
+				log_success "Switched KOS to branch '${cfg_branch}'."
+				kosaio_reg_build
+				kosaio_reg_apply
+				return 0
+			else
+				log_error "Failed to switch KOS to branch '${cfg_branch}'."
+				return 1
+			fi
+		else
+			log_info "Keeping KOS on current branch '${current_branch}'."
+		fi
+	fi
+
+	kosaio_standard_update_flow "kos" "KallistiOS" "$tool_dir" "$@"
+}
+
 kosaio_tool_info() {
 	local tool_dir=$(__get_tool_dir)
 	local lib_status="${C_RED}Not Compiled${C_RESET}"
@@ -20,7 +85,7 @@ kosaio_tool_build() {
 	local tool_dir=$(__get_tool_dir)
 
 	if [ ! -f "${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc" ]; then
-		log_error "SH4 Toolchain not found! Please run: kosaio build toolchain"
+		log_error "SH4 Toolchain not found! Please run: kosaio build kos-chain"
 		return 3
 	fi
 

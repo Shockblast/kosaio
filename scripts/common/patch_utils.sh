@@ -5,7 +5,7 @@
 function kosaio_apply_patches() {
 	local target_dir="$1"
 	local patch_group="$2"
-	local patches_dir="${KOSAIO_DIR}/patches/${patch_group}"
+	local patches_dir="${KOSAIO_DIR}/scripts/registry/patches/${patch_group}"
 
 	if [ ! -d "$patches_dir" ]; then
 		log_warn "No patches found for group: ${patch_group}"
