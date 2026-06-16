@@ -234,3 +234,14 @@ function kosaio_git_fix_permissions() {
 	git config --global --add safe.directory '*'
 	log_success "Git safe directory check disabled for all paths."
 }
+
+function kosaio_git_exclude_dir() {
+	local dir="$1"
+	local git_root
+	git_root=$(cd "$dir" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null) || return 0
+	local name
+	name=$(basename "$(cd "$dir" && pwd)")
+	if ! grep -qxF "$name/" "$git_root/.git/info/exclude" 2>/dev/null; then
+		echo "$name/" >> "$git_root/.git/info/exclude"
+	fi
+}

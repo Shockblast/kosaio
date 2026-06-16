@@ -19,15 +19,30 @@ class StatusService:
 
             # Generic tools (not in _SPECIAL_CASES): check .kosaio_installed marker
             if item_id not in StatusService._SPECIAL_CASES:
-                if (c_base / ".kosaio_installed").exists():
+                # Try standard path, then kos-ports fallback (for tools with DIR_OVERRIDE)
+                c_path = c_base
+                if not c_path.exists():
+                    c_alt = cfg.sdk_root / "kos-ports" / item_id
+                    if c_alt.exists():
+                        c_path = c_alt
+
+                if (c_path / ".kosaio_installed").exists():
                     c_inst = True
-                elif c_base.exists():
-                    c_inst = "c"  # cloned but not compiled
+                elif c_path.exists():
+                    c_inst = "c"
                 else:
                     c_inst = False
-                if (h_base / ".kosaio_installed").exists():
+
+                # Same for host
+                h_path = h_base
+                if not h_path.exists():
+                    h_alt = cfg.dev_root / "kos-ports" / item_id
+                    if h_alt.exists():
+                        h_path = h_alt
+
+                if (h_path / ".kosaio_installed").exists():
                     h_inst = True
-                elif h_base.exists():
+                elif h_path.exists():
                     h_inst = "c"
                 else:
                     h_inst = False

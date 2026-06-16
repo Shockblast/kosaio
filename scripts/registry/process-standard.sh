@@ -39,6 +39,7 @@ function kosaio_reg_clone() {
 	[[ -n "${KOSAIO_TOOL_BRANCH:-}" ]] && clone_args+=(--branch "${KOSAIO_TOOL_BRANCH}")
 
 	kosaio_git_clone "${clone_args[@]}" "${KOSAIO_TOOL_REPO}" "${tool_dir}"
+	kosaio_git_exclude_dir "${tool_dir}" 2>/dev/null || true
 }
 
 function kosaio_reg_apply_config() {
