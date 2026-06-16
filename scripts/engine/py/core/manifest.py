@@ -106,9 +106,7 @@ class ManifestParser:
             match_desc = re.search(r'^SHORT_DESC\s*=\s*(.*)$', content, re.MULTILINE)
             if match_desc:
                 short_desc = match_desc.group(1).strip()
-            if '|' in short_desc:
-                print(f"Warning: SHORT_DESC for '{lib_name}' contains '|' character (will be replaced)", file=sys.stderr)
-                short_desc = short_desc.replace('|', ' ')
+            short_desc = short_desc.replace('|', ' ')
 
             # Extract more technical fields for updates
             version = "unknown"
