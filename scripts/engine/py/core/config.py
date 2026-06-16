@@ -64,6 +64,14 @@ class Config:
         return self.kosaio_dir / "scripts" / "registry" / "tools"
 
     @property
+    def registry_cfg_dir(self) -> Path:
+        return self.registry_dir / "cfg"
+
+    @property
+    def user_cfg_dir(self) -> Path:
+        return self.kosaio_dir / "data" / "cfg"
+
+    @property
     def template_path(self) -> Path:
         return self.registry_dir / "process-standard.sh"
 

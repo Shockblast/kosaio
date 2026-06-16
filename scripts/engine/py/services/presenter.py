@@ -8,13 +8,13 @@ class Presenter:
     @staticmethod
     def print_legend() -> None:
         l_inst = f"{UI.GREEN}[✓]{UI.RESET}=Installed"
-        l_actv = f"{UI.YELLOW}[*]{UI.RESET}=Active"
-        l_none = f"{UI.GRAY}[x]{UI.RESET}=Not"
+        l_none = f"{UI.GRAY}[X]{UI.RESET}=Not"
         l_clon = f"{UI.BLUE}[S]{UI.RESET}=Source"
         l_fail = f"{UI.RED}[!]{UI.RESET}=Issue"
 
-        print(f"{UI.BOLD}STATUS:{UI.RESET} {l_inst}  {l_actv}  {l_none}  {l_clon}  {l_fail}")
-        print(f"{UI.BOLD}MODES:{UI.RESET}  {UI.B_CYAN}CONT{UI.RESET}:Container  {UI.B_CYAN}HOST{UI.RESET}:Host\n")
+        print(f"{UI.BOLD}STATUS:{UI.RESET} {l_inst}  {l_none}  {l_clon}  {l_fail}")
+        print(f"{UI.BOLD}CFG:{UI.RESET}  {UI.GRAY}[ ]{UI.RESET}=None  {UI.CYAN}[D]{UI.RESET}=Default  {UI.YELLOW}[O]{UI.RESET}=Override")
+        print(f"{UI.BOLD}MODE:{UI.RESET}  {UI.B_CYAN}C{UI.RESET}=Container  {UI.B_CYAN}H{UI.RESET}=Host\n")
 
     @staticmethod
     def render_search_table(results: List[Manifest], filter_installed: bool = False) -> None:
@@ -26,8 +26,8 @@ class Presenter:
         headers = [
             ("TYPE", 12, UI.B_CYAN),
             ("ID", 20, UI.B_CYAN),
-            ("CONT", 4, UI.B_CYAN),
-            ("HOST", 4, UI.B_CYAN),
+            ("CFG", 4, UI.B_CYAN),
+            ("STATUS", 5, UI.B_CYAN),
             ("DESCRIPTION", 40, UI.B_CYAN)
         ]
 
@@ -39,18 +39,23 @@ class Presenter:
 
             # Apply Installation Filter
             if filter_installed:
-                # Show if installed in EITHER container OR host
                 if status["c_inst"] == "x" and status["h_inst"] == "x":
                     continue
 
-            c_pill = UI.status_pill(status["c_inst"], status["c_active"])
-            h_pill = UI.status_pill(status["h_inst"], status["h_active"])
+            cfg_status = StatusService.get_config_status(m.id)
+            cfg_pill = UI.cfg_pill(cfg_status)
+
+            # Show only the active mode's status with C/H prefix
+            if status["h_active"]:
+                stat_pill = UI.active_pill(status["h_inst"], "H")
+            else:
+                stat_pill = UI.active_pill(status["c_inst"], "C")
 
             rows.append([
                 (f"[{m.type.upper()}]", UI.CYAN),
                 (m.id, UI.BLUE),
-                (c_pill, ""),
-                (h_pill, ""),
+                (cfg_pill, ""),
+                (stat_pill, ""),
                 (m.desc, UI.RESET)
             ])
             filtered_count += 1
@@ -59,7 +64,6 @@ class Presenter:
             print(f"  {UI.GRAY}No installed packages found matching query.{UI.RESET}\n")
             return
 
-        # Explicitly typing rows for safety, though dynamic
         print(UI.render_table(headers, rows))
 
         # Help user if ports repo is missing

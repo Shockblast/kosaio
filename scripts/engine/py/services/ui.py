@@ -199,6 +199,33 @@ class UI:
             return f"{color}{pill}{UI.RESET}"
 
     @staticmethod
+    def active_pill(installed: Union[str, bool], prefix: str) -> str:
+        char = "X"
+        color = UI.GRAY
+
+        if installed == "o" or installed is True:
+            char = "✓"
+            color = UI.GREEN
+        elif installed == "c":
+            char = "S"
+            color = UI.BLUE
+        elif installed == "!":
+            char = "!"
+            color = UI.RED
+
+        pill = f"[{prefix}{char}]"
+        return f"{color}{UI.BOLD}{pill}{UI.RESET}"
+
+    @staticmethod
+    def cfg_pill(status: str) -> str:
+        if status == "override":
+            return f"{UI.YELLOW}[O]{UI.RESET}"
+        elif status == "default":
+            return f"{UI.CYAN}[D]{UI.RESET}"
+        else:
+            return f"{UI.GRAY}[ ]{UI.RESET}"
+
+    @staticmethod
     def render_table(headers: List[Tuple[str, int, str]], rows: List[List[Tuple[Any, str]]]) -> str:
         """
         headers: List of (label, width, color)

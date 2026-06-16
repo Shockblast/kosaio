@@ -176,6 +176,16 @@ class StatusService:
         return cfg.dev_mode == "1"
 
     @staticmethod
+    def get_config_status(item_id: str) -> str:
+        user_cfg = cfg.user_cfg_dir / f"{item_id}.cfg"
+        if user_cfg.exists():
+            return "override"
+        default_cfg = cfg.registry_cfg_dir / f"{item_id}.cfg.default"
+        if default_cfg.exists():
+            return "default"
+        return "none"
+
+    @staticmethod
     def _detect_broken(item_id: str, is_host_active: bool, c_inst, h_inst):
         broken_marker = cfg.state_dir / f"{item_id}_broken"
         if broken_marker.exists():
