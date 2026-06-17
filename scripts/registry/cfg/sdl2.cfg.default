@@ -39,6 +39,10 @@ KOSAIO_TOOL_ARGS=(
     # -DSDL_AUDIO_PIPEWIRE=OFF        # Disable Pipewire
     # -DSDL_AUDIO_JACK=OFF            # Disable JACK audio
 
+    # ── Architecture ──
+    # -DCMAKE_C_FLAGS=-m32              # Build 32-bit (requires gcc-multilib)
+    # -DCMAKE_CXX_FLAGS=-m32            # Build 32-bit (requires gcc-multilib)
+
     # ── Build Options ──
     # -DSDL_TESTS=OFF                 # Skip building tests
     # -DSDL_EXAMPLES=OFF              # Skip building examples

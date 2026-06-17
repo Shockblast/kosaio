@@ -27,6 +27,10 @@ KOSAIO_TOOL_ARGS=(
     # ── Library Type ──
     # -DSDL_SHARED=OFF                # Build static library only
 
+    # ── Architecture ──
+    # -DCMAKE_C_FLAGS=-m32            # Build 32-bit (requires gcc-multilib)
+    # -DCMAKE_CXX_FLAGS=-m32          # Build 32-bit (requires gcc-multilib)
+
     # ── Build Options ──
     # -DSDL_TESTS=OFF                 # Skip building tests
     # -DSDL_EXAMPLES=OFF              # Skip building examples

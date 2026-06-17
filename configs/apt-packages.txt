@@ -11,6 +11,8 @@ pkg-config
 ninja-build
 meson
 rake
+gcc-multilib
+g++-multilib
 
 # Version Control
 git
@@ -57,7 +59,9 @@ libsdl2-ttf-dev
 libfontconfig-dev
 qtbase5-dev
 libopenal-dev
+libopenal-dev:i386
 libgl1-mesa-dev
+libgl1-mesa-dev:i386
 
 # Scripting
 python3

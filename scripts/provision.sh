@@ -13,6 +13,7 @@ DREAMCAST_SDK="${DREAMCAST_SDK:-/opt/toolchains/dc}"
 
 # --- 1. System Update & Dependencies ---
 echo ">>> [PROVISION] Updating System..."
+dpkg --add-architecture i386
 apt-get update && apt-get upgrade -y
 
 # Source KOSAIO libraries for dependency management
