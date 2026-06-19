@@ -27,7 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+        run: |
+          # GitHub-hosted runners pre-install third-party repos (Google
+          # Chrome, VS Code, MS) whose mirrors occasionally fail with
+          # "Mirror sync in progress" — irrelevant for shellcheck. Drop
+          # them before apt-get update to keep the index step stable.
+          sudo find /etc/apt/sources.list.d -type f \
+            \( -name 'google-chrome.list' -o -name 'vscode.list' -o -name 'microsoft-prod.list' \) \
+            -delete
+          sudo apt-get update && sudo apt-get install -y shellcheck
       - name: Run shellcheck on core scripts
         run: |
           shellcheck -x scripts/kosaio
