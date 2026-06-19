@@ -38,11 +38,11 @@ kosaio/
 │   │   ├── ports/          # Port-specific Driver Scripts
 │   │   └── driver_*.sh     # Native Drivers (Bridges)
 │   └── registry/           # Tool Manifests
-│       ├── core/           # KOS, KOS-Ports
-│       ├── tools/          # Build/Asset utilities (dcaconv, mkdcdisc)
-│       ├── libs/           # External libraries
-│       ├── emu/            # Host emulators (flycast)
-│       └── load/           # Hardware loaders (dcload-ip)
+│       ├── tools/          # Manifests (*.tool) declaring KOSAIO_TOOL_* vars
+│       ├── hooks/          # Per-tool hooks (kos.sh, aicaos.sh, ...)
+│       ├── cfg/            # Default configs (*.cfg.default)
+│       ├── patches/        # Tool-specific source patches
+│       └── process-standard.sh  # Generic template (drives install/update/build)
 └── ...
 ```
 
@@ -65,9 +65,13 @@ When a user runs `kosaio install libpng`:
 ## 5. Components Detail
 
 ### 5.1 The Registry
-Located in `scripts/registry/`.
-Contains `.sh` files that define Tools (compilers, debuggers, emulators).
-*   **Format**: Bash-compatible variables (`ID`, `NAME`, `DESC`).
+Located in `scripts/registry/`. Each tool is defined by:
+*   A `tools/<id>.tool` manifest declaring `KOSAIO_TOOL_*` variables (id, name, repo, branch, deps, libs, ...).
+*   An optional `hooks/<id>.sh` for custom install/update/build/apply behavior.
+*   An optional `cfg/<id>.cfg.default` exposing user-tunable build flags.
+*   An optional `patches/<id>/` directory with source patches applied during clone.
+
+The generic `process-standard.sh` template drives the common lifecycle (install, update, build, apply) by reading the `.tool` manifest; hooks override individual phases when needed.
 *   **Parsing**: Parsed by Python (via Regex) for speed and safety, sourced by Bash for installation logic.
 
 ### 5.2 The Ports Engine

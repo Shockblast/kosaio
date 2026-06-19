@@ -8,17 +8,6 @@ KOSAIO provides a unified workspace for Dreamcast homebrew development, managing
 
 *The KOSAIO Master HUD showing a healthy, ready-to-use cross-compiler environment.*
 
-> [!WARNING]  
-> **Legacy Version Notice (January 2026)**  
-> This version introduces a new **Hybrid Python-based architecture**.  
-> If you wish to remain on the legacy version to avoid changes to your current workflow, please run:
-> ```bash
-> git fetch
-> git checkout v1.x
-> ```
-> *If you have local changes preventing the switch, use `git stash` to save them or `git checkout -f v1.x` to force the transition and discard local script modifications.*
-
-
 ## Core Features
 
 *   **Integrated Environment**: Comes with KOS and essential tools pre-configured.
@@ -34,23 +23,26 @@ You can install these tools with kosaio:
 
 | Tool              | Description                                                                                         |
 | ----------------- | --------------------------------------------------------------------------------------------------- |
-| **KOS**           | KallistiOS, is the main open-source SDK for the Dreamcast.                                          |
-| **KOS-PORTS**     | KOS-PORTS is a collection of third-party libraries ported to work with KOS.                         |
-| **dcaconv**       | dcaconv converts audio to a format for the Dreamcast's AICA.                                        |
-| **dcload-ip**     | Allows loading and executing binaries on the Dreamcast over a network (with a Broadband Adapter).   |
-| **dcload-serial** | Allows loading and executing binaries on the Dreamcast via the serial port (with a "Coders Cable"). |
-| **flycast**       | A Dreamcast emulator with GDB support, ideal for debugging and testing without real hardware.       |
-| **nitrocast**     | A Dreamcast emulator with GDB support, ideal for debugging and testing without real hardware.       |
-| **makeip**        | Tool for creating 'IP.BIN' boot files for Dreamcast executables.                                    |
-| **mkdcdisc**      | Allows creating disc images in CDI format, compatible with emulators and for burning to CD-R.       |
-| **mksdiso**       | Utility for creating ISO images for SD loaders like GDEmu.                                          |
+| **KOS**           | KallistiOS, the main open-source SDK for the Sega Dreamcast.                                        |
+| **KOS-CHAIN**     | The compiler suite (GCC/Binutils) for SH4 and ARM architectures.                                    |
+| **KOS-PORTS**     | Collection of third-party libraries ported to KallistiOS (zlib, libpng, GLdc, etc.).                 |
+| **dcaconv**       | Converts audio to a format for the Dreamcast's AICA.                                                |
+| **dcload-ip**     | Loads and executes binaries over Ethernet using a Broadband Adapter.                                |
+| **dcload-serial** | Loads and executes binaries over a serial "Coders Cable".                                           |
+| **makeip**        | Generates 'IP.BIN' boot files for Dreamcast executables.                                            |
+| **mkdcdisc**      | Creates self-booting CDI disc images, compatible with emulators and CD-R burning.                    |
+| **mksdiso**       | Creates ISO images for SD loaders like GDEmu.                                                       |
 | **img4dc**        | Tools for working with Dreamcast disc images (CDI/MDS).                                             |
-| **AICAOS**        | Advanced sound driver for Dreamcast (ARM side).                                                     |
-| **mame**          | Multiple Arcade Machine Emulator (Optimized for Dreamcast). Requires 'dc.zip'.                      |
+| **AICAOS**        | Dedicated Operating System for the AICA (ARM7) Sound Chip.                                          |
+| **libdreamroq**   | RoQ playback library for Dreamcast.                                                                 |
+| **mame**          | Multi-purpose emulation framework (configured for Dreamcast).                                       |
 | **SDL2**          | Simple DirectMedia Layer 2 (vanilla, compiled with container GCC into `/usr/local`).                |
 | **SDL3**          | Simple DirectMedia Layer 3 (vanilla, compiled with container GCC into `/usr/local`).                |
 | **SDL2-DC**       | SDL2 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
 | **SDL3-DC**       | SDL3 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
+| **flycast**       | High-performance Dreamcast emulator with Vulkan support.                                            |
+| **nitrocast**     | Modern, fast Dreamcast emulator (successor to lxdream-nitro).                                       |
+| **SGDK**          | Sega Genesis Development Kit (C library & tools). Different platform, but shares the toolchain flow. |
 
 * **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.
 * **SDL Build Customization**: All SDL variants (`sdl2`, `sdl3`, `sdl2-dc`, `sdl3-dc`) accept CMake flags to customize the build. See [SDL Build Configuration](#sdl-build-configuration) below.
@@ -161,7 +153,7 @@ Some examples of how to use kosaio:
 
 `kosaio update self`
 
-`kosaio update libwav`
+`kosaio update sh4zam`
 
 #### Advanced Interactive Shell
 Enabling the KOSAIO shell provides a series of productivity helpers:
@@ -206,6 +198,15 @@ kosaio build sdl2-dc
 ```
 
 Use CMake-style `-DSDL_*=ON/OFF` flags. Available options are documented with comments in each `.cfg.default` file.
+
+#### Update Behavior: Auto-Stash
+
+Several tools leave the working tree dirty after building or installing — `kos` (toolchain `Makefile.*.cfg` in `utils/kos-chain/`, plus `addons/` and `.kos-manifest/` from addon installs), `kos-ports` (`lib/.kos-ports/`), and addons that deploy into `${KOS_BASE}/addons`. To prevent data loss, `kosaio update <tool>` auto-stashes tracked and untracked changes before pulling, and pops the stash back after.
+
+*   The prompt defaults to **Y** (auto-stash). Press `N` to skip and let the update abort cleanly.
+*   If the pop has conflicts (e.g. upstream changed the same file you modified), the stash is left in place and recovery instructions are printed (`git status`, `git stash list`, `git checkout --ours|--theirs <file>`).
+*   Set `KOSAIO_AUTO_STASH=false` to disable the feature entirely and keep the previous behavior.
+*   Set `KOSAIO_NON_INTERACTIVE=1` to skip the prompt and always auto-stash (useful for CI).
 
 ### Direct Access to KOS Utilities
 You can execute internal KOS tools directly without adding them to your PATH:
