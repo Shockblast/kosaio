@@ -94,6 +94,66 @@ function kosaio_git_common_update() {
 	fi
 }
 
+# --- Safe Update Wrapper ---
+
+# Wraps kosaio_git_common_update with auto-stash of dirty working tree.
+# Set KOSAIO_AUTO_STASH=false to opt-out.
+function kosaio_safe_update() {
+	local repo_dir="$1"
+	shift
+
+	if [ "${KOSAIO_AUTO_STASH:-true}" = "false" ]; then
+		kosaio_git_common_update "$repo_dir" "$@"
+		return $?
+	fi
+
+	local stashed=0
+	local stash_msg=""
+	local interactive=1
+	[[ "${KOSAIO_NON_INTERACTIVE:-0}" == "1" ]] && interactive=0
+	[ ! -t 0 ] && interactive=0
+
+	if [ -n "$(git -C "$repo_dir" status --porcelain 2>/dev/null)" ]; then
+		local should_stash=0
+		if [ $interactive -eq 1 ]; then
+			if confirm "Working tree has local changes. Stash them before update? [Y/n]" "Y"; then
+				should_stash=1
+			fi
+		else
+			log_warn "Auto-stashing dirty working tree (non-interactive mode)."
+			should_stash=1
+		fi
+
+		if [ $should_stash -eq 1 ]; then
+			stash_msg="kosaio-pre-update-$(basename "$repo_dir")-$(date +%s)"
+			if git -C "$repo_dir" stash push -u -m "$stash_msg" >/dev/null 2>&1; then
+				stashed=1
+				log_info "Stashed as '${stash_msg}'."
+			else
+				log_warn "Stash failed. Proceeding without stash."
+			fi
+		fi
+	fi
+
+	local rc=0
+	kosaio_git_common_update "$repo_dir" "$@" || rc=$?
+
+	if [ $stashed -eq 1 ]; then
+		if git -C "$repo_dir" stash pop >/dev/null 2>&1; then
+			log_success "Restored stashed changes."
+		else
+			log_warn "Stash pop had conflicts. Manual recovery required:"
+			log_info "  cd ${repo_dir}"
+			log_info "  git status"
+			log_info "  git stash list   (look for: ${stash_msg})"
+			log_info "  git checkout --ours|--theirs <file>"
+			log_info "  git stash drop"
+			rc=1
+		fi
+	fi
+	return $rc
+}
+
 # --- High Level Lifecycle Helpers ---
 
 function kosaio_standard_update_flow() {
@@ -110,7 +170,7 @@ function kosaio_standard_update_flow() {
 	done
 
 	local status=0
-	kosaio_git_common_update "${repo_dir}" || status=$?
+	kosaio_safe_update "${repo_dir}" || status=$?
 
 	# If forced build, we treat it as if changes were found (status 1)
 	if [ $force_build -eq 1 ]; then

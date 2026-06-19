@@ -40,6 +40,38 @@ kosaio_tool_update() {
 		return 1
 	fi
 
+	# Auto-stash dirty working tree (tracked + untracked) to protect local
+	# changes (toolchain build artifacts, addon files) during update / branch switch.
+	local stashed=0
+	local stash_msg=""
+	if [ "${KOSAIO_AUTO_STASH:-true}" != "false" ]; then
+		if [ -n "$(git -C "$tool_dir" status --porcelain 2>/dev/null)" ]; then
+			local interactive=1
+			[[ "${KOSAIO_NON_INTERACTIVE:-0}" == "1" ]] && interactive=0
+			[ ! -t 0 ] && interactive=0
+
+			local should_stash=0
+			if [ $interactive -eq 1 ]; then
+				if confirm "KOS working tree has local changes. Stash them before update? [Y/n]" "Y"; then
+					should_stash=1
+				fi
+			else
+				log_warn "Auto-stashing KOS working tree (non-interactive mode)."
+				should_stash=1
+			fi
+
+			if [ $should_stash -eq 1 ]; then
+				stash_msg="kosaio-pre-update-kos-$(date +%s)"
+				if git -C "$tool_dir" stash push -u -m "$stash_msg" >/dev/null 2>&1; then
+					stashed=1
+					log_info "Stashed as '${stash_msg}'."
+				else
+					log_warn "KOS stash failed. Proceeding without stash."
+				fi
+			fi
+		fi
+	fi
+
 	local cfg_branch
 	cfg_branch=$(_kosaio_kos_resolve_branch)
 
@@ -48,6 +80,7 @@ kosaio_tool_update() {
 	local current_branch
 	current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
 
+	local update_rc=0
 	if [ "$current_branch" != "$cfg_branch" ]; then
 		log_info "Branch mismatch: current=${current_branch}, config=${cfg_branch}"
 		if confirm "Switch KOS to branch '${cfg_branch}'? This may discard local changes." "N"; then
@@ -55,17 +88,34 @@ kosaio_tool_update() {
 				log_success "Switched KOS to branch '${cfg_branch}'."
 				kosaio_reg_build
 				kosaio_reg_apply
-				return 0
+				update_rc=0
 			else
 				log_error "Failed to switch KOS to branch '${cfg_branch}'."
-				return 1
+				update_rc=1
 			fi
 		else
 			log_info "Keeping KOS on current branch '${current_branch}'."
+			kosaio_standard_update_flow "kos" "KallistiOS" "$tool_dir" "$@" || update_rc=$?
+		fi
+	else
+		kosaio_standard_update_flow "kos" "KallistiOS" "$tool_dir" "$@" || update_rc=$?
+	fi
+
+	if [ $stashed -eq 1 ]; then
+		if git -C "$tool_dir" stash pop >/dev/null 2>&1; then
+			log_success "Restored stashed changes."
+		else
+			log_warn "Stash pop had conflicts. Manual recovery required:"
+			log_info "  cd ${tool_dir}"
+			log_info "  git status"
+			log_info "  git stash list   (look for: ${stash_msg})"
+			log_info "  git checkout --ours|--theirs <file>"
+			log_info "  git stash drop"
+			update_rc=1
 		fi
 	fi
 
-	kosaio_standard_update_flow "kos" "KallistiOS" "$tool_dir" "$@"
+	return $update_rc
 }
 
 kosaio_tool_info() {
