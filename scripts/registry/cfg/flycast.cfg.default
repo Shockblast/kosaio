@@ -6,13 +6,13 @@
 
 KOSAIO_TOOL_ARGS=(
     # ── Active Defaults (uncomment to override) ──
-    -DUSE_VULKAN=ON                  # Build with Vulkan support
-    -DUSE_OPENGL=ON                  # Use OpenGL API
-    -DUSE_OPENMP=ON                  # Use OpenMP if available
-    -DUSE_ALSA=ON                    # Build with ALSA support
-    -DUSE_PULSEAUDIO=ON              # Build with PulseAudio support
-    -DUSE_BREAKPAD=ON                # Build and link with breakpad library
-    -DUSE_LUA=ON                     # Build with Lua support
+    # -DUSE_VULKAN=ON                  # Build with Vulkan support
+    # -DUSE_OPENGL=ON                  # Use OpenGL API
+    # -DUSE_OPENMP=ON                  # Use OpenMP if available
+    # -DUSE_ALSA=ON                    # Build with ALSA support
+    # -DUSE_PULSEAUDIO=ON              # Build with PulseAudio support
+    # -DUSE_BREAKPAD=ON                # Build and link with breakpad library
+    # -DUSE_LUA=ON                     # Build with Lua support
     -DUSE_HOST_SDL=ON                # Use host SDL library (vs bundled)
 
     # ── Graphics ──
@@ -26,7 +26,7 @@ KOSAIO_TOOL_ARGS=(
     # -DUSE_LIBCDIO=ON                # Use libcdio for CDROM access
 
     # ── Debug & Profiling ──
-    -DENABLE_GDB_SERVER=ON            # Build with GDB debugging support
+    # -DENABLE_GDB_SERVER=ON            # Build with GDB debugging support
     # -DENABLE_DC_PROFILER=ON         # Support for SH4 profiler
     # -DENABLE_FC_PROFILER=ON         # Support for host app profiler
     # -DENABLE_LOG=ON                 # Enable full logging

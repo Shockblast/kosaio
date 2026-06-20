@@ -163,11 +163,17 @@ function kosaio_standard_update_flow() {
 	local build_cmd="${4:-}"
 	local apply_cmd="${5:-}"
 	shift 5 || shift 3 # Handle 3 or 5 positional args
-	
+
 	local force_build=0
 	for arg in "$@"; do
 		[[ "$arg" == "--build" ]] && force_build=1
 	done
+
+	if [ -z "${repo_dir}" ] || [ ! -d "${repo_dir}" ]; then
+		log_error "${name} is not installed (source not found at: ${repo_dir:-<unknown>})."
+		log_info "Tip: Run '${C_CYAN}kosaio install ${id}${C_RESET}' to set it up first."
+		return 1
+	fi
 
 	local status=0
 	kosaio_safe_update "${repo_dir}" || status=$?

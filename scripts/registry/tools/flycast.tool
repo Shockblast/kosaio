@@ -8,7 +8,7 @@ KOSAIO_TOOL_DEPS=("libvulkan-dev" "libsdl2-dev" "cmake" "build-essential")
 
 # === SOURCE CONTROL ===
 KOSAIO_TOOL_REPO="https://github.com/flyinghead/flycast.git"
-KOSAIO_TOOL_BRANCH=""
+KOSAIO_TOOL_BRANCH="dev"
 KOSAIO_TOOL_CLONE_RECURSIVE=true
 
 # === BUILD OPTIONS ===
@@ -16,7 +16,6 @@ KOSAIO_TOOL_BUILD_SYSTEM="cmake"
 KOSAIO_TOOL_BUILD_DIR="build"
 KOSAIO_TOOL_BUILD_SUBDIR=""
 KOSAIO_TOOL_TOOLCHAIN=""
-KOSAIO_TOOL_PREBUILD_FUNC="cmake"
 KOSAIO_TOOL_ARGS=()
 
 # === INSTALLATION ===

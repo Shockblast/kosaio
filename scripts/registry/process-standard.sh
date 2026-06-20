@@ -34,6 +34,11 @@ function kosaio_reg_clone() {
 
 	log_info --draw-line "Cloning ${NAME}..."
 
+	local branch_label="${KOSAIO_TOOL_BRANCH:-default}"
+	[[ "${KOSAIO_TOOL_CLONE_RECURSIVE:-false}" == "true" ]] && branch_label+=" (recursive)"
+	log_info "Branch: ${C_YELLOW}${branch_label}${C_RESET}"
+	log_info "Target: ${tool_dir}"
+
 	local clone_args=()
 	[[ "${KOSAIO_TOOL_CLONE_RECURSIVE:-false}" == "true" ]] && clone_args+=(--recursive)
 	[[ -n "${KOSAIO_TOOL_BRANCH:-}" ]] && clone_args+=(--branch "${KOSAIO_TOOL_BRANCH}")

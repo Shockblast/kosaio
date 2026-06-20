@@ -50,6 +50,7 @@ libisofs-dev
 libjpeg-dev
 libpng-dev
 zlib1g-dev
+zlib1g-dev:i386
 
 # Graphics & Sound
 libgtk-3-dev
