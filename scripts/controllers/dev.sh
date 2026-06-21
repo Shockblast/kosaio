@@ -40,8 +40,6 @@ function controller_dev_handle() {
 		fi
 	fi
 
-	local state_dir="${KOSAIO_STATE_DIR:-${KOSAIO_DIR}/data/states}"
-
 	if [ -z "$mode" ]; then
 		# Check Status (new state system: data/states/host/<tool>)
 		if kosaio_state_get host "$target"; then
