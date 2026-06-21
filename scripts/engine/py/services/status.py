@@ -17,7 +17,7 @@ class StatusService:
             c_inst, h_inst = StatusService._apply_fallback(item_id, c_base, h_base, c_inst, h_inst)
             c_inst, h_inst = StatusService._run_specialized_check(item_id, c_base, h_base, c_inst, h_inst)
 
-            # Generic tools (not in _SPECIAL_CASES): check .kosaio_installed marker
+            # Generic tools (not in _SPECIAL_CASES): check data/states/container/<tool> marker
             if item_id not in StatusService._SPECIAL_CASES:
                 # Try standard path, then kos-ports fallback (for tools with DIR_OVERRIDE)
                 c_path = c_base
@@ -26,7 +26,7 @@ class StatusService:
                     if c_alt.exists():
                         c_path = c_alt
 
-                if (c_path / ".kosaio_installed").exists():
+                if (cfg.state_dir / "container" / item_id).exists():
                     c_inst = True
                 elif c_path.exists():
                     c_inst = "c"
@@ -40,7 +40,7 @@ class StatusService:
                     if h_alt.exists():
                         h_path = h_alt
 
-                if (h_path / ".kosaio_installed").exists():
+                if (cfg.state_dir / "host" / item_id).exists():
                     h_inst = True
                 elif h_path.exists():
                     h_inst = "c"
@@ -167,11 +167,12 @@ class StatusService:
 
     @staticmethod
     def _detect_active_mode(item_id: str, item_type: str) -> bool:
-        state_file = cfg.state_dir / f"{item_id}_dev"
+        # New state system: data/states/host/<tool>
+        state_file = cfg.state_dir / "host" / item_id
         if state_file.exists():
             return True
         if item_type == "port":
-            p_state = cfg.state_dir / "kos-ports_dev"
+            p_state = cfg.state_dir / "host" / "kos-ports"
             return p_state.exists() or cfg.dev_mode == "1"
         return cfg.dev_mode == "1"
 
@@ -187,7 +188,7 @@ class StatusService:
 
     @staticmethod
     def _detect_broken(item_id: str, is_host_active: bool, c_inst, h_inst):
-        broken_marker = cfg.state_dir / f"{item_id}_broken"
+        broken_marker = cfg.state_dir / "broken" / item_id
         if broken_marker.exists():
             if is_host_active:
                 h_inst = "!"

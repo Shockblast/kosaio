@@ -3,6 +3,9 @@ set -Eeuo pipefail
 # scripts/controllers/dev.sh
 # Handles development environment switching (Container vs Host)
 
+# shellcheck source=../common/state.sh
+source "${KOSAIO_DIR}/scripts/common/state.sh" 2>/dev/null || true
+
 function controller_dev_handle() {
 	local target="$1"
 	local mode="$2"
@@ -38,11 +41,10 @@ function controller_dev_handle() {
 	fi
 
 	local state_dir="${KOSAIO_STATE_DIR:-${KOSAIO_DIR}/data/states}"
-	local state_file="${state_dir}/${target}_dev"
 
 	if [ -z "$mode" ]; then
-		# Check Status
-		if [ -f "$state_file" ]; then
+		# Check Status (new state system: data/states/host/<tool>)
+		if kosaio_state_get host "$target"; then
 			log_info "${C_BLUE}${target}${C_RESET} is set to ${C_YELLOW}HOST${C_RESET} (Workspace)."
 		else
 			log_info "${C_BLUE}${target}${C_RESET} is set to ${C_CYAN}CONTAINER${C_RESET} (System)."
@@ -50,26 +52,24 @@ function controller_dev_handle() {
 		return
 	fi
 
-	mkdir -p "$(dirname "$state_file")"
-
 	case "${mode,,}" in
 		"host"|"h"|"workspace"|"enable"|"dev")
 			# Validation: Check if the target exists in the workspace
 			# Use the engine to get the authoritative path for host mode
 			local workspace_path
 			workspace_path=$(python3 "${KOSAIO_DIR}/scripts/engine/py/main.py" get_tool_path "$target" --mode dev)
-			
+
 			if [ ! -d "${workspace_path}" ]; then
 				log_error "Target '${target}' not found in workspace: ${workspace_path}"
 				log_info "Tip: Run 'kosaio clone ${target}' or 'kosaio install ${target}' first."
 				return 1
 			fi
 
-			touch "$state_file"
+			kosaio_state_set host "$target"
 			log_success "${C_BLUE}${target}${C_RESET} switched to ${C_YELLOW}HOST${C_RESET} mode."
 			;;
 		"container"|"c"|"system"|"disable"|"cont"|"sys")
-			rm -f "$state_file"
+			kosaio_state_unset host "$target"
 			log_success "${C_BLUE}${target}${C_RESET} switched to ${C_CYAN}CONTAINER${C_RESET} mode."
 			;;
 		*)

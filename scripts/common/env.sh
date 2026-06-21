@@ -81,6 +81,9 @@ export KOS_MAKE="${KOS_MAKE:-make}"
 # State Directory for Dev Mode
 KOSAIO_STATE_DIR="${KOSAIO_DIR}/data/states"
 
+# Library metadata (.mk files) for user projects
+export KOSAIO_MK="${KOSAIO_DIR}/scripts/registry/mk"
+
 # Logging Configuration
 # FULL: [YYYY-MM-DD HH:MM:SS] INFO: Message
 # SHORT: [HH:MM:SS] INFO: Message
@@ -111,7 +114,8 @@ function kosaio_get_tool_dir() {
 	fi
 
 	# Fallback: static resolution for bootstrap / minimal environments
-	local state_file="${KOSAIO_STATE_DIR}/${tool}_dev"
+	# New state system: data/states/host/<tool>
+	local state_file="${KOSAIO_STATE_DIR}/host/${tool}"
 
 	local use_dev=0
 	if [ "${KOSAIO_DEV_MODE:-}" = "1" ]; then

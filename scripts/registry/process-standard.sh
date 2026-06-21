@@ -4,6 +4,11 @@
 # Reads all data from KOSAIO_TOOL_* config variables.
 # Override individual kosaio_reg_* functions in a custom manifest for specialized tools.
 
+# Source state helpers (kosaio_state_set/unset/get/list + legacy cleanup)
+# shellcheck source=../common/state.sh
+source "${KOSAIO_DIR}/scripts/common/state.sh" 2>/dev/null || \
+	source "$(dirname "${BASH_SOURCE[0]}")/../common/state.sh" 2>/dev/null || true
+
 ID="${KOSAIO_TOOL_ID}"
 NAME="${KOSAIO_TOOL_NAME}"
 DESC="${KOSAIO_TOOL_DESC}"
@@ -202,7 +207,7 @@ function kosaio_reg_apply() {
 		done
 	fi
 
-	touch "$tool_dir/.kosaio_installed"
+	kosaio_state_set container "$ID"
 }
 
 function kosaio_reg_check_health() {
@@ -248,7 +253,7 @@ function kosaio_reg_check_health() {
 	if [ "$missing" -eq 0 ]; then
 		# Reconcile: marker exists only if all libs are present
 		if [ -n "${KOSAIO_TOOL_LIBS[0]:-}" ]; then
-			touch "$tool_dir/.kosaio_installed"
+			kosaio_state_set container "$ID"
 		fi
 		log_box --info "${NAME} — Health Check" \
 			"${C_YELLOW}Status:${C_RESET} ${C_GREEN}Healthy${C_RESET}" \
@@ -258,7 +263,7 @@ function kosaio_reg_check_health() {
 	fi
 
 	# Reconcile: remove marker if anything is missing
-	rm -f "$tool_dir/.kosaio_installed"
+	kosaio_state_unset container "$ID"
 
 	log_box --type=warn "${NAME} — Health Check" \
 		"${C_YELLOW}Status:${C_RESET} ${C_RED}Incomplete${C_RESET}" \
@@ -290,7 +295,7 @@ function kosaio_reg_uninstall() {
 	done
 
 	rm -rf "$tool_dir"
-	rm -f "$tool_dir/.kosaio_installed"
+	kosaio_state_unset container "$ID"
 	log_success "${NAME} removed."
 }
 
@@ -339,7 +344,7 @@ function kosaio_reg_clean() {
 		local build_dir="${KOSAIO_TOOL_BUILD_DIR:-build}"
 		[ -d "${tool_dir}/${build_dir}" ] && rm -rf "${tool_dir}/${build_dir}"
 	fi
-	rm -f "$(dirname "$tool_dir")/.kosaio_installed"
+	kosaio_state_unset container "$ID"
 	log_success "${NAME} cleaned."
 }
 
@@ -394,6 +399,6 @@ function kosaio_reg_install() {
 	if [ -n "${KOSAIO_TOOL_POSTINSTALL_MESSAGE:-}" ]; then
 		log_info "$KOSAIO_TOOL_POSTINSTALL_MESSAGE"
 	fi
-	touch "$tool_dir/.kosaio_installed"
+	kosaio_state_set container "$ID"
 	log_success "${NAME} installation complete."
 }

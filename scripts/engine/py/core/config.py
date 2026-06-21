@@ -19,7 +19,8 @@ class Config:
         if tool == "kos-ports" and self.kos_ports_dir_override and force_mode is None:
             return Path(self.kos_ports_dir_override)
 
-        state_file = self.state_dir / f"{tool}_dev"
+        # New state system: data/states/host/<tool>
+        state_file = self.state_dir / "host" / tool
 
         is_dev = False
         if mode == "1":

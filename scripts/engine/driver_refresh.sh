@@ -1,6 +1,11 @@
 #!/bin/bash
 set -Eeuo pipefail
-# driver_refresh.sh - Reconcile .kosaio_installed markers with actual filesystem state
+# driver_refresh.sh - Reconcile install markers with actual filesystem state
+# Writes data/states/container/<tool> when KOSAIO_TOOL_LIBS are present.
+
+# shellcheck source=../common/state.sh
+source "${KOSAIO_DIR}/scripts/common/state.sh" 2>/dev/null || \
+	source "$(dirname "${BASH_SOURCE[0]}")/../common/state.sh" 2>/dev/null || true
 
 ENGINE_PY="${KOSAIO_DIR}/scripts/engine/py/main.py"
 
@@ -24,7 +29,11 @@ function kosaio_refresh() {
 
 		if [ -f "$tool_file" ]; then
 			kosaio_load_tool_config "$id" 2>/dev/null || continue
-			kosaio_reg_reconcile_marker "$id" && ((updated++)) || ((fixed++))
+			if kosaio_reg_reconcile_marker "$id"; then
+				updated=$((updated + 1))
+			else
+				fixed=$((fixed + 1))
+			fi
 		fi
 	done
 
@@ -49,15 +58,13 @@ function kosaio_reg_reconcile_marker() {
 		return 2
 	}
 
-	local marker="$tool_dir/.kosaio_installed"
-
 	# Load KOSAIO_TOOL_LIBS from the .tool file via Python or bash
 	python3 "$ENGINE_PY" get_manifest_path "$id" 2>/dev/null | head -1 | while read -r manifest; do
 		[ -f "$manifest" ] && source "$manifest"
 	done 2>/dev/null
 
 	if [ ! -d "$tool_dir" ]; then
-		rm -f "$marker"
+		kosaio_state_unset container "$id" 2>/dev/null || true
 		return 1
 	fi
 
@@ -68,11 +75,11 @@ function kosaio_reg_reconcile_marker() {
 	done
 
 	if [ "$found" -eq 1 ]; then
-		touch "$marker"
+		kosaio_state_set container "$id" 2>/dev/null || true
 		log_info "${id}: ${C_GREEN}healthy${C_RESET}"
 		return 0
 	else
-		rm -f "$marker"
+		kosaio_state_unset container "$id" 2>/dev/null || true
 		log_info "${id}: ${C_YELLOW}not compiled${C_RESET}"
 		return 1
 	fi

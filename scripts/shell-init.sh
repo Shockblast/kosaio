@@ -33,6 +33,7 @@ export PATH="${KOSAIO_DIR}/scripts:$PATH"
 # 3. Load Environment & UI
 [ -f "${KOSAIO_DIR}/scripts/common/env.sh" ] && source "${KOSAIO_DIR}/scripts/common/env.sh"
 [ -f "${KOSAIO_DIR}/scripts/common/ui.sh" ] && source "${KOSAIO_DIR}/scripts/common/ui.sh"
+[ -f "${KOSAIO_DIR}/scripts/common/state.sh" ] && source "${KOSAIO_DIR}/scripts/common/state.sh"
 [ -f "${KOSAIO_DIR}/scripts/common/kos_pivot.sh" ] && source "${KOSAIO_DIR}/scripts/common/kos_pivot.sh"
 [ -f "${KOSAIO_DIR}/scripts/common/completions.sh" ] && source "${KOSAIO_DIR}/scripts/common/completions.sh"
 [ -f "${KOSAIO_DIR}/scripts/common/update_check.sh" ] && source "${KOSAIO_DIR}/scripts/common/update_check.sh"
