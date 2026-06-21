@@ -93,13 +93,13 @@ kosaio_tool_export() {
 	for bin in "cdi4dc/cdi4dc" "gdi4dc/gdi4dc" "mds4dc/mds4dc"; do
 		if [ -f "${build_dir}/${bin}" ]; then
 			cp -v "${build_dir}/${bin}" "${host_out}/"
-			((count++))
+			count=$((count + 1))
 		fi
 	done
 
 	if [ $count -eq 0 ] && [ -f "${build_dir}/cdi4dc" ]; then
 		cp -v "${build_dir}/cdi4dc" "${host_out}/"
-		((count++))
+		count=$((count + 1))
 	fi
 
 	if [ $count -eq 0 ]; then

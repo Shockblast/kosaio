@@ -276,9 +276,9 @@ function _router_handle_update_all() {
 		local log_file="/tmp/kosaio_update_${id}.log"
 		
 		case $code in
-			10) 
+			10)
 				printf "  ${C_GRAY}[UP-TO-DATE]${C_RESET}  %-15s %s\n" "$id" "No changes found."
-				((count_uptodate++))
+				count_uptodate=$((count_uptodate + 1))
 				;;
 			11)
 				printf "  ${C_B_CYAN}[UPDATED]   ${C_RESET}  %-15s ${C_GREEN}%s${C_RESET}\n" "$id" "Rebuilt & Deployed"
@@ -288,20 +288,20 @@ function _router_handle_update_all() {
 						printf "                    ${C_GRAY}* %s${C_RESET}\n" "$line"
 					done < "$log_file" # Show all commits
 				fi
-				((count_updated++))
+				count_updated=$((count_updated + 1))
 				;;
 			12)
 				printf "  ${C_YELLOW}[SKIPPED]   ${C_RESET}  %-15s %s\n" "$id" "Code updated, build skipped."
-				((count_skipped++))
+				count_skipped=$((count_skipped + 1))
 				;;
 			0)
 				# Handle targets that don't return our special codes yet but succeeded
 				printf "  ${C_GRAY}[SUCCESS]   ${C_RESET}  %-15s %s\n" "$id" "Completed."
-				((count_uptodate++))
+				count_uptodate=$((count_uptodate + 1))
 				;;
 			*)
 				printf "  ${C_RED}[ERROR]     ${C_RESET}  %-15s %s\n" "$id" "Failed with code $code"
-				((count_error++))
+				count_error=$((count_error + 1))
 				;;
 		esac
 		rm -f "$log_file"

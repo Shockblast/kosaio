@@ -24,11 +24,11 @@ function kosaio_reg_check_health() {
 			printf "  %-25s: ${C_GREEN}Clean${C_RESET}\n" "Git Status"
 		else
 			printf "  %-25s: ${C_YELLOW}Modified (Dirty)${C_RESET}\n" "Git Status"
-			((warnings++)) || true
+			warnings=$((warnings + 1))
 		fi
 	else
 		printf "  %-25s: ${C_RED}NOT A GIT REPO${C_RESET}\n" "Git Status"
-		((warnings++)) || true
+		warnings=$((warnings + 1))
 	fi
 
 	log_info "--- Engine Status ---"
@@ -37,7 +37,7 @@ function kosaio_reg_check_health() {
 		printf "  %-25s: ${C_GREEN}OPERATIONAL${C_RESET}\n" "Python Engine"
 	else
 		printf "  %-25s: ${C_RED}FAILED${C_RESET}\n" "Python Engine"
-		((errors++)) || true
+		errors=$((errors + 1))
 	fi
 
 	local py_pkg_ok=0
@@ -46,7 +46,7 @@ function kosaio_reg_check_health() {
 			printf "  %-25s: ${C_GREEN}OK${C_RESET}\n" "Python $pkg"
 		else
 			printf "  %-25s: ${C_YELLOW}MISSING${C_RESET}\n" "Python $pkg"
-			((warnings++)) || true
+			warnings=$((warnings + 1))
 		fi
 	done
 
@@ -54,7 +54,7 @@ function kosaio_reg_check_health() {
 		printf "  %-25s: ${C_GREEN}OK${C_RESET}\n" "pyproject.toml"
 	else
 		printf "  %-25s: ${C_YELLOW}MISSING${C_RESET}\n" "pyproject.toml"
-		((warnings++)) || true
+		warnings=$((warnings + 1))
 	fi
 
 	log_info "--- Critical Scripts ---"
@@ -65,7 +65,7 @@ function kosaio_reg_check_health() {
 			printf "  %-35s: ${C_GREEN}OK${C_RESET}\n" "$s"
 		else
 			printf "  %-35s: ${C_RED}MISSING${C_RESET}\n" "$s"
-			((errors++)) || true
+			errors=$((errors + 1))
 		fi
 	done
 
@@ -74,7 +74,7 @@ function kosaio_reg_check_health() {
 	else
 		printf "  %-35s: ${C_YELLOW}NOT INSTALLED${C_RESET}\n" "shellcheck"
 		printf "  ${C_GRAY}  Tip: apt install shellcheck${C_RESET}\n"
-		((warnings++)) || true
+		warnings=$((warnings + 1))
 	fi
 
 	log_info "--- Tests ---"
@@ -83,7 +83,7 @@ function kosaio_reg_check_health() {
 		printf "  %-25s: ${C_GREEN}PASSING${C_RESET}\n" "Python Tests"
 	else
 		printf "  %-25s: ${C_YELLOW}FAILING${C_RESET}\n" "Python Tests"
-		((warnings++)) || true
+		warnings=$((warnings + 1))
 	fi
 
 	if [ "$errors" -gt 0 ]; then

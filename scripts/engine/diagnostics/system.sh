@@ -19,7 +19,7 @@ function kosaio_reg_check_health() {
 			printf "  %-20s: ${C_GREEN}CONNECTED${C_RESET} → %s\n" "$var" "${!var}"
 		else
 			printf "  %-20s: ${C_RED}DISCONNECTED${C_RESET}\n" "$var"
-			((errors++)) || true
+			errors=$((errors + 1))
 		fi
 	done
 
@@ -36,7 +36,7 @@ function kosaio_reg_check_health() {
 		printf "  %-20s: ${C_GRAY}%s${C_RESET}\n" "Location" "$sh_gcc"
 	else
 		printf "  %-20s: ${C_YELLOW}MISSING${C_RESET}\n" "SH4 Compiler"
-		((errors++)) || true
+		errors=$((errors + 1))
 	fi
 
 	local sh_gdb="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gdb"
@@ -64,7 +64,7 @@ function kosaio_reg_check_health() {
 			printf "  %-20s: ${C_GREEN}OK${C_RESET}\n" "$tool"
 		else
 			printf "  %-20s: ${C_RED}MISSING${C_RESET}\n" "$tool"
-			((errors++)) || true
+			errors=$((errors + 1))
 		fi
 	done
 
