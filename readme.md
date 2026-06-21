@@ -36,8 +36,10 @@ You can install these tools with kosaio:
 | **AICAOS**        | Dedicated Operating System for the AICA (ARM7) Sound Chip.                                          |
 | **libdreamroq**   | RoQ playback library for Dreamcast.                                                                 |
 | **mame**          | Multi-purpose emulation framework (configured for Dreamcast).                                       |
-| **SDL2**          | Simple DirectMedia Layer 2 (vanilla, compiled with container GCC into `/usr/local`).                |
-| **SDL3**          | Simple DirectMedia Layer 3 (vanilla, compiled with container GCC into `/usr/local`).                |
+| **SDL2**          | SDL2 kosaio custom build (64-bit, compila desde source a `/opt/kosaio/data/lib/sdl2/64/`).            |
+| **SDL2-32**       | SDL2 kosaio custom build (32-bit, para simular Dreamcast en PC: `PC_SIMULATE_DC=yes`).                |
+| **SDL3**          | SDL3 kosaio custom build (64-bit, compila desde source a `/opt/kosaio/data/lib/sdl3/64/`).            |
+| **SDL3-32**       | SDL3 kosaio custom build (32-bit, para simular Dreamcast en PC).                                     |
 | **SDL2-DC**       | SDL2 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
 | **SDL3-DC**       | SDL3 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
 | **flycast**       | High-performance Dreamcast emulator with Vulkan support.                                            |
@@ -45,7 +47,7 @@ You can install these tools with kosaio:
 | **SGDK**          | Sega Genesis Development Kit (C library & tools). Different platform, but shares the toolchain flow. |
 
 * **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.
-* **SDL Build Customization**: All SDL variants (`sdl2`, `sdl3`, `sdl2-dc`, `sdl3-dc`) accept CMake flags to customize the build. See [SDL Build Configuration](#sdl-build-configuration) below.
+* **SDL Build Customization**: All SDL variants (`sdl2`, `sdl2-32`, `sdl3`, `sdl3-32`, `sdl2-dc`, `sdl3-dc`) accept CMake flags to customize the build. See [SDL Build Configuration](#sdl-build-configuration) below.
 * **makeip** is already included in KOS, but this version is more updated.
 * **flycast**, **nitrocast** and **mame** emulators compile in the container but run on the host. They require BIOS files installed on the host.
 * Dependencies are installed automatically when a tool is requested. If you need to manually refresh them, use `kosaio install-deps system`.
@@ -198,6 +200,30 @@ kosaio build sdl2-dc
 ```
 
 Use CMake-style `-DSDL_*=ON/OFF` flags. Available options are documented with comments in each `.cfg.default` file.
+
+**Architecture note**: the arch (32 vs 64-bit) is selected by the tool name (`sdl2.tool` = 64-bit, `sdl2-32.tool` = 32-bit) — there is no need to set `-DCMAKE_C_FLAGS=-m32` manually. Use `kosaio build sdl2-32` for 32-bit builds.
+
+#### Using SDL in your own projects
+
+For user projects, kosaio ships a set of `.mk` files under `scripts/registry/mk/` (the path is exposed as the `KOSAIO_MK` env var after sourcing `shell-init.sh`). These provide complete `CFLAGS` / `LDFLAGS` per variant, so the project Makefile only needs to `include` the right one:
+
+```make
+# 32-bit (Dreamcast simulation on PC)
+include $(KOSAIO_MK)/sdl2-custom-32.mk
+SDL2_CFLAGS  := $(SDL2_CUSTOM-32_CFLAGS)
+SDL2_LDFLAGS := $(SDL2_CUSTOM-32_LDFLAGS)
+
+# 64-bit (kosaio custom)
+include $(KOSAIO_MK)/sdl2-custom-64.mk
+
+# apt (system)
+include $(KOSAIO_MK)/sdl2-std.mk
+
+# Dreamcast (KOS)
+include $(KOSAIO_MK)/sdl2-dc.mk
+```
+
+Available: `sdl2-{std,std32,custom-32,custom-64,dc}.mk`, `sdl3-{custom-32,custom-64,dc}.mk`, `openal-{32,64}.mk`. See [`docs/plan-library-resolver.md`](docs/plan-library-resolver.md) for the full design.
 
 #### Update Behavior: Auto-Stash
 
