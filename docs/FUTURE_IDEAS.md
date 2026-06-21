@@ -8,7 +8,7 @@ This document contains a list of tools and libraries that were previously in the
   * ~~Description: A small library for the Dreamcast AICA sound subsystem.~~
   * ~~URL: [https://github.com/pcercuei/AICAOS.git](https://github.com/pcercuei/AICAOS.git)~~
 
-- **libdreamroq**
+- **libdreamroq** (DONE)
   * Description: Library for playing RoQ videos.
   * URL: [https://github.com/dreamcastdevs/libdreamroq.git](https://github.com/dreamcastdevs/libdreamroq.git)
 
