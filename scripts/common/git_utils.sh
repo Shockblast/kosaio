@@ -74,7 +74,7 @@ function kosaio_git_common_update() {
 		elif [[ "${local_rev}" == "${base_rev}" ]]; then
 			git reset --hard
 			log_info "Local branch is behind '${upstream}'. Pulling changes..."
-			git log --pretty=format:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
+			git log --pretty=tformat:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
 			git pull || return 2
 			log_info "New changes:"
 			cat "$log_file"
@@ -85,7 +85,7 @@ function kosaio_git_common_update() {
 		else
 			git reset --hard
 			log_warn "Branches have diverged. Resetting to remote '${upstream}'..."
-			git log --pretty=format:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
+			git log --pretty=tformat:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
 			git pull || return 2
 			log_info "New changes:"
 			cat "$log_file"
