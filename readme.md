@@ -36,10 +36,10 @@ You can install these tools with kosaio:
 | **AICAOS**        | Dedicated Operating System for the AICA (ARM7) Sound Chip.                                          |
 | **libdreamroq**   | RoQ playback library for Dreamcast.                                                                 |
 | **mame**          | Multi-purpose emulation framework (configured for Dreamcast).                                       |
-| **SDL2**          | SDL2 kosaio custom build (64-bit, compila desde source a `/opt/kosaio/data/lib/sdl2/64/`).            |
-| **SDL2-32**       | SDL2 kosaio custom build (32-bit, para simular Dreamcast en PC: `PC_SIMULATE_DC=yes`).                |
-| **SDL3**          | SDL3 kosaio custom build (64-bit, compila desde source a `/opt/kosaio/data/lib/sdl3/64/`).            |
-| **SDL3-32**       | SDL3 kosaio custom build (32-bit, para simular Dreamcast en PC).                                     |
+| **SDL2**          | SDL2 kosaio custom build (64-bit, compiles from source to `/opt/kosaio/data/lib/sdl2/64/`).            |
+| **SDL2-32**       | SDL2 kosaio custom build (32-bit, for Dreamcast simulation on PC: `PC_SIMULATE_DC=yes`).                |
+| **SDL3**          | SDL3 kosaio custom build (64-bit, compiles from source to `/opt/kosaio/data/lib/sdl3/64/`).            |
+| **SDL3-32**       | SDL3 kosaio custom build (32-bit, for Dreamcast simulation on PC).                                     |
 | **SDL2-DC**       | SDL2 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
 | **SDL3-DC**       | SDL3 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
 | **flycast**       | High-performance Dreamcast emulator with Vulkan support.                                            |
