@@ -7,7 +7,7 @@ KOSAIO_TOOL_TYPE=("tool")
 KOSAIO_TOOL_DEPS=("build-essential" "git" "cmake" "libelf-dev")
 
 # === SOURCE CONTROL ===
-KOSAIO_TOOL_REPO="https://github.com/mrneo240/img4dc.git"
+KOSAIO_TOOL_REPO="https://github.com/Kazade/img4dc.git"
 KOSAIO_TOOL_BRANCH=""
 
 # === BUILD OPTIONS ===
