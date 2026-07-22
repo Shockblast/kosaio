@@ -42,6 +42,7 @@ You can install these tools with kosaio:
 | **SDL3-32**       | SDL3 kosaio custom build (32-bit, for Dreamcast simulation on PC).                                     |
 | **SDL2-DC**       | SDL2 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
 | **SDL3-DC**       | SDL3 port for Dreamcast by GPF (cross-compiled with KOS toolchain into `${KOS_BASE}/addons`).       |
+| **deecy**         | Experimental Dreamcast emulator written in Zig (SH-4 JIT, WebGPU).                                  |
 | **flycast**       | High-performance Dreamcast emulator with Vulkan support.                                            |
 | **nitrocast**     | Modern, fast Dreamcast emulator (successor to lxdream-nitro).                                       |
 | **SGDK**          | Sega Genesis Development Kit (C library & tools). Different platform, but shares the toolchain flow. |
@@ -49,7 +50,7 @@ You can install these tools with kosaio:
 * **KOS-PORTS Library Management**: You can now install individual libraries (like **Sh4zam**, **GLdc**, **SDL**) directly using `kosaio clone kos-ports` and `kosaio install <library>`.
 * **SDL Build Customization**: All SDL variants (`sdl2`, `sdl2-32`, `sdl3`, `sdl3-32`, `sdl2-dc`, `sdl3-dc`) accept CMake flags to customize the build. See [SDL Build Configuration](#sdl-build-configuration) below.
 * **makeip** is already included in KOS, but this version is more updated.
-* **flycast**, **nitrocast** and **mame** emulators compile in the container but run on the host. They require BIOS files installed on the host.
+* **deecy**, **flycast**, **nitrocast** and **mame** emulators compile in the container but run on the host. They require BIOS files installed on the host.
 * Dependencies are installed automatically when a tool is requested. If you need to manually refresh them, use `kosaio install-deps system`.
 * More tools will be implemented. If you want to contribute, check the `scripts/registry` structure. If you have a tool suggestion, please open an issue!
 

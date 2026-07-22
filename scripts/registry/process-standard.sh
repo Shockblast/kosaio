@@ -109,6 +109,9 @@ function kosaio_reg_apply_config() {
 		make)
 			:
 			;;
+		zig)
+			cd "$tool_dir"
+			;;
 	esac
 }
 
@@ -152,6 +155,10 @@ function kosaio_reg_build() {
 			;;
 		none)
 			log_info "No compilation needed for ${NAME}."
+			;;
+		zig)
+			cd "$tool_dir"
+			zig build --release=fast "${KOSAIO_TOOL_ARGS[@]}"
 			;;
 	esac
 }

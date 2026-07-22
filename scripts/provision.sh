@@ -48,6 +48,7 @@ TARGET_DIRS=(
 	"${KOSAIO_DIR}/data/exports"
 	"${KOSAIO_DIR}/data/cfg"
 	"${KOSAIO_DIR}/data/states"
+	"${KOSAIO_DIR}/data/lib/zig"
 )
 
 for dir in "${TARGET_DIRS[@]}"; do

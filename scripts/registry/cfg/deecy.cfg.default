@@ -1,0 +1,22 @@
+# ── Build Configuration: Deecy ──────────────────────
+# Deecy uses Zig Build. Pass -D flags to customize.
+# Run `kosaio apply-config deecy` after changing this file.
+# Run `kosaio reset-config deecy` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+KOSAIO_TOOL_ARGS=(
+    # ── Emulation ──
+    # -Dmmu=true                    # Enable full MMU emulation (default: true)
+    # -Dfast_mem=true               # Enable FastMem JIT mapping (default: true)
+    # -Ddreampicoport=true          # Enable DreamPicoPort support (default: true)
+    # -Djit_instrumentation=false   # Enable JIT instrumentation, slow (default: false)
+
+    # ── Paths ──
+    # -Ddata_path="./data"          # Path to BIOS/flash files (default: ./data)
+    # -Duserdata_path="./userdata"  # Path to save states/VMUs (default: ./userdata)
+    # -Duse_appdata_dir=false       # Use platform appdata dir (default: false)
+
+    # ── Performance ──
+    # -Dcpu=x86_64_v3               # Target CPU arch (default: native)
+    # -Dgpu_profiling=false         # GPU timestamp queries (default: true debug)
+)
