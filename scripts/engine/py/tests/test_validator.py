@@ -28,3 +28,14 @@ class TestValidatorService:
         
         assert valid.is_valid is True
         assert invalid.is_valid is False
+
+    def test_validate_port_alias_returns_port(self, tmp_path, monkeypatch):
+        from core.config import cfg
+        ports = tmp_path / "kos-ports"
+        (ports / "libgl").mkdir(parents=True)
+        (ports / "libgl" / "Makefile").write_text("SHORT_DESC=GLdc\n")
+        monkeypatch.setattr(cfg, "kos_ports_dir_override", str(ports))
+
+        result = ValidatorService.validate_target("gldc")
+        assert result.exit_code == 0
+        assert result.target_type == "port"

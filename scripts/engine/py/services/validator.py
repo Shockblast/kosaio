@@ -110,7 +110,9 @@ class ValidatorService:
         target_type = SearchService.identify_target(tool)
         
         if target_type == "port":
+            from services.ports import PortService
+            canonical = PortService.resolve_port_name(tool)
             ports_dir = cfg.get_tool_dir("kos-ports", force_mode=force_mode)
-            return ports_dir / tool
+            return ports_dir / (canonical if canonical else tool)
 
         return cfg.get_tool_dir(tool, force_mode=force_mode)

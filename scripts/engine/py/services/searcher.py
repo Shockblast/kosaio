@@ -36,13 +36,17 @@ class SearchService:
         # Use SYSTEM path for identification (Authoritative registry)
         ports_path = cfg.system_kos_ports_dir
         if ports_path.exists():
+            # Community aliases resolve to canonical port names
+            from services.ports import PortService
+            port_id = PortService.PORT_ALIASES.get(target_id, target_id)
+
             # Exact match
-            if (ports_path / target_id / "Makefile").exists():
+            if (ports_path / port_id / "Makefile").exists():
                 return "port"
 
             # Case-insensitive match
             for path in ports_path.iterdir():
-                if path.is_dir() and path.name.lower() == target_id:
+                if path.is_dir() and path.name.lower() == port_id:
                     if (path / "Makefile").exists():
                         return "port"
 

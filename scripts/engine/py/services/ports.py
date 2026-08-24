@@ -4,11 +4,20 @@ from typing import List, Optional
 from core.manifest import ManifestParser
 
 class PortService:
+    # Community aliases for kos-ports libraries.
+    # Key = alias the community uses, value = canonical directory inside kos-ports.
+    # e.g. GLdc is upstream "gldc" but lives in kos-ports as "libgl".
+    PORT_ALIASES = {
+        "gldc": "libgl",
+        "aldc": "libal",
+    }
+
     @staticmethod
     def resolve_bulk_dependencies(libs: List[str]) -> List[str]:
         resolved: List[str] = []
 
         def _resolve_recursive(lib_name: str):
+            lib_name = PortService.PORT_ALIASES.get(lib_name.lower(), lib_name)
             deps = ManifestParser.get_port_dependencies(lib_name)
             for dep in deps:
                 if dep not in resolved:
@@ -41,6 +50,9 @@ class PortService:
         safe_name = PortService._sanitize_port_name(input_name)
         if safe_name is None:
             return None
+
+        # Community aliases map to canonical kos-ports directory names
+        safe_name = PortService.PORT_ALIASES.get(safe_name.lower(), safe_name)
 
         ports_dir = cfg.system_kos_ports_dir
         if not ports_dir.exists():
