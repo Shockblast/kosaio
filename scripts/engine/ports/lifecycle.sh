@@ -103,13 +103,23 @@ function ports_update() {
 	
 	# If there are arguments, we handle them individually
 	if [ "$#" -gt 0 ]; then
+		local port_name="$1"
 		# Always update the recipe repository first
-		kosaio_git_common_update "${KOS_PORTS}" || true
+		local git_status=0
+		kosaio_git_common_update "${KOS_PORTS}" --log-id "${port_name}" || git_status=$?
 		
 		# Now run install for each target. 
 		# Our new smart ports_install will detect version changes.
 		ports_install "$@"
-		return $?
+		local install_status=$?
+
+		# Map to KOSAIO status codes
+		if [ $git_status -eq 1 ]; then
+			return 11  # UPDATED
+		elif [ $install_status -eq 0 ]; then
+			return 10  # UP-TO-DATE
+		fi
+		return 1
 	else
 		# Just pull changes for the main repo
 		local status=0

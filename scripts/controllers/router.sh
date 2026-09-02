@@ -281,13 +281,11 @@ function _router_handle_update_all() {
 				count_uptodate=$((count_uptodate + 1))
 				;;
 			11)
-				printf "  ${C_B_CYAN}[UPDATED]   ${C_RESET}  %-15s ${C_GREEN}%s${C_RESET}\n" "$id" "Rebuilt & Deployed"
-				# Print changelog if it exists
+				local commit_count=0
 				if [ -f "$log_file" ]; then
-					while read -r line; do
-						printf "                    ${C_GRAY}* %s${C_RESET}\n" "$line"
-					done < "$log_file" # Show all commits
+					commit_count=$(wc -l < "$log_file")
 				fi
+				printf "  ${C_B_CYAN}[UPDATED]   ${C_RESET}  %-15s ${C_GREEN}%s${C_RESET}\n" "$id" "${commit_count} commit(s) pulled"
 				count_updated=$((count_updated + 1))
 				;;
 			12)

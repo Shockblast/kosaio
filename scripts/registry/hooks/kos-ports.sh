@@ -72,8 +72,15 @@ kosaio_tool_install() {
 }
 
 kosaio_tool_update() {
-	kosaio_git_common_update "${KOS_PORTS}"
+	local status=0
+	kosaio_git_common_update "${KOS_PORTS}" --log-id "kos-ports" || status=$?
 	(cd "${KOS_PORTS}" && git submodule update --init --recursive)
+	if [ $status -eq 1 ]; then
+		return 11  # UPDATED
+	elif [ $status -eq 0 ]; then
+		return 10  # UP-TO-DATE
+	fi
+	return 1
 }
 
 kosaio_tool_uninstall() {

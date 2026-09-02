@@ -7,6 +7,7 @@ function kosaio_git_common_update() {
 	local repo_dir="$1"
 	shift
 	local force_update=0
+	local log_id=""
 
 	local target_branch=""
 	# Simple flag parsing
@@ -14,13 +15,14 @@ function kosaio_git_common_update() {
 		case "$1" in
 			--force) force_update=1 ;;
 			--branch) shift; target_branch="$1" ;;
+			--log-id) shift; log_id="$1" ;;
 			*) ;; # Ignore other args
 		esac
 		shift
 	done
 
 	if [[ -z "${repo_dir}" ]]; then
-		log_info --draw-line "Usage: kosaio_git_common_update <path_to_repo> [--force]" >&2
+		log_info --draw-line "Usage: kosaio_git_common_update <path_to_repo> [--force] [--log-id <id>]" >&2
 		return 1
 	fi
 
@@ -48,7 +50,7 @@ function kosaio_git_common_update() {
 		branch_to_update="${target_branch:-$current_branch}"
 
 		log_info "Fetching ${branch_to_update} from origin..."
-		git fetch origin "${branch_to_update}" --depth=1 || return 2
+		git fetch origin "${branch_to_update}" --depth=50 || return 2
 
 		local upstream
 		upstream="origin/${branch_to_update}"
@@ -63,32 +65,39 @@ function kosaio_git_common_update() {
 		fi
 
 		local base_rev
-		base_rev=$(git merge-base HEAD "${upstream}")
+		base_rev=$(git merge-base HEAD "${upstream}" 2>/dev/null || echo "")
 		local log_file
-		log_file="/tmp/kosaio_update_$(basename "${repo_dir}").log"
+		local log_name="${log_id:-$(basename "${repo_dir}")}"
+		log_file="/tmp/kosaio_update_${log_name}.log"
 		rm -f "$log_file"
 
 		if [[ "${local_rev}" == "${remote_rev}" ]]; then
 			log_success "Code is already up-to-date."
 			return 0
-		elif [[ "${local_rev}" == "${base_rev}" ]]; then
-			git reset --hard
+		elif [[ -z "${base_rev}" || "${local_rev}" == "${base_rev}" ]]; then
+			# Local is behind (or merge-base unreliable in shallow clone)
 			log_info "Local branch is behind '${upstream}'. Pulling changes..."
-			git log --pretty=tformat:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
-			git pull || return 2
-			log_info "New changes:"
-			cat "$log_file"
+			git log --pretty=tformat:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file" 2>/dev/null || \
+				git log --oneline -20 "${upstream}" > "$log_file" 2>/dev/null || true
+			git reset --hard "${upstream}" || return 2
+			if [ -s "$log_file" ]; then
+				log_info "New changes:"
+				cat "$log_file"
+			fi
 			return 1
 		elif [[ "${remote_rev}" == "${base_rev}" ]]; then
 			log_success "Local branch is ahead of '${upstream}'. Nothing to pull."
 			return 0
 		else
-			git reset --hard
+			# Branches have diverged
 			log_warn "Branches have diverged. Resetting to remote '${upstream}'..."
-			git log --pretty=tformat:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file"
-			git pull || return 2
-			log_info "New changes:"
-			cat "$log_file"
+			git log --pretty=tformat:'%h - %s (%cr)' "${old_head}..${upstream}" > "$log_file" 2>/dev/null || \
+				git log --oneline -20 "${upstream}" > "$log_file" 2>/dev/null || true
+			git reset --hard "${upstream}" || return 2
+			if [ -s "$log_file" ]; then
+				log_info "New changes:"
+				cat "$log_file"
+			fi
 			return 1
 		fi
 	fi
@@ -176,7 +185,7 @@ function kosaio_standard_update_flow() {
 	fi
 
 	local status=0
-	kosaio_safe_update "${repo_dir}" || status=$?
+	kosaio_safe_update "${repo_dir}" --log-id "$id" || status=$?
 
 	# If forced build, we treat it as if changes were found (status 1)
 	if [ $force_build -eq 1 ]; then
