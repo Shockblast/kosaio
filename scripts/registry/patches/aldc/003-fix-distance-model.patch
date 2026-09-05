@@ -1,0 +1,34 @@
+Fix positional sounds silent: implement alDistanceModel() and default to
+the linear distance model.
+
+alDistanceModel() was a no-op that only set an error, so the distance model
+stayed stuck at AL_INVERSE_DISTANCE_CLAMPED. With the inverse model a source
+falls to near-silence within a few world units (gain = ref/(rolloff*dist)),
+so positional sounds like projectile flight or bullet impacts are inaudible,
+while sources attached to the listener (distance 0) stay full volume.
+
+Quake-derived backends (e.g. makroncast) set REFERENCE_DISTANCE=1,
+MAX_DISTANCE=8192 and ROLLOFF_FACTOR=dist_mult*8191 expecting
+AL_LINEAR_DISTANCE_CLAMPED, which reproduces the engine's linear falloff
+(1 - dist_mult*(dist-1)). Implement the API and default the model to
+AL_LINEAR_DISTANCE_CLAMPED so those parameters work out of the box.
+--- a/src/core.c
++++ b/src/core.c
+@@ -4,7 +4,7 @@
+ #include "private.h"
+ 
+ static ALenum CURRENT_ERROR = AL_NO_ERROR;
+-static ALenum DISTANCE_MODEL = AL_INVERSE_DISTANCE_CLAMPED;
++static ALenum DISTANCE_MODEL = AL_LINEAR_DISTANCE_CLAMPED;
+ 
+ ALboolean _alSetError(const char* func, ALenum error, const ALchar* msg) {
+     if(CURRENT_ERROR == AL_NO_ERROR) {
+@@ -33,7 +33,7 @@
+ }
+ 
+ AL_API void AL_APIENTRY alDistanceModel(ALenum distanceModel) {
+-    _alSetError(__func__, AL_INVALID_OPERATION, "Not Implemented");
++    DISTANCE_MODEL = distanceModel;
+ }
+ 
+ AL_API void AL_APIENTRY alEnable(ALenum capability) {
