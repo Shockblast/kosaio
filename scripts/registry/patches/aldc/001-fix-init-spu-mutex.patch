@@ -1,0 +1,21 @@
+Fix crash de audio en Dreamcast: assert de mutex en snd_sh4_to_aica_start.
+
+ALdc init_spu() (variante Dreamcast) llama directamente a
+snd_sh4_to_aica_start(), que en KOS hace mutex_unlock(&queue_proc_mutex)
+sobre un mutex estatico nunca bloqueado (MUTEX_INITIALIZER: holder=NULL,
+count=0). El assert de KOS mutex_unlock (m->holder == thd && m->count > 0)
+aborta el sistema.
+
+El contrato de KOS es que snd_sh4_to_aica_stop() toma el mutex y
+snd_sh4_to_aica_start() lo libera. Balanceamos el lock llamando a
+snd_sh4_to_aica_stop() antes de start().
+--- a/src/platform.c
++++ b/src/platform.c
+@@ -22,6 +22,7 @@
+ 
+ void init_spu() {
+     snd_init();
++    snd_sh4_to_aica_stop();
+     snd_sh4_to_aica_start();
+ }
+ 

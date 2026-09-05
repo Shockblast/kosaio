@@ -1,0 +1,26 @@
+Fix device-thread holding the context mutex while sleeping.
+
+The ALdc device thread calls ThreadPass() (thd_sleep(10) on Dreamcast)
+while still holding the context mutex (SCOPED_LOCK(&ctx->mutex)). Every
+main-thread AL call that resolves a source (_alSource()) locks the same
+context mutex, so the game blocks behind those sleeps whenever any sound
+plays (65 allocated sources -> ~650ms of context-mutex hold per cycle,
+game becomes unplayable).
+
+Drop the per-source ThreadPass() so the lock is only held for the brief
+_updateSource() call; the usleep(5000) at the end of the cycle still
+yields the device thread.
+
+--- a/src/context.c
++++ b/src/context.c
+@@ -465,9 +465,8 @@ static void* _alDeviceThread(void* dev) {
+                 for(int j = 0; j < MAX_SOURCES_PER_CONTEXT; ++j) {
+                     SCOPED_LOCK(&ctx->mutex);
+                     Source* s = &ctx->sources[j];
+                     if(!s->is_dead) {
+                         _alUpdateSource(s);
+-                        ThreadPass();
+                     }
+                 }
+ 
+                 usleep(5000);
