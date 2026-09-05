@@ -200,3 +200,51 @@ function ports_apply() {
 	done
 	_ports_print_summary "Application" "${success_libs[@]}"
 }
+
+# Apply the registry patches for a port (scripts/registry/patches/<group>/) to
+# every source tree under dist/ and build/ (the source of truth and the tree
+# that actually compiles). Idempotent: already-applied patches are skipped.
+function ports_patch() {
+	_ports_check_exists
+	_ports_check_requirements
+	local lib_name="${1:-}"
+
+	if [ -z "$lib_name" ]; then
+		log_error "Usage: kosaio patch <library>"
+		return 1
+	fi
+
+	local resolved_name
+	if ! resolved_name=$(ports_resolve_name "${lib_name}"); then
+		log_error "Library '${lib_name}' not found."
+		return 1
+	fi
+
+	local lib_dir="${KOS_PORTS}/${resolved_name}"
+	check_dir_soft "${lib_dir}" "Port source not found for ${resolved_name}" || return 1
+
+	# Patch group: prefer the input name (community alias, e.g. aldc),
+	# then fall back to the canonical resolved name.
+	local group="${lib_name}"
+	if [ ! -d "${KOSAIO_DIR}/scripts/registry/patches/${group}" ]; then
+		group="${resolved_name}"
+	fi
+	if [ ! -d "${KOSAIO_DIR}/scripts/registry/patches/${group}" ]; then
+		log_info "No patches found for '${lib_name}' — nothing to apply."
+		return 0
+	fi
+
+	local trees=0
+	local src_dir
+	while IFS= read -r src_dir; do
+		[ -z "$src_dir" ] && continue
+		kosaio_apply_patches "$src_dir" "$group" || return 1
+		trees=$((trees + 1))
+	done < <(find "${lib_dir}/dist" "${lib_dir}/build" -mindepth 1 -maxdepth 2 -type d -name src -printf "%h\n" 2>/dev/null | sort -u)
+
+	if [ "$trees" -eq 0 ]; then
+		log_warn "No source tree found under ${lib_dir}/dist or ${lib_dir}/build. Run 'kosaio clone ${lib_name}' first."
+	fi
+
+	return 0
+}

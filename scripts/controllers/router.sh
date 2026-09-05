@@ -29,7 +29,7 @@ function kosaio_router_dispatch() {
 			esac
 			;;
 
-		"install"|"uninstall"|"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"info"|"export") 
+		"install"|"uninstall"|"build"|"apply"|"reset"|"checkout"|"clone"|"clean"|"info"|"export"|"patch") 
 			_router_handle_lifecycle "$ACTION" "$TARGET" "${ARGS[@]}"
 			;;
 
@@ -106,10 +106,15 @@ function _router_handle_lifecycle() {
 				"checkout")  ports_checkout "$target" "$@" ;;
 				"reset")	 ports_reset "$target" "$@" ;;
 				"info")	  ports_info "$target" "$@" ;;
+				"patch")	 ports_patch "$target" "$@" ;;
 				*) log_error "Action '$action' not supported for ports." ;;
 			esac
 			;;
 		"tool"|"core"|"unknown")
+			if [ "$action" = "patch" ]; then
+				log_error "kosaio patch only supports ports (kos-ports libraries) for now."
+				return 1
+			fi
 			# Default to Registry Manager
 			kosaio_manager_execute "$action" "$target" "$@"
 			;;
