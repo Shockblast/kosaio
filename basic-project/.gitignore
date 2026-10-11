@@ -1,0 +1,33 @@
+# KallistiOS Dreamcast Project - Gitignore
+# See https://kallistiose.org/ for more information
+
+# Build artifacts
+build/
+release/
+
+# Object files
+*.o
+
+# ELF and binary outputs
+*.elf
+*.bin
+
+# Manifest files (KOSAIO)
+.kos-manifest/
+
+# Temporary/auto-generated files
+*.d
+
+# IDE/Editor temporary files
+*.swp
+*.swo
+*~
+
+# KOSAIO state files (container-specific)
+data/states/
+
+# Log files
+*.log
+
+# Generated configuration
+.data/cfg/

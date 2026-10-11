@@ -22,10 +22,16 @@ GAME_DEPS= $(GAME_OBJS:.o=.d)
 -include $(GAME_DEPS)
 
 # Default action for make
-.PHONY: make.dirs build.elf
+.PHONY: make.dirs build.elf bin
 
-# Build all
+# Build all (ELF)
 all: build.elf
+
+# Build binary (ELF -> binary conversion)
+bin: release/game.elf
+	@echo "===> Converting ELF to binary"
+	$(Q)$(if $(KOS_OBJCOPY),$(KOS_OBJCOPY),sh-elf-objcopy) -R .stack -O binary release/game.elf release/game.bin
+	@echo "===> Binary created: release/game.bin"
 
 # Make folders
 make.dirs:
