@@ -83,6 +83,19 @@ kosaio_tool_update() {
 	return 1
 }
 
+kosaio_tool_checkout() {
+	local ref="${1:-}"
+
+	if [ -z "${ref}" ]; then
+		log_error "Usage: kosaio checkout kos-ports <ref>"
+		return 1
+	fi
+
+	[ -d "${KOS_PORTS}" ] || { log_error "KOS-PORTS source not found at: ${KOS_PORTS}. Run 'kosaio clone kos-ports' first."; return 1; }
+
+	kosaio_git_checkout "${KOS_PORTS}" "${ref}"
+}
+
 kosaio_tool_uninstall() {
 	rm -rf "${KOS_PORTS}"
 	log_success "KOS-PORTS removed."

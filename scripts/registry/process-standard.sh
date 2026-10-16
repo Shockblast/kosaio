@@ -341,6 +341,26 @@ function kosaio_reg_update() {
 	kosaio_standard_update_flow "${ID}" "${NAME}" "$tool_dir" "$@"
 }
 
+function kosaio_reg_checkout() {
+	# Tool checkout hook (from helper) overrides standard checkout
+	if declare -F kosaio_tool_checkout &>/dev/null; then
+		kosaio_tool_checkout "$@"
+		return $?
+	fi
+
+	local tool_dir=$(__get_tool_dir)
+	local ref="${1:-}"
+
+	if [ -z "${ref}" ]; then
+		log_error "Usage: kosaio checkout ${ID} <ref>"
+		return 1
+	fi
+
+	[ -d "$tool_dir" ] || { log_error "${NAME} source not found at: ${tool_dir}."; return 1; }
+
+	kosaio_git_checkout "$tool_dir" "$ref"
+}
+
 function kosaio_reg_clean() {
 	local tool_dir=$(__get_tool_dir)
 	[ -d "$tool_dir" ] || return 0

@@ -266,7 +266,7 @@ function kosaio_git_clone() {
 
 function kosaio_git_checkout() {
 	local repo_dir="$1"
-	local ref="$2"
+	local ref="${2:-}"
 	local hard_reset="${3:-true}" # Default to hard reset for sdk-like behavior
 
 	if [[ -z "${repo_dir}" ]] || [[ -z "${ref}" ]]; then
@@ -279,14 +279,49 @@ function kosaio_git_checkout() {
 		return 1
 	fi
 
-	cd "${repo_dir}" || return 1
-
 	log_info "Switching $(basename "${repo_dir}") to: ${ref}"
+
+	# Fetch all refs plus the requested one explicitly. The explicit fetch
+	# matters for shallow / single-branch clones, where the default fetch
+	# only follows the configured refspec and new branches stay unknown.
+	# Note: `fetch origin <branch>` alone lands in FETCH_HEAD without
+	# creating refs/remotes/origin/<branch>, so fetch the heads refspec too.
+	git -C "${repo_dir}" fetch origin --tags 2>/dev/null || true
+	git -C "${repo_dir}" fetch origin "+refs/heads/*:refs/remotes/origin/*" 2>/dev/null || true
+	git -C "${repo_dir}" fetch origin "${ref}" 2>/dev/null || true
+
+	# Resolve the ref to something `reset --hard` / `checkout` understands.
+	# Prefer a local match; fall back to origin/<ref> for remote branches.
+	local target="${ref}"
+	if ! git -C "${repo_dir}" rev-parse --verify --quiet "${ref}^{commit}" >/dev/null 2>&1; then
+		if git -C "${repo_dir}" rev-parse --verify --quiet "origin/${ref}^{commit}" >/dev/null 2>&1; then
+			target="origin/${ref}"
+		else
+			log_error "Reference '${ref}' not found in '$(basename "${repo_dir}")' (even after fetch)."
+			return 1
+		fi
+	fi
+
+	# If the target is a (remote) branch, switch to it first so that
+	# `reset --hard` does not move the currently checked-out branch pointer.
+	local branch_name="${ref#origin/}"
+	if git -C "${repo_dir}" rev-parse --verify --quiet "origin/${branch_name}^{commit}" >/dev/null 2>&1; then
+		if ! git -C "${repo_dir}" checkout -B "${branch_name}" "origin/${branch_name}" 2>/dev/null; then
+			log_error "Failed to checkout ${ref} (dirty tree? stash or commit first)"
+			return 1
+		fi
+		target="origin/${branch_name}"
+	elif git -C "${repo_dir}" show-ref --verify --quiet "refs/heads/${ref}" 2>/dev/null; then
+		if ! git -C "${repo_dir}" checkout "${ref}" 2>/dev/null; then
+			log_error "Failed to checkout ${ref} (dirty tree? stash or commit first)"
+			return 1
+		fi
+		target="${ref}"
+	fi
 
 	# If it's a hard reset, we clean everything first
 	if [ "${hard_reset}" = "true" ]; then
-		git fetch --all --tags || true
-		if git reset --hard "${ref}"; then
+		if git -C "${repo_dir}" reset --hard "${target}"; then
 			log_success "Successfully reset to ${ref}"
 			return 0
 		else
@@ -294,7 +329,7 @@ function kosaio_git_checkout() {
 			return 1
 		fi
 	else
-		if git checkout "${ref}"; then
+		if git -C "${repo_dir}" checkout "${ref}" 2>/dev/null || git -C "${repo_dir}" checkout "${target}"; then
 			log_success "Successfully checked out ${ref}"
 			return 0
 		else

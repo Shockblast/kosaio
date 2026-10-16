@@ -43,12 +43,21 @@ function ports_clone() {
 
 function ports_checkout() {
 	_ports_check_exists
-	local lib_name="$1"; local ref="$2"
+	local lib_name="${1:-}"; local ref="${2:-}"
 
-	if ! _ports_validate_library "${lib_name}"; then
+	if [ -z "${lib_name}" ] || [ -z "${ref}" ]; then
+		log_error "Usage: kosaio checkout <port> <ref>"
+		return 1
+	fi
+
+	# Resolve community aliases (e.g. aldc -> libAL) before touching the
+	# filesystem: the directory under $KOS_PORTS uses the canonical name.
+	local resolved_name
+	if ! resolved_name=$(ports_resolve_name "${lib_name}"); then
 		log_error "Library '${lib_name}' not found."
 		return 1
 	fi
+	lib_name="${resolved_name}"
 
 	local lib_dir="${KOS_PORTS}/${lib_name}"
 	check_dir_soft "${lib_dir}" "Port source not found for ${lib_name}" || return 1
@@ -62,8 +71,10 @@ function ports_checkout() {
 	log_info --draw-line "Changing git reference for ${lib_name} to ${ref}..."
 	if kosaio_git_checkout "${git_dist_dir}" "${ref}"; then
 		log_success "${lib_name} is now at ${ref}"
+		log_info "Rebuild with: kosaio install ${lib_name} (or build/apply)"
 	else
 		log_error "Failed to checkout ${ref}"
+		return 1
 	fi
 }
 
