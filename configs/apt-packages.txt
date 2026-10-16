@@ -64,6 +64,12 @@ libopenal-dev
 libopenal-dev:i386
 libgl1-mesa-dev
 libgl1-mesa-dev:i386
+libx11-dev
+libxext-dev
+libasound2-dev
+libpulse-dev
+libevdev-dev
+libudev-dev
 
 # Scripting
 python3

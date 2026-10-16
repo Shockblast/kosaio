@@ -20,6 +20,14 @@ apt-get update && apt-get upgrade -y
 source "${KOSAIO_DIR}/scripts/common/ui.sh"
 source "${KOSAIO_DIR}/scripts/common/deps.sh"
 
+# Install Node.js 22 LTS (required by nulldc3 DevTools UI build).
+# Ubuntu 24.04 apt only ships Node 18, so we use the NodeSource repository.
+if ! command -v node >/dev/null 2>&1 || ! node --version 2>/dev/null | grep -qE "^v(2[2-9]|[3-9][0-9])"; then
+	echo ">>> [PROVISION] Installing Node.js 22 LTS (NodeSource)..."
+	curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+	apt-get install -y nodejs
+fi
+
 # Install Core SDK Dependencies using centralized logic
 if ! kosaio_install_core_sdk_deps; then
 	echo "ERROR: Failed to install core dependencies."

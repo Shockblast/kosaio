@@ -1,0 +1,63 @@
+# ── Build Configuration: nullDC 3 ──────────────────────
+# nullDC 3 uses CMake + Ninja. The kosaio hook configures with -G Ninja
+# automatically; only -D flags go here.
+# Run `kosaio apply-config nulldc3` after changing this file.
+# Run `kosaio reset-config nulldc3` to restore defaults.
+# ──────────────────────────────────────────────────────
+
+KOSAIO_TOOL_ARGS=(
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+    # ── TA (tile accelerator) ──
+    # ON  = TA LLE + reference software renderers (refsw2/refmister).
+    #       Required for headless runs with Exit.FrameHash/FramePng.
+    # OFF = TA HLE + hardware gles renderer (needs a window/display).
+    # -DHAS_TA_LLE=ON
+    # -DHAS_TA_LLE=OFF
+
+    # ── Debugger (HTTP + WebSocket server + embedded web UI) ──
+    # OFF removes libswirl/debugger entirely: minimal binary, no port 55543.
+    # The default ON build serves the DevTools UI at http://127.0.0.1:55543/
+    # Runtime keys (emu.cfg or --config): Debugger:Enabled, Debugger:Port,
+    # Debugger:Bind, Debugger:StartPaused (debug from boot),
+    # Debugger:Required, Debugger:WebRoot (serve a dist-native dir from disk).
+    # -DNULLDC_DEBUGGER=OFF
+
+    # ── DevTools UI bundle to embed ──
+    # Empty (default): auto-use devtools/dist-native built by the hook.
+    # OFF: embed nothing (debugger serves a fallback page instead).
+    # Or a path to a prebuilt dist-native directory.
+    # -DNULLDC_DEVTOOLS_DIST=OFF
+
+    # ── CPU engines ──
+    # Interpreters only: no SH4/ARM7/DSP recompiler on any host.
+    # Useful to isolate JIT bugs and for deterministic comparisons
+    # (state hash differs from JIT in 'sched' only).
+    # Day-to-day you can instead use the RUNTIME key Dynarec.Enabled=no
+    # without recompiling.
+    # -DTARGET_NO_REC=ON
+    # -DTARGET_NO_AREC=ON    # ARM7 + DSP recompiler off only (finer grain)
+
+    # ── Misc ──
+    # -Wno-dev  # Silence upstream developer warnings (e.g. CMP0072:
+                # FindOpenGL picking legacy libGL over GLVND). Harmless:
+                # upstream's CMakeLists predates the policy and the legacy
+                # default links and runs fine.
+
+    # ── Warning noise (cosmetic, safe to ignore) ──
+    # GCC 13+ warns about upstream's vendored code: dozens of
+    # -Wdeprecated-enum-enum-conversion in libswirl/deps/vixl and one
+    # "NDEBUG redefined" in libswirl/gpl/deps/xbrz (RelWithDebInfo
+    # defines NDEBUG on the command line, xbrz_config.h redefines it).
+    # They do not affect the build. To mute the vixl spam, uncomment:
+    # -DCMAKE_CXX_FLAGS=-Wno-deprecated-enum-enum-conversion
+)
+
+# ── Headless test runs (runtime, NOT build flags) ──
+# nulldc3 --config config:Headless=yes , audio:backend=none , \
+#                  config:Debug.SerialConsoleEnabled=yes , \
+#                  config:Dreamcast.RTC=946684800 , \
+#                  config:Exit.AfterVblanks=600 , config:Exit.StateHash=yes \
+#          game.elf
+# Prints one `nulldc-exit:` line with reason + state hash. Needs no BIOS
+# (reios boots .elf directly) and no display.
