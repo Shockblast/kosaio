@@ -34,7 +34,7 @@ You can install these tools with kosaio:
 | **mksdiso**       | Creates ISO images for SD loaders like GDEmu.                                                       |
 | **img4dc**        | Tools for working with Dreamcast disc images (CDI/MDS).                                             |
 | **AICAOS**        | Dedicated Operating System for the AICA (ARM7) Sound Chip.                                          |
-| **libdreamroq**   | RoQ playback library for Dreamcast.                                                                 |
+| **libdreamroq**   | RoQ playback library for Dreamcast (cross-compiled with the KOS toolchain, installed into `${KOS_BASE}/addons`). |
 | **mame**          | Multi-purpose emulation framework (configured for Dreamcast).                                       |
 | **SDL2**          | SDL2 kosaio custom build (64-bit, compiles from source to `/opt/kosaio/data/lib/sdl2/64/`).            |
 | **SDL2-32**       | SDL2 kosaio custom build (32-bit, for Dreamcast simulation on PC: `PC_SIMULATE_DC=yes`).                |

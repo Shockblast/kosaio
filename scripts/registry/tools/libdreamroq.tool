@@ -14,30 +14,31 @@ KOSAIO_TOOL_BRANCH=""
 KOSAIO_TOOL_BUILD_SYSTEM="make"
 KOSAIO_TOOL_BUILD_DIR=""
 KOSAIO_TOOL_BUILD_SUBDIR="."
-KOSAIO_TOOL_BUILD_TARGET="defaultall"
+# Only builds the static library locally; installation into KOS addons is
+# handled by the tool hook (kosaio_tool_apply).
+KOSAIO_TOOL_BUILD_TARGET="build"
 KOSAIO_TOOL_TOOLCHAIN=""
 KOSAIO_TOOL_ARGS=()
 
 # === INSTALLATION ===
+# The hook copies the library + headers into ${KOS_BASE}/addons.
 KOSAIO_TOOL_INSTALL_METHOD="none"
 KOSAIO_TOOL_BINARIES=()
 KOSAIO_TOOL_BINARY_SUBDIR=""
-KOSAIO_TOOL_INSTALLATION_FOLDER="${KOS_PORTS}/${KOSAIO_TOOL_ID}"
-KOSAIO_TOOL_INSTALLATION_LIBDIR=""
-KOSAIO_TOOL_INSTALLATION_INCLUDEDIR=""
+KOSAIO_TOOL_INSTALLATION_FOLDER="${KOS_BASE}/addons"
+KOSAIO_TOOL_INSTALLATION_LIBDIR="lib/dreamcast"
+KOSAIO_TOOL_INSTALLATION_INCLUDEDIR="include/dreamroq"
 
 # === PATCHES ===
 KOSAIO_TOOL_PATCHES=()
 
 # === UNINSTALL & HEALTH ===
-KOSAIO_TOOL_DIR_OVERRIDE="${KOS_PORTS}/${KOSAIO_TOOL_ID}"
 KOSAIO_TOOL_CAN_MAKE_CLEAN=true
-KOSAIO_TOOL_SYMLINKS=("${KOS_PORTS}/include/dreamroq:../${KOSAIO_TOOL_ID}/include")
 KOSAIO_TOOL_LIBS=(
-    "${KOS_PORTS}/${KOSAIO_TOOL_ID}/libdreamroq.a"
+    "${KOS_BASE}/addons/lib/dreamcast/libdreamroq.a"
 )
 KOSAIO_TOOL_INCLUDE_DIRS=(
-    "${KOS_PORTS}/include/dreamroq"
+    "${KOS_BASE}/addons/include/dreamroq"
 )
 
 # === RICH MESSAGING ===
@@ -45,4 +46,7 @@ KOSAIO_TOOL_INSTALL_CONFIRM=false
 KOSAIO_TOOL_POSTINSTALL_MESSAGE=""
 KOSAIO_TOOL_BUILD_WARNING=()
 KOSAIO_TOOL_INSTALL_WARNING=()
-KOSAIO_TOOL_INFO_EXTRA=()
+KOSAIO_TOOL_INFO_EXTRA=(
+    "${C_YELLOW}Context:${C_RESET} High performance RoQ video decoding for Dreamcast."
+    "${C_YELLOW}Usage:${C_RESET}   ${C_CYAN}#include <dreamroq/dreamroqlib.h>${C_RESET} + ${C_CYAN}-ldreamroq${C_RESET}."
+)
