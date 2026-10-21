@@ -11,8 +11,8 @@ kosaio_libdreamroq_require_kos() {
 		return 1
 	fi
 
-	if [ ! -f "${KOS_BASE}/environ.sh" ]; then
-		log_error "KOS environment not found at ${KOS_BASE}/environ.sh. Run 'kosaio install kos' first."
+	if ! kosaio_kos_find_env_file "${KOS_BASE}" > /dev/null; then
+		log_error "KOS environment file not found in ${KOS_BASE}. Run 'kosaio install kos' first."
 		return 1
 	fi
 
@@ -26,7 +26,7 @@ kosaio_libdreamroq_make() {
 	(
 		cd "$tool_dir" || exit 1
 		# shellcheck source=/dev/null
-		source "${KOS_BASE}/environ.sh"
+		kosaio_kos_source_env "${KOS_BASE}" || exit 1
 		make "$@"
 	)
 }

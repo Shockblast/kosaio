@@ -141,12 +141,12 @@ kosaio_tool_build() {
 
 	log_info --draw-line "Building KOS Libraries..."
 
-	if [ -f "${tool_dir}/environ.sh" ]; then
-		source "${tool_dir}/environ.sh"
-	else
-		log_warn "environ.sh not found. Auto-initializing KOS environment..."
+	# The generated env filename varies by KOS branch (environ.sh everywhere
+	# today, environment.sh accepted defensively).
+	if ! kosaio_kos_source_env "${tool_dir}" > /dev/null 2>&1; then
+		log_warn "KOS environment file not found. Auto-initializing KOS environment..."
 		kosaio_tool_apply || return 1
-		source "${tool_dir}/environ.sh"
+		kosaio_kos_source_env "${tool_dir}" || return 1
 	fi
 
 	cd "${tool_dir}"
@@ -160,10 +160,21 @@ kosaio_tool_apply() {
 
 	log_info --draw-line "Configuring KOS Environment..."
 
-	local target_env="${tool_dir}/environ.sh"
-	local sample_env="${tool_dir}/doc/environ.sh.sample"
+	# The sample name matches the generated env filename, which varies by
+	# KOS branch (environ.sh.sample on v2.2.x and master alike; a future
+	# environment.sh.sample rename is accepted too).
+	local target_env=""
+	local sample_env=""
+	local sample_name
+	for sample_name in "environ.sh.sample" "environment.sh.sample"; do
+		if [ -f "${tool_dir}/doc/${sample_name}" ]; then
+			sample_env="${tool_dir}/doc/${sample_name}"
+			target_env="${tool_dir}/${sample_name%.sample}"
+			break
+		fi
+	done
 
-	if [ ! -f "${sample_env}" ]; then
+	if [ -z "${sample_env}" ]; then
 		log_error "environ.sh.sample not found. Is KOS source correct?"
 		return 1
 	fi
@@ -176,7 +187,10 @@ kosaio_tool_apply() {
 	sed -i "s|^#\? \?export DC_TOOLS_BASE=.*|export DC_TOOLS_BASE=\"${DREAMCAST_SDK}/bin\"|g" "${target_env}"
 	sed -i "s|^#\? \?export KOS_SUBARCH=.*|export KOS_SUBARCH=\"pristine\"|g" "${target_env}"
 
-	sed -i 's|^\. ${KOS_BASE}/environ_base.sh|export KOS_INC_PATHS_CPP=""\n. ${KOS_BASE}/environ_base.sh|' "${target_env}"
+	# The shared base path moved in master/3.x: ${KOS_BASE}/environ_base.sh
+	# (v2.2.x) vs ${KOS_BASE}/env/environ_base.sh (master). Match both, plus
+	# a defensive environment*.sh variant, preserving the original line.
+	sed -i 's|^\(\. ${KOS_BASE}/\(env/\)\?environ[^ ]*\.sh\)$|export KOS_INC_PATHS_CPP=""\n\1|' "${target_env}"
 
 	log_success "KOS Environment configured at ${target_env}."
 }

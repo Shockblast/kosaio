@@ -23,10 +23,8 @@ function kosaio_reg_check_health() {
 		fi
 	done
 
-	# Source KOS environ.sh if it exists
-	if [ -f "${DREAMCAST_SDK}/kos/environ.sh" ]; then
-		source "${DREAMCAST_SDK}/kos/environ.sh"
-	fi
+	# Source KOS environment file if it exists (filename varies by KOS branch)
+	kosaio_kos_source_env "${DREAMCAST_SDK}/kos" > /dev/null 2>&1 || true
 
 	log_info "--- SH4 Toolchain (Main CPU) ---"
 	local sh_gcc="${DREAMCAST_SDK}/sh-elf/bin/sh-elf-gcc"

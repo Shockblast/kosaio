@@ -8,9 +8,23 @@ function kosaio_kos_pivot() {
 	# 1. Load current environment rules
 	source "${KOSAIO_DIR}/scripts/common/env.sh" > /dev/null
 
-	local target_environ="${KOS_DIR}/environ.sh"
+	# Ensure the env-file resolver is available (standalone sourcing contexts)
+	if ! declare -F kosaio_kos_source_env > /dev/null 2>&1; then
+		source "${KOSAIO_DIR}/scripts/common/kos_env.sh" > /dev/null
+	fi
 
-	# 2. DEEP CLEANUP: Reset all KOS-related variables before switching
+	# 2. Resolve the generated KOS environment file (name varies by KOS branch)
+	local target_environ
+	if ! target_environ=$(kosaio_kos_find_env_file "${KOS_DIR}"); then
+		log_error "KOS Environment file not found (environ.sh missing) at: ${KOS_DIR}"
+		local current_mode="CONTAINER (System)"
+		[ -f "${HOME}/.kosaio/states/kos_dev" ] && current_mode="HOST (Workspace)"
+		log_info "Current Mode: ${current_mode}"
+		log_info "Next step: kosaio clone|install kos"
+		return 1
+	fi
+
+	# 3. DEEP CLEANUP: Reset all KOS-related variables before switching
 	# Standard KOS variables
 	unset KOS_BASE KOS_ARCH KOS_SUBARCH KOS_PORTS KOS_MAKE KOS_LOADER KOS_GENROMFS KOS_STRIP
 	unset KOS_CC_BASE KOS_CC_PREFIX KOS_AS KOS_AR KOS_OBJCOPY KOS_LD
@@ -22,23 +36,14 @@ function kosaio_kos_pivot() {
 	CLEAN_PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "toolchains" | grep -v "kosaio-dev" | tr "\n" ":" | sed 's/:$//')
 	export PATH="${CLEAN_PATH}"
 
-	# 3. Check if the target environment exists
-	if [ ! -f "${target_environ}" ]; then
-		log_error "KOS Environment not found at: ${target_environ}"
-		local current_mode="CONTAINER (System)"
-		[ -f "${HOME}/.kosaio/states/kos_dev" ] && current_mode="HOST (Workspace)"
-		log_info "Current Mode: ${current_mode}"
-		log_info "Next step: kosaio clone|install kos"
-		return 1
-	fi
-
 	# 4. Source the environment
-	# Standard KOS environ.sh will populate PATH and variables
+	# Standard KOS environ file will populate PATH and variables
 	# shellcheck source=/dev/null
 	source "${target_environ}" > /dev/null 2>&1
+	export KOSAIO_KOS_ENV_FILE="${target_environ}"
 
 	# 4b. PATH PROTECTION: Re-enforce KOSAIO's choice for Ports
-	# This prevents environ.sh from hijacking the path back to container defaults.
+	# This prevents the KOS environ file from hijacking the path back to container defaults.
 	export KOS_PORTS="${KOS_PORTS}"
 
 	# 5. Re-inject KOSAIO Extras Bin (it might have been wiped by cleanup)

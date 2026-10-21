@@ -22,7 +22,10 @@ kosaio_tool_build() {
 
 	(
 		cd "${tool_dir}"
-		source "${KOS_BASE}/environ.sh"
+		if ! kosaio_kos_source_env "${KOS_BASE}" > /dev/null 2>&1; then
+			log_error "KOS environment file not found. Run 'kosaio install kos' first."
+			exit 3
+		fi
 
 		log_info "Compiling ARM driver (SPU subsystem)..."
 		make -C arm clean

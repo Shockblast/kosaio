@@ -35,6 +35,7 @@ set -- "${CLEAN_ARGS[@]}"
 
 # Load essential UI and Environment
 source "${KOSAIO_DIR}/scripts/common/env.sh"
+source "${KOSAIO_DIR}/scripts/common/kos_env.sh"
 
 # Self-Heal Environment Configuration
 ensure_bashrc_config
