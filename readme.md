@@ -84,14 +84,28 @@ The easiest way to set up your environment is using the assistant script. It wil
 > This method mounts your local KOSAIO folder into the container, allowing you to edit scripts on your host and see changes instantly inside Podman/Docker.
 
 ### First Steps
-The first SDK you need to install is KallistiOS (KOS). It is a long process, so be prepared for a break!
-
-> [!TIP]
-> Before installing KOS, you can look at the config files inside the `configs` folder and make adjustments if required (like changing GCC version). For KOS v2, the file is `kos-v2-dreamcast.cfg`; for KOS v3, use `kos-v3-dreamcast.cfg` and `kos-v3-aica.cfg`.
+The first SDK you need to install is KallistiOS (KOS). It is a long process, so be prepared for a break! The installation follows 4 stages: clone the source, optionally configure it, build the compiler toolchain, and finally build KOS itself.
 
 ```bash
-kosaio install kos
+# 1. Clone the KOS source code
+kosaio clone kos
+
+# 2. (Optional) Configure before building:
+#    - KOS branch: kosaio config kos (v2.2.x stable by default, master for KOS 3.x)
+#    - Toolchain GCC version: edit configs/kos-v2-dreamcast.cfg (KOS v2)
+#      or configs/kos-v3-dreamcast.cfg + configs/kos-v3-aica.cfg (KOS v3)
+
+# 3. Build the compiler toolchain (SH4 + GDB by default)
+kosaio build kos-chain
+# For SH4 + ARM + GDB:
+# kosaio build kos-chain --all
+
+# 4. Build the KOS libraries (generates environ.sh automatically)
+kosaio build kos
 ```
+
+> [!NOTE]
+> `kosaio install kos` is just a shortcut for clone + build + apply, but the build step requires the toolchain to already exist — so on a fresh setup follow the 4 steps above instead.
 
 > After installing KOS, you don't need to exit! Just run **`kreload`** to activate the new environment and refresh your shell instantly.
 
